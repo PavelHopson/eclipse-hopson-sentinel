@@ -1,35 +1,44 @@
-# Гибридная архитектура PavelCode
+# Eclipse Hopson Sentinel Hybrid Architecture
 
-`PavelCode` сейчас развивается как единый репозиторий с двумя runtime-слоями.
+`Eclipse Hopson Sentinel` is being developed as a multi-layer local AI system.
 
-## TypeScript runtime
+## Sentinel Core
 
-Основной и наиболее готовый к использованию слой:
+The current primary engine:
 
-- запускается через `bun` и `node`
-- уже содержит CLI, команды, инструменты, агентов, MCP и документацию
-- используется как текущий рабочий интерфейс проекта
+- TypeScript/Bun runtime
+- coding-agent workflow
+- file, shell, tool, task, and MCP orchestration
+- model-provider integration
 
-## Rust runtime
+This is the most practical day-to-day layer right now.
 
-Новый слой в `rust/`:
+## Sentinel Rust Runtime
 
-- ориентирован на более быстрый и строгий runtime
-- организован как Cargo workspace
-- развивается отдельно от текущего TypeScript CLI
-- в будущем может стать основным движком или работать как альтернативный backend
+The parallel engine in `rust/`:
 
-## Зачем держать оба слоя
+- designed for higher performance and stronger runtime discipline
+- currently treated as the next-generation engine
+- evolves in parallel with the TypeScript runtime
 
-- не теряем уже рабочий CLI
-- можем развивать более качественный runtime без полной заморозки продукта
-- проще мигрировать по частям, а не большим рискованным переписыванием
+## Sentinel Voice
 
-## Целевое состояние
+Planned outer layer:
 
-В будущем `PavelCode` должен поддерживать:
+- wake word
+- speech-to-text
+- speech synthesis
+- desktop shell / operator UI
+- bridge to Sentinel Core
 
-- единый бренд
-- единый launcher
-- единый набор команд
-- выбор runtime или прозрачный переход на Rust без поломки пользовательского опыта
+## Recommended product shape
+
+- `Sentinel Core` stays the operational brain
+- `Sentinel Voice` becomes the interaction shell
+- the Rust runtime matures underneath as the future engine
+
+## Why this split matters
+
+- we keep a usable coding core today
+- we avoid coupling voice experiments to the main agent runtime
+- we can evolve voice, UI, and runtime independently

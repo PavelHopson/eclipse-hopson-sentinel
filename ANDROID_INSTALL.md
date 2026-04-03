@@ -1,34 +1,34 @@
-# PavelCode на Android через Termux
+# Eclipse Hopson Sentinel on Android via Termux
 
-Полноценная сборка `PavelCode` на Android обычно идет через `Termux` и `proot`-окружение Ubuntu, потому что Bun не работает нативно на Android так же стабильно, как на обычном Linux.
+Running `Eclipse Hopson Sentinel` on Android usually means using `Termux` together with a Linux environment through `proot`.
 
-## Краткая схема
+## Short path
 
-1. Установите `Termux`.
-2. Поднимите Ubuntu через `proot-distro`.
-3. Установите `git`, `curl`, `unzip`, `nodejs`.
-4. Установите Bun внутри Ubuntu.
-5. Клонируйте ваш репозиторий:
+1. Install `Termux`
+2. Create Ubuntu with `proot-distro`
+3. Install `git`, `curl`, `unzip`, `nodejs`
+4. Install Bun inside the Ubuntu environment
+5. Clone the repository:
 
 ```bash
-git clone https://github.com/PavelHopson/pavelcode-cli.git
-cd pavelcode-cli
+git clone https://github.com/PavelHopson/eclipse-hopson-sentinel.git
+cd eclipse-hopson-sentinel
 ```
 
-6. Установите зависимости и соберите проект:
+6. Install dependencies and build:
 
 ```bash
 bun install
 bun run build
 ```
 
-7. Запустите CLI:
+7. Run the core:
 
 ```bash
 node dist/cli.mjs
 ```
 
-## Если нужен OpenAI-compatible режим
+## OpenAI-compatible mode
 
 ```bash
 export CLAUDE_CODE_USE_OPENAI=1
@@ -37,7 +37,7 @@ export OPENAI_MODEL=gpt-4o
 node dist/cli.mjs
 ```
 
-## Если нужен локальный Ollama
+## Local Ollama mode
 
 ```bash
 export CLAUDE_CODE_USE_OPENAI=1
@@ -46,8 +46,8 @@ export OPENAI_MODEL=qwen2.5-coder:7b
 node dist/cli.mjs
 ```
 
-## Замечания
+## Notes
 
-- внутренние переменные `CLAUDE_CODE_*` сохранены для совместимости
-- на слабых устройствах лучше использовать более легкие модели
-- после обновления исходников заново выполняйте `bun run build`
+- inherited `CLAUDE_CODE_*` variables are still used for compatibility
+- weaker devices should use lighter models
+- rebuild after pulling source updates

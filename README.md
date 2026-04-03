@@ -1,87 +1,102 @@
-# PavelCode
+# Eclipse Hopson Sentinel
 
-`PavelCode` — гибридный AI CLI для разработки с двумя слоями исполнения:
+`Eclipse Hopson Sentinel` is a hybrid local AI system for development and personal automation.
 
-- текущий рабочий `TypeScript/Bun` runtime для повседневного использования
-- новый `Rust` runtime как более быстрый и безопасный движок следующего поколения
+The project is being shaped as a two-layer platform:
 
-Проект работает как терминальный coding-agent с поддержкой разных провайдеров моделей, инструментов, агентов, MCP и потокового вывода.
+- `Sentinel Core` — the coding-agent runtime for code, files, shell, tools, agents, and MCP
+- `Sentinel Voice` — the future local voice shell inspired by Jarvis-style interaction
 
-## Что сейчас внутри
+Right now this repository contains the early foundation of `Sentinel Core` with:
 
-### 1. Основной runtime
+- a working TypeScript/Bun runtime
+- an imported Rust runtime workspace for the next-generation engine
+- a unified launcher
 
-Текущая реализация в корне репозитория:
+## Vision
+
+The goal is not just another CLI.
+
+The goal is to build a local operator system under the `Eclipse Hopson` brand:
+
+- understands code
+- works through terminal tools
+- can be connected to cloud or local models
+- later gains voice, wake word, TTS, and desktop interaction
+
+## Current Runtime Layers
+
+### 1. Sentinel Core (TypeScript runtime)
+
+The current working implementation lives in:
 
 - `src/`
 - `scripts/`
 - `bin/`
 - `package.json`
 
-Это основной CLI-слой, который уже можно собирать и запускать через `Bun` и `Node.js`.
+This is the active runtime that should be treated as the primary day-to-day engine for now.
 
-### 2. Новый Rust runtime
+### 2. Sentinel Rust Runtime
 
-В каталоге `rust/` находится импортированный Rust workspace, который используется как направление развития следующего поколения `PavelCode`.
+The `rust/` directory contains the imported Rust workspace that will evolve into the next-generation runtime.
 
-Там находятся:
+It currently serves as a parallel engine under development.
 
-- `rust/crates/api-client`
-- `rust/crates/runtime`
-- `rust/crates/tools`
-- `rust/crates/commands`
-- `rust/crates/plugins`
-- `rust/crates/claw-cli`
+## Quick Start
 
-## Быстрый запуск текущего CLI
-
-### Установка зависимостей
+### Install dependencies
 
 ```bash
 bun install
 ```
 
-### Сборка
+### Build
 
 ```bash
 bun run build
 ```
 
-### Запуск
+### Run Sentinel Core
 
 ```bash
 node dist/cli.mjs
 ```
 
-или
+or through the unified launcher:
 
 ```bash
-node .\bin\pavelcode
+node .\bin\sentinel
 ```
 
-## Единый launcher
+## Unified Launcher
 
-Теперь `PavelCode` умеет запускать оба движка через одну команду:
+The launcher supports both engines.
+
+Default TypeScript runtime:
 
 ```bash
-pavelcode
+sentinel
 ```
 
-Это запускает текущий TypeScript runtime.
-
-Запуск Rust runtime:
+Rust runtime:
 
 ```bash
-pavelcode --engine rust
+sentinel --engine rust
 ```
 
-или
+or:
 
 ```bash
-pavelcode rust
+sentinel rust
 ```
 
-## Запуск с OpenAI
+Legacy compatibility:
+
+- `pavelcode` is still kept as a compatibility entrypoint
+- `bin/pavelcode` remains available as a shim during the rebrand transition
+
+## OpenAI-Compatible Setup
 
 Windows PowerShell:
 
@@ -89,10 +104,10 @@ Windows PowerShell:
 $env:CLAUDE_CODE_USE_OPENAI="1"
 $env:OPENAI_API_KEY="sk-your-key-here"
 $env:OPENAI_MODEL="gpt-4o"
-node .\bin\pavelcode
+node .\bin\sentinel
 ```
 
-## Запуск с Ollama
+## Ollama Setup
 
 Windows PowerShell:
 
@@ -100,56 +115,67 @@ Windows PowerShell:
 $env:CLAUDE_CODE_USE_OPENAI="1"
 $env:OPENAI_BASE_URL="http://localhost:11434/v1"
 $env:OPENAI_MODEL="qwen2.5-coder:7b"
-node .\bin\pavelcode
+node .\bin\sentinel
 ```
 
-## Сборка Rust runtime
+## Rust Build
 
 ```bash
 cd rust
 cargo build --release
 ```
 
-Пока Rust-часть рассматривается как отдельный runtime workspace и не заменяет основной CLI по умолчанию.
-После сборки ожидаемый бинарник: `rust/target/release/pavelcode-rust`.
+Expected Rust binary after build:
 
-## Структура проекта
+```text
+rust/target/release/sentinel-rust
+```
+
+On Windows:
+
+```text
+rust/target/release/sentinel-rust.exe
+```
+
+## Repository Structure
 
 ```text
 .
-├── bin/                     # launchers текущего CLI
-├── docs/                    # документация
-├── rust/                    # новый Rust runtime workspace
-├── scripts/                 # сборка и служебные скрипты
-├── src/                     # текущий TypeScript runtime
-├── vscode-extension/        # VS Code extension
+├── bin/                     # launchers and compatibility shims
+├── docs/                    # docs and architecture notes
+├── rust/                    # next-generation Rust runtime
+├── scripts/                 # build and support scripts
+├── src/                     # active TypeScript runtime
+├── vscode-extension/        # VS Code integration
 ├── package.json
 └── README.md
 ```
 
-## Документация
+## Documentation
 
-- [Быстрый старт для Windows](docs/quick-start-windows.md)
-- [Быстрый старт для macOS / Linux](docs/quick-start-mac-linux.md)
-- [Установка для начинающих](docs/non-technical-setup.md)
-- [Расширенная настройка](docs/advanced-setup.md)
-- [Политика безопасности](SECURITY.md)
-- [Локальный playbook](PLAYBOOK.md)
-- [Описание гибридной архитектуры](docs/hybrid-architecture.md)
-- [Сторонние компоненты и происхождение кода](THIRD_PARTY_NOTICES.md)
+- [Advanced Setup](docs/advanced-setup.md)
+- [Windows Quick Start](docs/quick-start-windows.md)
+- [macOS / Linux Quick Start](docs/quick-start-mac-linux.md)
+- [Hybrid Architecture](docs/hybrid-architecture.md)
+- [Sentinel Roadmap](docs/sentinel-roadmap.md)
+- [Voice Architecture Plan](docs/sentinel-voice-plan.md)
+- [Third-Party Notices](THIRD_PARTY_NOTICES.md)
+- [Security](SECURITY.md)
 
-## Текущее направление развития
+## Strategic Direction
 
-- сохранить работоспособность текущего TypeScript CLI
-- постепенно переносить критичные части runtime в Rust
-- привести единый бренд, документацию и команды запуска к одному виду
-- позже добавить единый launcher с выбором движка
+- stabilize `Sentinel Core`
+- add a local bridge/API for external voice and desktop clients
+- develop `Sentinel Voice` as a separate shell around the core
+- continue Rust runtime maturation in parallel
+- unify brand, launchers, docs, and operator workflow under `Eclipse Hopson`
 
-## Важно
+## Important
 
-- Переменные `CLAUDE_CODE_*` пока сохранены для совместимости текущей кодовой базы.
-- Импортированный Rust workspace добавлен как отдельный слой развития и требует собственной сборки через Cargo.
+- `CLAUDE_CODE_*` variables are still preserved for compatibility with the inherited runtime
+- some internal names from earlier upstream layers still exist and will be cleaned up incrementally
+- this repository is the main base for the `Eclipse Hopson Sentinel` system
 
-## Лицензия
+## License
 
 MIT

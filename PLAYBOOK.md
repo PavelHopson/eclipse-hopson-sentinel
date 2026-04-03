@@ -1,28 +1,28 @@
-# PavelCode Local Agent Playbook
+# Eclipse Hopson Sentinel Core Playbook
 
-Этот playbook помогает быстро запустить `PavelCode` с локальной или облачной моделью и не потерять рабочий ритм.
+This playbook helps you run `Sentinel Core` with a local or cloud model and keep development moving.
 
-## Базовый сценарий
+## Base flow
 
-1. Установите зависимости:
+1. Install dependencies:
 
 ```bash
 bun install
 ```
 
-2. Соберите проект:
+2. Build the project:
 
 ```bash
 bun run build
 ```
 
-3. Запустите CLI:
+3. Start the system:
 
 ```bash
-pavelcode
+sentinel
 ```
 
-## Быстрый локальный запуск через Ollama
+## Fast local start with Ollama
 
 Windows PowerShell:
 
@@ -31,7 +31,7 @@ $env:CLAUDE_CODE_USE_OPENAI="1"
 $env:OPENAI_BASE_URL="http://localhost:11434/v1"
 $env:OPENAI_MODEL="qwen2.5-coder:7b"
 
-pavelcode
+sentinel
 ```
 
 macOS / Linux:
@@ -41,25 +41,20 @@ export CLAUDE_CODE_USE_OPENAI=1
 export OPENAI_BASE_URL=http://localhost:11434/v1
 export OPENAI_MODEL=qwen2.5-coder:7b
 
-pavelcode
+sentinel
 ```
 
-## Полезные команды
+## Useful commands
 
-- `bun run dev` — быстрая локальная разработка
-- `bun run smoke` — проверка, что CLI собирается и стартует
-- `bun run doctor:runtime` — диагностика окружения
-- `bun run typecheck` — проверка типов
+- `bun run dev`
+- `bun run smoke`
+- `bun run doctor:runtime`
+- `bun run typecheck`
+- `npm run rust:build`
 
-## Практика работы
+## Working rules
 
-- держите локальные токены только в переменных окружения
-- не коммитьте приватные профили и пользовательские конфиги
-- проверяйте `doctor:runtime` после смены окружения или провайдера
-- не трогайте внутренние `CLAUDE_CODE_*` переменные без отдельной миграции кода
-
-## Перед публикацией изменений
-
-- проверьте README и docs
-- прогоните сборку
-- убедитесь, что package name и repository URL указывают на ваш проект
+- keep tokens only in environment variables
+- do not commit local profiles or secrets
+- run `doctor:runtime` after provider or environment changes
+- keep inherited `CLAUDE_CODE_*` variables intact until dedicated migration work

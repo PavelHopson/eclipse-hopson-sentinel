@@ -1,9 +1,10 @@
 {
-  "name": "@pavelhopson/pavelcode",
+  "name": "@eclipse-hopson/sentinel",
   "version": "0.1.7",
-  "description": "Русифицированный CLI-агент для разработки с поддержкой OpenAI, Gemini, DeepSeek, Ollama и других LLM",
+  "description": "Eclipse Hopson Sentinel core runtime for coding, tools, agents, and local operator workflows",
   "type": "module",
   "bin": {
+    "sentinel": "./bin/sentinel",
     "pavelcode": "./bin/pavelcode"
   },
   "files": [
@@ -129,10 +130,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PavelHopson/pavelcode-cli"
+    "url": "https://github.com/PavelHopson/eclipse-hopson-sentinel"
   },
   "keywords": [
-    "pavelcode",
+    "eclipse-hopson",
+    "sentinel",
     "openai",
     "llm",
     "cli",
@@ -140,7 +142,8 @@
     "deepseek",
     "ollama",
     "gemini",
-    "russian"
+    "voice",
+    "local-ai"
   ],
   "license": "MIT",
   "publishConfig": {

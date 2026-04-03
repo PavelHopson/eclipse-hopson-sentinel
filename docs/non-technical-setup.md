@@ -1,37 +1,37 @@
-# PavelCode для начинающих
+# Eclipse Hopson Sentinel For Beginners
 
-`PavelCode` — это консольный AI-помощник для задач разработки.
+`Eclipse Hopson Sentinel` is a local AI operator system for development tasks.
 
-## Что он умеет
+## What it does
 
-- работать с разными AI-моделями
-- помогать с кодом через терминал
-- использовать локальные и облачные модели
+- works with different AI models
+- helps with code through the terminal
+- can use both cloud and local models
 
-## Что нужно заранее
+## What you need
 
-- установленный Node.js 20+
-- установленный npm
-- доступ к API-ключу или локальной модели
+- Node.js 20+
+- npm
+- API key or local model access
 
-## Установка
-
-```bash
-npm install -g @pavelhopson/pavelcode
-```
-
-## Запуск
+## Install
 
 ```bash
-pavelcode
+npm install -g @eclipse-hopson/sentinel
 ```
 
-После запуска настройте провайдера командой `/provider`.
+## Run
 
-## Если команда не найдена
+```bash
+sentinel
+```
 
-Перезапустите терминал и проверьте, что глобальные npm-бинарники доступны в `PATH`.
+After launch, configure the provider with `/provider`.
 
-## Если нужен локальный запуск без облачного API
+## If the command is not found
 
-Используйте Ollama и укажите локальный `OPENAI_BASE_URL`.
+Restart the terminal and confirm your global npm binary directory is available in `PATH`.
+
+## If you want local/offline use
+
+Use Ollama with `OPENAI_BASE_URL`.

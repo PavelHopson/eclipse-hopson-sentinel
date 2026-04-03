@@ -1,22 +1,22 @@
-# Расширенная настройка PavelCode
+# Eclipse Hopson Sentinel Advanced Setup
 
-## Установка пакета
+## Package Install
 
 ```bash
-npm install -g @pavelhopson/pavelcode
+npm install -g @eclipse-hopson/sentinel
 ```
 
-## Сборка из репозитория
+## Build From Repository
 
 ```bash
-git clone https://github.com/PavelHopson/pavelcode-cli.git
-cd pavelcode-cli
+git clone https://github.com/PavelHopson/eclipse-hopson-sentinel.git
+cd eclipse-hopson-sentinel
 bun install
 bun run build
 node dist/cli.mjs
 ```
 
-## Провайдеры
+## Providers
 
 ### OpenAI-compatible
 
@@ -24,7 +24,7 @@ node dist/cli.mjs
 export CLAUDE_CODE_USE_OPENAI=1
 export OPENAI_API_KEY=sk-your-key-here
 export OPENAI_MODEL=gpt-4o
-pavelcode
+sentinel
 ```
 
 ### Ollama
@@ -33,30 +33,30 @@ pavelcode
 export CLAUDE_CODE_USE_OPENAI=1
 export OPENAI_BASE_URL=http://localhost:11434/v1
 export OPENAI_MODEL=qwen2.5-coder:7b
-pavelcode
+sentinel
 ```
 
 ### Codex
 
-Если у вас уже есть локальная авторизация Codex CLI, текущая кодовая база умеет использовать существующие учетные данные.
+If you already use Codex CLI locally, the current inherited runtime can reuse existing credentials.
 
-## Полезные переменные
+## Useful Variables
 
-| Переменная | Назначение |
+| Variable | Purpose |
 | --- | --- |
-| `CLAUDE_CODE_USE_OPENAI` | Включает OpenAI-compatible провайдер |
-| `OPENAI_API_KEY` | API-ключ |
-| `OPENAI_BASE_URL` | Базовый URL совместимого `/v1` API |
-| `OPENAI_MODEL` | Имя модели |
-| `CODEX_API_KEY` | Явный токен для Codex |
+| `CLAUDE_CODE_USE_OPENAI` | Enables the OpenAI-compatible provider path |
+| `OPENAI_API_KEY` | API key |
+| `OPENAI_BASE_URL` | Base URL for compatible `/v1` APIs |
+| `OPENAI_MODEL` | Model name |
+| `CODEX_API_KEY` | Explicit token for Codex |
 
-## Проверка окружения
+## Environment Checks
 
 ```bash
 bun run doctor:runtime
 bun run smoke
 ```
 
-## Совместимость
+## Compatibility Notes
 
-Исторические переменные и некоторые внутренние имена пока сохранены для стабильного запуска. Их можно будет мигрировать отдельным refactor-этапом.
+Some inherited names and environment variables are still preserved for runtime stability while the rebrand is in progress.

@@ -1,0 +1,115 @@
+#!/usr/bin/env node
+
+/**
+ * Unified Eclipse Hopson Sentinel launcher.
+ *
+ * Default engine:
+ *   sentinel
+ *
+ * Rust engine:
+ *   sentinel --engine rust
+ *   sentinel rust
+ */
+
+import { existsSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { spawn } from 'child_process';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const distPath = join(__dirname, '..', 'dist', 'cli.mjs');
+const rustBinaryName = process.platform === 'win32' ? 'sentinel-rust.exe' : 'sentinel-rust';
+const rustBinaryPath = join(__dirname, '..', 'rust', 'target', 'release', rustBinaryName);
+
+function printTsBuildHelp() {
+  console.error(`
+sentinel: TypeScript runtime is not built.
+
+Build it first:
+  bun install
+  bun run build
+
+Or run in dev mode:
+  bun run dev
+`);
+}
+
+function printRustBuildHelp() {
+  console.error(`
+sentinel: Rust runtime is not built.
+
+Build it first:
+  npm run rust:build
+
+Or manually:
+  cargo build --release --manifest-path rust/Cargo.toml
+`);
+}
+
+function runRust(args) {
+  if (!existsSync(rustBinaryPath)) {
+    printRustBuildHelp();
+    process.exit(1);
+  }
+
+  const child = spawn(rustBinaryPath, args, {
+    stdio: 'inherit',
+  });
+
+  child.on('exit', (code, signal) => {
+    if (signal) {
+      process.kill(process.pid, signal);
+      return;
+    }
+
+    process.exit(code ?? 0);
+  });
+}
+
+function resolveEngine(argv) {
+  const args = [...argv];
+
+  if (args[0] === 'rust') {
+    return { engine: 'rust', args: args.slice(1) };
+  }
+
+  const engineIndex = args.findIndex((arg) => arg === '--engine');
+  if (engineIndex >= 0) {
+    const engine = args[engineIndex + 1];
+    const nextArgs = args.slice(0, engineIndex).concat(args.slice(engineIndex + 2));
+    return { engine: engine ?? 'ts', args: nextArgs };
+  }
+
+  const engineEq = args.find((arg) => arg.startsWith('--engine='));
+  if (engineEq) {
+    const engine = engineEq.split('=', 2)[1] || 'ts';
+    return {
+      engine,
+      args: args.filter((arg) => arg !== engineEq),
+    };
+  }
+
+  return { engine: 'ts', args };
+}
+
+const { engine, args } = resolveEngine(process.argv.slice(2));
+
+if (engine === 'rust') {
+  runRust(args);
+} else if (engine === 'ts') {
+  if (existsSync(distPath)) {
+    process.argv = [process.argv[0], process.argv[1], ...args];
+    await import(pathToFileURL(distPath).href);
+  } else {
+    printTsBuildHelp();
+    process.exit(1);
+  }
+} else {
+  console.error(`Unknown engine: ${engine}
+
+Available engines:
+  ts
+  rust
+`);
+  process.exit(1);
+}

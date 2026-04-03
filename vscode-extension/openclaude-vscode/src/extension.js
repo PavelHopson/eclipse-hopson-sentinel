@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 
 const execAsync = promisify(exec);
-const REPO_URL = 'https://github.com/PavelHopson/pavelcode-cli';
+const REPO_URL = 'https://github.com/PavelHopson/eclipse-hopson-sentinel';
 
 async function isCommandAvailable(command) {
   try {
@@ -28,17 +28,17 @@ function getExecutableFromCommand(command) {
   return command.trim().split(/\s+/)[0];
 }
 
-async function launchPavelCode() {
-  const configured = vscode.workspace.getConfiguration('pavelcode');
-  const launchCommand = configured.get('launchCommand', 'pavelcode');
-  const terminalName = configured.get('terminalName', 'PavelCode');
+async function launchSentinel() {
+  const configured = vscode.workspace.getConfiguration('sentinel');
+  const launchCommand = configured.get('launchCommand', 'sentinel');
+  const terminalName = configured.get('terminalName', 'Sentinel');
   const shimEnabled = configured.get('useOpenAIShim', false);
   const executable = getExecutableFromCommand(launchCommand);
   const installed = await isCommandAvailable(executable);
 
   if (!installed) {
     const action = await vscode.window.showErrorMessage(
-      `Komanda PavelCode ne naidena: ${executable}. Ustanovite paket: npm install -g @pavelhopson/pavelcode`,
+      `Sentinel command not found: ${executable}. Install it with: npm install -g @eclipse-hopson/sentinel`,
       'Open Repository'
     );
 
@@ -63,11 +63,11 @@ async function launchPavelCode() {
   terminal.sendText(launchCommand, true);
 }
 
-class PavelCodeControlCenterProvider {
+class SentinelControlCenterProvider {
   async resolveWebviewView(webviewView) {
     webviewView.webview.options = { enableScripts: true };
-    const configured = vscode.workspace.getConfiguration('pavelcode');
-    const launchCommand = configured.get('launchCommand', 'pavelcode');
+    const configured = vscode.workspace.getConfiguration('sentinel');
+    const launchCommand = configured.get('launchCommand', 'sentinel');
     const executable = getExecutableFromCommand(launchCommand);
     const installed = await isCommandAvailable(executable);
     const shimEnabled = configured.get('useOpenAIShim', false);
@@ -82,7 +82,7 @@ class PavelCodeControlCenterProvider {
 
     webviewView.webview.onDidReceiveMessage(async (message) => {
       if (message?.type === 'launch') {
-        await launchPavelCode();
+        await launchSentinel();
         return;
       }
 
@@ -99,8 +99,8 @@ class PavelCodeControlCenterProvider {
 
   getHtml(status) {
     const nonce = crypto.randomBytes(16).toString('base64');
-    const runtimeLabel = status.installed ? 'dostupen' : 'ne naiden';
-    const shimLabel = status.shimEnabled ? 'vkliuchen (CLAUDE_CODE_USE_OPENAI=1)' : 'vykliuchen';
+    const runtimeLabel = status.installed ? 'available' : 'missing';
+    const shimLabel = status.shimEnabled ? 'enabled (CLAUDE_CODE_USE_OPENAI=1)' : 'disabled';
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -218,27 +218,27 @@ class PavelCodeControlCenterProvider {
 <body>
   <div class="panel">
     <div class="topbar">
-      <span>pavelcode control center</span>
+      <span>sentinel control center</span>
       <span>online</span>
     </div>
     <div class="content">
       <div>
-        <div class="title">PAVELCODE READY</div>
+        <div class="title">SENTINEL READY</div>
         <div class="sub">Terminal-first launcher inside VS Code.</div>
       </div>
       <div class="terminal-box">
-        <div class="terminal-row"><span class="prompt">$</span> pavelcode --status</div>
+        <div class="terminal-row"><span class="prompt">$</span> sentinel --status</div>
         <div class="terminal-row">runtime: ${runtimeLabel}</div>
         <div class="terminal-row">shim: ${shimLabel}</div>
         <div class="terminal-row">command: ${status.executable}</div>
       </div>
       <div class="actions">
-        <button class="btn primary" id="launch">Launch PavelCode</button>
+        <button class="btn primary" id="launch">Launch Sentinel</button>
         <button class="btn" id="docs">Open Repository</button>
         <button class="btn" id="commands">Open Command Palette</button>
       </div>
       <div class="hint">
-        Quick trigger: use <code>${status.shortcut}</code> and run PavelCode from anywhere.
+        Quick trigger: use <code>${status.shortcut}</code> and run Sentinel from anywhere.
       </div>
     </div>
   </div>
@@ -254,20 +254,20 @@ class PavelCodeControlCenterProvider {
 }
 
 function activate(context) {
-  const startCommand = vscode.commands.registerCommand('pavelcode.start', async () => {
-    await launchPavelCode();
+  const startCommand = vscode.commands.registerCommand('sentinel.start', async () => {
+    await launchSentinel();
   });
 
-  const openDocsCommand = vscode.commands.registerCommand('pavelcode.openDocs', async () => {
+  const openDocsCommand = vscode.commands.registerCommand('sentinel.openDocs', async () => {
     await vscode.env.openExternal(vscode.Uri.parse(REPO_URL));
   });
 
-  const openUiCommand = vscode.commands.registerCommand('pavelcode.openControlCenter', async () => {
-    await vscode.commands.executeCommand('workbench.view.extension.pavelcode');
+  const openUiCommand = vscode.commands.registerCommand('sentinel.openControlCenter', async () => {
+    await vscode.commands.executeCommand('workbench.view.extension.sentinel');
   });
 
-  const provider = new PavelCodeControlCenterProvider();
-  const providerDisposable = vscode.window.registerWebviewViewProvider('pavelcode.controlCenter', provider);
+  const provider = new SentinelControlCenterProvider();
+  const providerDisposable = vscode.window.registerWebviewViewProvider('sentinel.controlCenter', provider);
 
   context.subscriptions.push(startCommand, openDocsCommand, openUiCommand, providerDisposable);
 }

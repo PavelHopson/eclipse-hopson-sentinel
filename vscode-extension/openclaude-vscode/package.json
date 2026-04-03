@@ -1,7 +1,7 @@
 {
-  "name": "pavelcode-vscode",
-  "displayName": "PavelCode",
-  "description": "VS Code extension for PavelCode with a control center and terminal launch integration.",
+  "name": "eclipse-hopson-sentinel-vscode",
+  "displayName": "Eclipse Hopson Sentinel",
+  "description": "VS Code extension for Eclipse Hopson Sentinel with control center and terminal launch integration.",
   "version": "0.1.1",
   "publisher": "devnull-bootloader",
   "engines": {
@@ -13,71 +13,71 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onCommand:pavelcode.start",
-    "onCommand:pavelcode.openDocs",
-    "onCommand:pavelcode.openControlCenter",
-    "onView:pavelcode.controlCenter"
+    "onCommand:sentinel.start",
+    "onCommand:sentinel.openDocs",
+    "onCommand:sentinel.openControlCenter",
+    "onView:sentinel.controlCenter"
   ],
   "main": "./src/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "pavelcode.start",
-        "title": "PavelCode: Запуск в терминале",
-        "category": "PavelCode"
+        "command": "sentinel.start",
+        "title": "Sentinel: Launch in Terminal",
+        "category": "Sentinel"
       },
       {
-        "command": "pavelcode.openDocs",
-        "title": "PavelCode: Открыть репозиторий",
-        "category": "PavelCode"
+        "command": "sentinel.openDocs",
+        "title": "Sentinel: Open Repository",
+        "category": "Sentinel"
       },
       {
-        "command": "pavelcode.openControlCenter",
-        "title": "PavelCode: Открыть центр управления",
-        "category": "PavelCode"
+        "command": "sentinel.openControlCenter",
+        "title": "Sentinel: Open Control Center",
+        "category": "Sentinel"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "pavelcode",
-          "title": "PavelCode",
+          "id": "sentinel",
+          "title": "Sentinel",
           "icon": "media/openclaude.svg"
         }
       ]
     },
     "views": {
-      "pavelcode": [
+      "sentinel": [
         {
-          "id": "pavelcode.controlCenter",
-          "name": "Центр управления",
+          "id": "sentinel.controlCenter",
+          "name": "Control Center",
           "type": "webview"
         }
       ]
     },
     "configuration": {
-      "title": "PavelCode",
+      "title": "Sentinel",
       "properties": {
-        "pavelcode.launchCommand": {
+        "sentinel.launchCommand": {
           "type": "string",
-          "default": "pavelcode",
-          "description": "Команда, которая запускается во встроенном терминале VS Code."
+          "default": "sentinel",
+          "description": "Command executed in the integrated terminal."
         },
-        "pavelcode.terminalName": {
+        "sentinel.terminalName": {
           "type": "string",
-          "default": "PavelCode",
-          "description": "Имя вкладки встроенного терминала для сессии PavelCode."
+          "default": "Sentinel",
+          "description": "Integrated terminal tab name for Sentinel sessions."
         },
-        "pavelcode.useOpenAIShim": {
+        "sentinel.useOpenAIShim": {
           "type": "boolean",
           "default": false,
-          "description": "При запуске дополнительно выставляет CLAUDE_CODE_USE_OPENAI=1."
+          "description": "Optionally sets CLAUDE_CODE_USE_OPENAI=1 for launched terminals."
         }
       }
     },
     "themes": [
       {
-        "label": "PavelCode Terminal Black",
+        "label": "Sentinel Terminal Black",
         "uiTheme": "vs-dark",
         "path": "./themes/OpenClaude-Terminal-Black.json"
       }
@@ -88,7 +88,8 @@
     "package": "npx @vscode/vsce package --no-dependencies"
   },
   "keywords": [
-    "pavelcode",
+    "sentinel",
+    "eclipse-hopson",
     "terminal",
     "theme",
     "cli",
@@ -96,7 +97,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/PavelHopson/pavelcode-cli"
+    "url": "https://github.com/PavelHopson/eclipse-hopson-sentinel"
   },
   "license": "MIT"
 }

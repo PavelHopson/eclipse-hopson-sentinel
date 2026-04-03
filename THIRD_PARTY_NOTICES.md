@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Этот репозиторий содержит объединенную кодовую базу `PavelCode`.
+Этот репозиторий содержит объединенную кодовую базу `Eclipse Hopson Sentinel`.
 
 ## Основа текущего CLI
 
@@ -13,7 +13,7 @@
 - `ultraworkers/claw-code-parity`
 - URL: `https://github.com/ultraworkers/claw-code-parity`
 
-Импорт производился как отдельный runtime workspace для дальнейшей интеграции в `PavelCode`.
+Импорт производился как отдельный runtime workspace для дальнейшей интеграции в `Eclipse Hopson Sentinel`.
 
 На момент импорта:
 

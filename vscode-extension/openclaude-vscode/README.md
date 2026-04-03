@@ -1,25 +1,25 @@
-# PavelCode VS Code Extension
+# Eclipse Hopson Sentinel VS Code Extension
 
-Расширение добавляет простой центр управления `PavelCode` прямо в VS Code.
+This extension adds a lightweight control center for `Eclipse Hopson Sentinel` inside VS Code.
 
-## Возможности
+## Features
 
-- запуск `PavelCode` из терминала VS Code
-- быстрый переход к репозиторию
-- отдельная вкладка с мини-панелью управления
-- тёмная terminal-тема
+- launch `Sentinel` from the integrated terminal
+- open the repository quickly
+- use a simple control panel inside VS Code
+- keep a terminal-oriented workflow
 
-## Требования
+## Requirements
 
-- установлен `pavelcode` в `PATH`
-- рекомендуемая команда установки:
+- `sentinel` available in your `PATH`
+- recommended install command:
 
 ```bash
-npm install -g @pavelhopson/pavelcode
+npm install -g @eclipse-hopson/sentinel
 ```
 
-## Команды
+## Commands
 
-- `PavelCode: Запуск в терминале`
-- `PavelCode: Открыть репозиторий`
-- `PavelCode: Открыть центр управления`
+- `Sentinel: Launch in Terminal`
+- `Sentinel: Open Repository`
+- `Sentinel: Open Control Center`
