@@ -35,8 +35,30 @@ function parseArgs(argv) {
   return config
 }
 
-async function askBridge(config, prompt) {
-  const response = await fetch(`${config.url}/v1/ask`, {
+async function createSession(config) {
+  const response = await fetch(`${config.url}/v1/sessions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(config.token ? { Authorization: `Bearer ${config.token}` } : {}),
+    },
+    body: JSON.stringify({
+      cwd: config.cwd,
+    }),
+  })
+
+  const payload = await response.json()
+
+  if (!response.ok) {
+    const error = payload?.error || `HTTP ${response.status}`
+    throw new Error(String(error))
+  }
+
+  return payload.session
+}
+
+async function askSession(config, sessionId, prompt) {
+  const response = await fetch(`${config.url}/v1/sessions/${sessionId}/ask`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -81,10 +103,12 @@ function formatResponse(payload) {
 async function main() {
   const config = parseArgs(process.argv.slice(2))
   const rl = createInterface({ input, output })
+  const session = await createSession(config)
 
   output.write('Eclipse Hopson Sentinel Voice MVP\n')
   output.write(`Bridge: ${config.url}\n`)
   output.write(`Workspace: ${config.cwd}\n`)
+  output.write(`Bridge session: ${session.id}\n`)
   output.write("Type your request and press Enter. Type 'exit' to quit.\n\n")
 
   try {
@@ -100,7 +124,7 @@ async function main() {
       }
 
       try {
-        const payload = await askBridge(config, prompt)
+        const payload = await askSession(config, session.id, prompt)
         output.write(`\n${formatResponse(payload)}\n\n`)
       } catch (error) {
         const message =

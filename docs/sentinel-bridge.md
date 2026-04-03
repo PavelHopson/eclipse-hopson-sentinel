@@ -96,6 +96,61 @@ The `response` object is the stable contract for external clients.
 - `metrics` gives latency and cost signals for future dashboards
 - `parsed` remains available as the raw CLI result envelope
 
+### Create session
+
+```http
+POST /v1/sessions
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "cwd": "E:\\PR-BOT\\openclaude-pavel"
+}
+```
+
+Response:
+
+```json
+{
+  "ok": true,
+  "session": {
+    "id": "bridge-session-id",
+    "cwd": "E:\\PR-BOT\\openclaude-pavel",
+    "sentinelSessionId": null,
+    "createdAt": "2026-04-03T12:00:00.000Z",
+    "updatedAt": "2026-04-03T12:00:00.000Z"
+  }
+}
+```
+
+### Ask within session
+
+```http
+POST /v1/sessions/<bridge-session-id>/ask
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+This endpoint reuses the underlying Sentinel session via `--resume` once the first turn returns a real `session_id`.
+
+### Get session
+
+```http
+GET /v1/sessions/<bridge-session-id>
+Authorization: Bearer <token>
+```
+
+### Delete session
+
+```http
+DELETE /v1/sessions/<bridge-session-id>
+Authorization: Bearer <token>
+```
+
 ## Current behavior
 
 The bridge currently proxies prompts into the non-interactive Sentinel CLI.
@@ -105,6 +160,6 @@ This is the Phase 3 foundation, not the final voice runtime API.
 ## Next steps
 
 - add richer structured responses
-- add session-aware requests
+- add richer session metadata
 - add voice-shell friendly response fields
 - support desktop and wake-word clients

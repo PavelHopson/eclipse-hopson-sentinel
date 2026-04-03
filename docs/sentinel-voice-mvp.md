@@ -15,6 +15,7 @@ Validate the product loop before adding STT, TTS, and wake word:
 1. send a request to `Sentinel Core`
 2. get a usable answer back
 3. keep the client layer separate from the core
+4. maintain a reusable dialogue session through the bridge
 
 ## Start Sentinel Bridge
 
@@ -47,6 +48,7 @@ node .\bin\sentinel-voice
 - bridge-based local communication
 - workspace-aware requests through `cwd`
 - uses the stable bridge `response.reply` contract for rendering answers
+- creates a bridge session and reuses the underlying Sentinel session between turns
 
 ## Not implemented yet
 

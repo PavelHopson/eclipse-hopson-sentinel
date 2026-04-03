@@ -16,6 +16,18 @@ export type SentinelBridgeAskRequest = {
   cwd?: string
 }
 
+type SentinelBridgeSessionRecord = {
+  id: string
+  cwd: string
+  sentinelSessionId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+type SentinelBridgeSessionCreateRequest = {
+  cwd?: string
+}
+
 type SentinelCliResultMessage = {
   type?: string
   subtype?: string
@@ -53,6 +65,17 @@ type SentinelBridgeAskResponse = {
     }
     rawResultType: string | null
     rawResultSubtype: string | null
+  }
+}
+
+type SentinelBridgeSessionResponse = {
+  ok: true
+  session: {
+    id: string
+    cwd: string
+    sentinelSessionId: string | null
+    createdAt: string
+    updatedAt: string
   }
 }
 
@@ -108,6 +131,7 @@ function isAuthorized(req: IncomingMessage, token?: string): boolean {
 
 async function runSentinelPrompt(
   request: SentinelBridgeAskRequest,
+  resumeSessionId?: string | null,
 ): Promise<SentinelBridgeAskResponse> {
   const prompt = request.prompt?.trim()
   if (!prompt) {
@@ -117,9 +141,15 @@ async function runSentinelPrompt(
   const cliEntrypoint = getCliEntrypointPath()
 
   return await new Promise((resolvePromise, rejectPromise) => {
+    const childArgs = [cliEntrypoint, '--print', '--output-format', 'json']
+    if (resumeSessionId) {
+      childArgs.push('--resume', resumeSessionId)
+    }
+    childArgs.push(prompt)
+
     const child = spawn(
       process.execPath,
-      [cliEntrypoint, '--print', '--output-format', 'json', prompt],
+      childArgs,
       {
         cwd: request.cwd || process.cwd(),
         env: process.env,
@@ -193,10 +223,26 @@ async function runSentinelPrompt(
   })
 }
 
+function toSessionPayload(
+  session: SentinelBridgeSessionRecord,
+): SentinelBridgeSessionResponse {
+  return {
+    ok: true,
+    session: {
+      id: session.id,
+      cwd: session.cwd,
+      sentinelSessionId: session.sentinelSessionId,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+    },
+  }
+}
+
 export async function startSentinelBridgeServer(
   config: SentinelBridgeConfig,
 ): Promise<{ close: () => Promise<void>; token?: string }> {
   const token = config.token || process.env.SENTINEL_BRIDGE_TOKEN || randomUUID()
+  const sessions = new Map<string, SentinelBridgeSessionRecord>()
 
   const server = createServer(async (req, res) => {
     try {
@@ -209,9 +255,10 @@ export async function startSentinelBridgeServer(
       }
 
       const method = req.method || 'GET'
-      const url = req.url || '/'
+      const requestUrl = new URL(req.url || '/', `http://${config.host}:${config.port}`)
+      const pathname = requestUrl.pathname
 
-      if (method === 'GET' && url === '/health') {
+      if (method === 'GET' && pathname === '/health') {
         sendJson(res, 200, {
           ok: true,
           service: 'sentinel-bridge',
@@ -221,7 +268,7 @@ export async function startSentinelBridgeServer(
         return
       }
 
-      if (method === 'POST' && url === '/v1/ask') {
+      if (method === 'POST' && pathname === '/v1/ask') {
         const body = (await readJsonBody(req)) as Partial<SentinelBridgeAskRequest>
         const result = await runSentinelPrompt({
           prompt: body.prompt || '',
@@ -229,6 +276,89 @@ export async function startSentinelBridgeServer(
         })
         sendJson(res, 200, result)
         return
+      }
+
+      if (method === 'POST' && pathname === '/v1/sessions') {
+        const body =
+          (await readJsonBody(req)) as Partial<SentinelBridgeSessionCreateRequest>
+        const now = new Date().toISOString()
+        const session: SentinelBridgeSessionRecord = {
+          id: randomUUID(),
+          cwd: body.cwd || process.cwd(),
+          sentinelSessionId: null,
+          createdAt: now,
+          updatedAt: now,
+        }
+        sessions.set(session.id, session)
+        sendJson(res, 201, toSessionPayload(session))
+        return
+      }
+
+      const askMatch = pathname.match(/^\/v1\/sessions\/([0-9a-fA-F-]+)\/ask$/)
+      if (method === 'POST' && askMatch) {
+        const session = sessions.get(askMatch[1])
+        if (!session) {
+          sendJson(res, 404, {
+            ok: false,
+            error: 'Session not found',
+          })
+          return
+        }
+
+        const body = (await readJsonBody(req)) as Partial<SentinelBridgeAskRequest>
+        const effectiveCwd = body.cwd || session.cwd
+        const result = await runSentinelPrompt(
+          {
+            prompt: body.prompt || '',
+            cwd: effectiveCwd,
+          },
+          session.sentinelSessionId,
+        )
+
+        const nextSentinelSessionId =
+          result.response.session.id || result.parsed?.session_id || null
+        session.cwd = effectiveCwd
+        session.sentinelSessionId = nextSentinelSessionId
+        session.updatedAt = new Date().toISOString()
+        sessions.set(session.id, session)
+
+        sendJson(res, 200, {
+          ...result,
+          bridgeSession: {
+            id: session.id,
+            cwd: session.cwd,
+            sentinelSessionId: session.sentinelSessionId,
+            updatedAt: session.updatedAt,
+          },
+        })
+        return
+      }
+
+      const sessionMatch = pathname.match(/^\/v1\/sessions\/([0-9a-fA-F-]+)$/)
+      if (sessionMatch) {
+        const session = sessions.get(sessionMatch[1])
+        if (!session) {
+          sendJson(res, 404, {
+            ok: false,
+            error: 'Session not found',
+          })
+          return
+        }
+
+        if (method === 'GET') {
+          sendJson(res, 200, toSessionPayload(session))
+          return
+        }
+
+        if (method === 'DELETE') {
+          sessions.delete(session.id)
+          sendJson(res, 200, {
+            ok: true,
+            deleted: true,
+            sessionId: session.id,
+          })
+          return
+        }
       }
 
       sendJson(res, 404, {
