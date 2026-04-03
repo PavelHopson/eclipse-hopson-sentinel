@@ -34,6 +34,19 @@ cd E:\PR-BOT\openclaude-pavel
 node .\bin\sentinel-voice --url http://127.0.0.1:8765 --token mytoken --cwd E:\PR-BOT\openclaude-pavel
 ```
 
+With speech output on Windows:
+
+```powershell
+cd E:\PR-BOT\openclaude-pavel
+node .\bin\sentinel-voice --speak --voice Russian --rate 1
+```
+
+List available system voices:
+
+```powershell
+node .\bin\sentinel-voice --list-voices
+```
+
 You can also use environment variables:
 
 ```powershell
@@ -49,15 +62,21 @@ node .\bin\sentinel-voice
 - workspace-aware requests through `cwd`
 - uses the stable bridge `response.reply` contract for rendering answers
 - creates a bridge session and reuses the underlying Sentinel session between turns
+- can optionally speak answers on Windows through local system TTS
 
 ## Not implemented yet
 
 - speech-to-text
-- text-to-speech
 - wake word
 - background listening
 - desktop UI
 - session memory tailored for voice
+
+## Current TTS implementation
+
+- Windows-only local speech output through `SAPI.SpVoice`
+- no external cloud dependency for speech
+- voice selection is substring-based, for example `Russian` or `Zira`
 
 ## Why this stage matters
 

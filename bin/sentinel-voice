@@ -2,12 +2,19 @@
 
 import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
+import { spawn } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 function parseArgs(argv) {
   const config = {
     url: process.env.SENTINEL_BRIDGE_URL || 'http://127.0.0.1:8765',
     token: process.env.SENTINEL_BRIDGE_TOKEN || '',
     cwd: process.cwd(),
+    speak: process.env.SENTINEL_VOICE_SPEAK === '1',
+    voice: process.env.SENTINEL_TTS_VOICE || '',
+    rate: Number(process.env.SENTINEL_TTS_RATE || '0'),
+    listVoices: false,
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -29,10 +36,40 @@ function parseArgs(argv) {
     if (part === '--cwd' && next) {
       config.cwd = next
       index += 1
+      continue
+    }
+
+    if (part === '--speak') {
+      config.speak = true
+      continue
+    }
+
+    if (part === '--voice' && next) {
+      config.voice = next
+      index += 1
+      continue
+    }
+
+    if (part === '--rate' && next) {
+      const parsed = Number(next)
+      if (!Number.isNaN(parsed)) {
+        config.rate = parsed
+      }
+      index += 1
+      continue
+    }
+
+    if (part === '--list-voices') {
+      config.listVoices = true
     }
   }
 
   return config
+}
+
+function getTtsScriptPath() {
+  const currentDir = dirname(fileURLToPath(import.meta.url))
+  return resolve(currentDir, '..', 'scripts', 'sentinel-tts.ps1')
 }
 
 async function createSession(config) {
@@ -100,8 +137,80 @@ function formatResponse(payload) {
   return '[empty response]'
 }
 
+async function speakText(config, text) {
+  if (!config.speak || !text.trim()) {
+    return
+  }
+
+  const scriptPath = getTtsScriptPath()
+
+  await new Promise((resolvePromise, rejectPromise) => {
+    const args = [
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      scriptPath,
+      '-Text',
+      text,
+      '-Rate',
+      String(config.rate),
+    ]
+
+    if (config.voice) {
+      args.push('-Voice', config.voice)
+    }
+
+    const child = spawn('powershell', args, {
+      stdio: 'ignore',
+      windowsHide: true,
+    })
+
+    child.on('error', rejectPromise)
+    child.on('close', code => {
+      if (code === 0) {
+        resolvePromise()
+        return
+      }
+
+      rejectPromise(new Error(`TTS exited with code ${code}`))
+    })
+  })
+}
+
+async function listVoices() {
+  const command =
+    "$voice = New-Object -ComObject SAPI.SpVoice; $voice.GetVoices() | ForEach-Object { $_.GetDescription() }"
+
+  await new Promise((resolvePromise, rejectPromise) => {
+    const child = spawn(
+      'powershell',
+      ['-ExecutionPolicy', 'Bypass', '-Command', command],
+      {
+        stdio: 'inherit',
+        windowsHide: true,
+      },
+    )
+
+    child.on('error', rejectPromise)
+    child.on('close', code => {
+      if (code === 0) {
+        resolvePromise()
+        return
+      }
+
+      rejectPromise(new Error(`Voice listing exited with code ${code}`))
+    })
+  })
+}
+
 async function main() {
   const config = parseArgs(process.argv.slice(2))
+
+  if (config.listVoices) {
+    await listVoices()
+    return
+  }
+
   const rl = createInterface({ input, output })
   const session = await createSession(config)
 
@@ -109,6 +218,7 @@ async function main() {
   output.write(`Bridge: ${config.url}\n`)
   output.write(`Workspace: ${config.cwd}\n`)
   output.write(`Bridge session: ${session.id}\n`)
+  output.write(`Speech output: ${config.speak ? 'enabled' : 'disabled'}\n`)
   output.write("Type your request and press Enter. Type 'exit' to quit.\n\n")
 
   try {
@@ -125,7 +235,9 @@ async function main() {
 
       try {
         const payload = await askSession(config, session.id, prompt)
-        output.write(`\n${formatResponse(payload)}\n\n`)
+        const text = formatResponse(payload)
+        output.write(`\n${text}\n\n`)
+        await speakText(config, text)
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Unknown bridge error'

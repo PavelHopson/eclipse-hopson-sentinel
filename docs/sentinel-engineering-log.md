@@ -11,6 +11,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - documented the bridge and MVP client flow
 - added a stable `voice-v1` response envelope for external clients
 - added bridge-managed dialogue sessions backed by the inherited Sentinel `--resume` flow
+- added local Windows TTS output for `Sentinel Voice MVP` via `SAPI.SpVoice`
 
 ### What did not succeed yet
 
@@ -20,11 +21,11 @@ This document records blocked checks, failed attempts, and known limitations dur
 ### Current known limitations
 
 - `Sentinel Voice MVP` is text-only and does not yet capture microphone input
-- no TTS pipeline exists yet
 - no wake-word/background listener exists yet
 - the bridge currently shells out to the non-interactive CLI instead of using a richer native session API
 - the new `voice-v1` contract is designed from code inspection and partial local validation, but not yet fully smoke-tested end-to-end because the Bun-based build is still blocked
 - bridge sessions are currently in-memory only, so they disappear when the bridge process stops
+- current TTS implementation is Windows-specific and depends on local SAPI voices being installed
 
 ### Next engineering targets
 
