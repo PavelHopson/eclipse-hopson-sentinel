@@ -1,0 +1,102 @@
+{
+  "name": "pavelcode-vscode",
+  "displayName": "PavelCode",
+  "description": "VS Code extension for PavelCode with a control center and terminal launch integration.",
+  "version": "0.1.1",
+  "publisher": "devnull-bootloader",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Themes",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:pavelcode.start",
+    "onCommand:pavelcode.openDocs",
+    "onCommand:pavelcode.openControlCenter",
+    "onView:pavelcode.controlCenter"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pavelcode.start",
+        "title": "PavelCode: Запуск в терминале",
+        "category": "PavelCode"
+      },
+      {
+        "command": "pavelcode.openDocs",
+        "title": "PavelCode: Открыть репозиторий",
+        "category": "PavelCode"
+      },
+      {
+        "command": "pavelcode.openControlCenter",
+        "title": "PavelCode: Открыть центр управления",
+        "category": "PavelCode"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pavelcode",
+          "title": "PavelCode",
+          "icon": "media/openclaude.svg"
+        }
+      ]
+    },
+    "views": {
+      "pavelcode": [
+        {
+          "id": "pavelcode.controlCenter",
+          "name": "Центр управления",
+          "type": "webview"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PavelCode",
+      "properties": {
+        "pavelcode.launchCommand": {
+          "type": "string",
+          "default": "pavelcode",
+          "description": "Команда, которая запускается во встроенном терминале VS Code."
+        },
+        "pavelcode.terminalName": {
+          "type": "string",
+          "default": "PavelCode",
+          "description": "Имя вкладки встроенного терминала для сессии PavelCode."
+        },
+        "pavelcode.useOpenAIShim": {
+          "type": "boolean",
+          "default": false,
+          "description": "При запуске дополнительно выставляет CLAUDE_CODE_USE_OPENAI=1."
+        }
+      }
+    },
+    "themes": [
+      {
+        "label": "PavelCode Terminal Black",
+        "uiTheme": "vs-dark",
+        "path": "./themes/OpenClaude-Terminal-Black.json"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "node --check ./src/extension.js",
+    "package": "npx @vscode/vsce package --no-dependencies"
+  },
+  "keywords": [
+    "pavelcode",
+    "terminal",
+    "theme",
+    "cli",
+    "llm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PavelHopson/pavelcode-cli"
+  },
+  "license": "MIT"
+}

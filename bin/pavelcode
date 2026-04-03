@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+/**
+ * Основной launcher PavelCode.
+ */
+
+import { existsSync } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath, pathToFileURL } from 'url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const distPath = join(__dirname, '..', 'dist', 'cli.mjs')
+
+if (existsSync(distPath)) {
+  await import(pathToFileURL(distPath).href)
+} else {
+  console.error(`
+  pavelcode: dist/cli.mjs not found.
+
+  Сначала соберите проект:
+    bun run build
+
+  Или запустите напрямую через Bun:
+    bun run dev
+
+  Подробности смотрите в README.md.
+`)
+  process.exit(1)
+}
