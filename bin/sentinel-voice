@@ -1,0 +1,116 @@
+#!/usr/bin/env node
+
+import { createInterface } from 'node:readline/promises'
+import { stdin as input, stdout as output } from 'node:process'
+
+function parseArgs(argv) {
+  const config = {
+    url: process.env.SENTINEL_BRIDGE_URL || 'http://127.0.0.1:8765',
+    token: process.env.SENTINEL_BRIDGE_TOKEN || '',
+    cwd: process.cwd(),
+  }
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const part = argv[index]
+    const next = argv[index + 1]
+
+    if (part === '--url' && next) {
+      config.url = next.replace(/\/$/, '')
+      index += 1
+      continue
+    }
+
+    if (part === '--token' && next) {
+      config.token = next
+      index += 1
+      continue
+    }
+
+    if (part === '--cwd' && next) {
+      config.cwd = next
+      index += 1
+    }
+  }
+
+  return config
+}
+
+async function askBridge(config, prompt) {
+  const response = await fetch(`${config.url}/v1/ask`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(config.token ? { Authorization: `Bearer ${config.token}` } : {}),
+    },
+    body: JSON.stringify({
+      prompt,
+      cwd: config.cwd,
+    }),
+  })
+
+  const payload = await response.json()
+
+  if (!response.ok) {
+    const error = payload?.error || `HTTP ${response.status}`
+    throw new Error(String(error))
+  }
+
+  return payload
+}
+
+function formatResponse(payload) {
+  if (payload?.parsed?.result) {
+    return String(payload.parsed.result)
+  }
+
+  if (typeof payload?.stdout === 'string' && payload.stdout.trim()) {
+    return payload.stdout.trim()
+  }
+
+  if (typeof payload?.stderr === 'string' && payload.stderr.trim()) {
+    return `[stderr]\n${payload.stderr.trim()}`
+  }
+
+  return '[empty response]'
+}
+
+async function main() {
+  const config = parseArgs(process.argv.slice(2))
+  const rl = createInterface({ input, output })
+
+  output.write('Eclipse Hopson Sentinel Voice MVP\n')
+  output.write(`Bridge: ${config.url}\n`)
+  output.write(`Workspace: ${config.cwd}\n`)
+  output.write("Type your request and press Enter. Type 'exit' to quit.\n\n")
+
+  try {
+    while (true) {
+      const prompt = (await rl.question('sentinel-voice> ')).trim()
+
+      if (!prompt) {
+        continue
+      }
+
+      if (prompt.toLowerCase() === 'exit') {
+        break
+      }
+
+      try {
+        const payload = await askBridge(config, prompt)
+        output.write(`\n${formatResponse(payload)}\n\n`)
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Unknown bridge error'
+        output.write(`\n[bridge error] ${message}\n\n`)
+      }
+    }
+  } finally {
+    rl.close()
+  }
+}
+
+main().catch(error => {
+  const message = error instanceof Error ? error.message : 'Unknown error'
+  output.write(`Fatal error: ${message}\n`)
+  process.exitCode = 1
+})

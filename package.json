@@ -5,6 +5,7 @@
   "type": "module",
   "bin": {
     "sentinel": "./bin/sentinel",
+    "sentinel-voice": "./bin/sentinel-voice",
     "pavelcode": "./bin/pavelcode"
   },
   "files": [
