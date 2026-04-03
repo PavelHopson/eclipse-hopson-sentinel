@@ -1,29 +1,115 @@
 #!/usr/bin/env node
 
 /**
- * Основной launcher PavelCode.
+ * Unified PavelCode launcher.
+ *
+ * Default engine:
+ *   pavelcode
+ *
+ * Rust engine:
+ *   pavelcode --engine rust
+ *   pavelcode rust
  */
 
-import { existsSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath, pathToFileURL } from 'url'
+import { existsSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { spawn } from 'child_process';
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const distPath = join(__dirname, '..', 'dist', 'cli.mjs')
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const distPath = join(__dirname, '..', 'dist', 'cli.mjs');
+const rustBinaryName = process.platform === 'win32' ? 'claw.exe' : 'claw';
+const rustBinaryPath = join(__dirname, '..', 'rust', 'target', 'release', rustBinaryName);
 
-if (existsSync(distPath)) {
-  await import(pathToFileURL(distPath).href)
-} else {
+function printTsBuildHelp() {
   console.error(`
-  pavelcode: dist/cli.mjs not found.
+pavelcode: TypeScript runtime is not built.
 
-  Сначала соберите проект:
-    bun run build
+Build it first:
+  bun install
+  bun run build
 
-  Или запустите напрямую через Bun:
-    bun run dev
+Or run in dev mode:
+  bun run dev
+`);
+}
 
-  Подробности смотрите в README.md.
-`)
-  process.exit(1)
+function printRustBuildHelp() {
+  console.error(`
+pavelcode: Rust runtime is not built.
+
+Build it first:
+  npm run rust:build
+
+Or manually:
+  cargo build --release --manifest-path rust/Cargo.toml
+`);
+}
+
+function runRust(args) {
+  if (!existsSync(rustBinaryPath)) {
+    printRustBuildHelp();
+    process.exit(1);
+  }
+
+  const child = spawn(rustBinaryPath, args, {
+    stdio: 'inherit',
+  });
+
+  child.on('exit', (code, signal) => {
+    if (signal) {
+      process.kill(process.pid, signal);
+      return;
+    }
+
+    process.exit(code ?? 0);
+  });
+}
+
+function resolveEngine(argv) {
+  const args = [...argv];
+
+  if (args[0] === 'rust') {
+    return { engine: 'rust', args: args.slice(1) };
+  }
+
+  const engineIndex = args.findIndex((arg) => arg === '--engine');
+  if (engineIndex >= 0) {
+    const engine = args[engineIndex + 1];
+    const nextArgs = args.slice(0, engineIndex).concat(args.slice(engineIndex + 2));
+    return { engine: engine ?? 'ts', args: nextArgs };
+  }
+
+  const engineEq = args.find((arg) => arg.startsWith('--engine='));
+  if (engineEq) {
+    const engine = engineEq.split('=', 2)[1] || 'ts';
+    return {
+      engine,
+      args: args.filter((arg) => arg !== engineEq),
+    };
+  }
+
+  return { engine: 'ts', args };
+}
+
+const { engine, args } = resolveEngine(process.argv.slice(2));
+
+if (engine === 'rust') {
+  runRust(args);
+} else if (engine === 'ts') {
+  if (existsSync(distPath)) {
+    process.argv = [process.argv[0], process.argv[1], ...args];
+    await import(pathToFileURL(distPath).href);
+  } else {
+    printTsBuildHelp();
+    process.exit(1);
+  }
+} else {
+  console.error(`Unknown engine: ${engine}
+
+Available engines:
+  ts
+  rust
+`);
+  process.exit(1);
 }

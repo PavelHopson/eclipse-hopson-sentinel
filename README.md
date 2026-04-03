@@ -59,6 +59,28 @@ node dist/cli.mjs
 node .\bin\pavelcode
 ```
 
+## Единый launcher
+
+Теперь `PavelCode` умеет запускать оба движка через одну команду:
+
+```bash
+pavelcode
+```
+
+Это запускает текущий TypeScript runtime.
+
+Запуск Rust runtime:
+
+```bash
+pavelcode --engine rust
+```
+
+или
+
+```bash
+pavelcode rust
+```
+
 ## Запуск с OpenAI
 
 Windows PowerShell:
