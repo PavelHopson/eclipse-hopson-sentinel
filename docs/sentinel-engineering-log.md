@@ -9,6 +9,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added the first localhost `Sentinel Bridge` API
 - added the first external `Sentinel Voice MVP` text client
 - documented the bridge and MVP client flow
+- added a stable `voice-v1` response envelope for external clients
 
 ### What did not succeed yet
 
@@ -21,6 +22,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - no TTS pipeline exists yet
 - no wake-word/background listener exists yet
 - the bridge currently shells out to the non-interactive CLI instead of using a richer native session API
+- the new `voice-v1` contract is designed from code inspection and partial local validation, but not yet fully smoke-tested end-to-end because the Bun-based build is still blocked
 
 ### Next engineering targets
 

@@ -59,8 +59,12 @@ async function askBridge(config, prompt) {
 }
 
 function formatResponse(payload) {
-  if (payload?.parsed?.result) {
-    return String(payload.parsed.result)
+  if (typeof payload?.response?.reply === 'string' && payload.response.reply.trim()) {
+    return payload.response.reply.trim()
+  }
+
+  if (Array.isArray(payload?.response?.errors) && payload.response.errors.length > 0) {
+    return `[errors]\n${payload.response.errors.join('\n')}`
   }
 
   if (typeof payload?.stdout === 'string' && payload.stdout.trim()) {

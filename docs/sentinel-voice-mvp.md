@@ -46,6 +46,7 @@ node .\bin\sentinel-voice
 - manual text requests
 - bridge-based local communication
 - workspace-aware requests through `cwd`
+- uses the stable bridge `response.reply` contract for rendering answers
 
 ## Not implemented yet
 

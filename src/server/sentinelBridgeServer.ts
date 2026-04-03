@@ -16,6 +16,46 @@ export type SentinelBridgeAskRequest = {
   cwd?: string
 }
 
+type SentinelCliResultMessage = {
+  type?: string
+  subtype?: string
+  result?: string
+  session_id?: string
+  total_cost_usd?: number
+  duration_ms?: number
+  duration_api_ms?: number
+  num_turns?: number
+  is_error?: boolean
+  errors?: string[]
+  usage?: Record<string, unknown>
+  modelUsage?: Record<string, unknown>
+}
+
+type SentinelBridgeAskResponse = {
+  ok: boolean
+  exitCode: number | null
+  stdout: string
+  stderr: string
+  parsed: SentinelCliResultMessage | null
+  response: {
+    format: 'voice-v1'
+    reply: string
+    summary: string
+    errors: string[]
+    session: {
+      id: string | null
+      turns: number | null
+    }
+    metrics: {
+      durationMs: number | null
+      apiDurationMs: number | null
+      totalCostUsd: number | null
+    }
+    rawResultType: string | null
+    rawResultSubtype: string | null
+  }
+}
+
 function getCliEntrypointPath(): string {
   const moduleDir = dirname(fileURLToPath(import.meta.url))
   const candidates = [
@@ -68,7 +108,7 @@ function isAuthorized(req: IncomingMessage, token?: string): boolean {
 
 async function runSentinelPrompt(
   request: SentinelBridgeAskRequest,
-): Promise<Record<string, unknown>> {
+): Promise<SentinelBridgeAskResponse> {
   const prompt = request.prompt?.trim()
   if (!prompt) {
     throw new Error('Missing prompt')
@@ -101,15 +141,29 @@ async function runSentinelPrompt(
 
     child.on('close', code => {
       const trimmed = stdout.trim()
-      let parsed: unknown = null
+      let parsed: SentinelCliResultMessage | null = null
 
       if (trimmed) {
         try {
-          parsed = JSON.parse(trimmed)
+          parsed = JSON.parse(trimmed) as SentinelCliResultMessage
         } catch {
           parsed = null
         }
       }
+
+      const errors = Array.isArray(parsed?.errors)
+        ? parsed.errors.filter(
+            (entry): entry is string => typeof entry === 'string' && entry.length > 0,
+          )
+        : stderr
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(Boolean)
+
+      const reply =
+        typeof parsed?.result === 'string' && parsed.result.trim()
+          ? parsed.result.trim()
+          : trimmed || stderr.trim()
 
       resolvePromise({
         ok: code === 0,
@@ -117,6 +171,23 @@ async function runSentinelPrompt(
         stdout: trimmed,
         stderr: stderr.trim(),
         parsed,
+        response: {
+          format: 'voice-v1',
+          reply,
+          summary: reply.slice(0, 280),
+          errors,
+          session: {
+            id: parsed?.session_id ?? null,
+            turns: parsed?.num_turns ?? null,
+          },
+          metrics: {
+            durationMs: parsed?.duration_ms ?? null,
+            apiDurationMs: parsed?.duration_api_ms ?? null,
+            totalCostUsd: parsed?.total_cost_usd ?? null,
+          },
+          rawResultType: parsed?.type ?? null,
+          rawResultSubtype: parsed?.subtype ?? null,
+        },
       })
     })
   })
@@ -145,6 +216,7 @@ export async function startSentinelBridgeServer(
           ok: true,
           service: 'sentinel-bridge',
           status: 'healthy',
+          responseFormat: 'voice-v1',
         })
         return
       }
