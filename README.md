@@ -111,6 +111,7 @@ cargo build --release
 ```
 
 Пока Rust-часть рассматривается как отдельный runtime workspace и не заменяет основной CLI по умолчанию.
+После сборки ожидаемый бинарник: `rust/target/release/pavelcode-rust`.
 
 ## Структура проекта
 

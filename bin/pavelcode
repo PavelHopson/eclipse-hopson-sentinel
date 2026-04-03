@@ -18,7 +18,7 @@ import { spawn } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distPath = join(__dirname, '..', 'dist', 'cli.mjs');
-const rustBinaryName = process.platform === 'win32' ? 'claw.exe' : 'claw';
+const rustBinaryName = process.platform === 'win32' ? 'pavelcode-rust.exe' : 'pavelcode-rust';
 const rustBinaryPath = join(__dirname, '..', 'rust', 'target', 'release', rustBinaryName);
 
 function printTsBuildHelp() {

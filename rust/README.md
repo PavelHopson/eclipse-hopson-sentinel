@@ -1,6 +1,6 @@
-# 🦞 Claw Code — Rust Implementation
+# PavelCode Rust Runtime
 
-A high-performance Rust rewrite of the Claw Code CLI agent harness. Built for speed, safety, and native tool execution.
+High-performance Rust runtime for PavelCode. Built for speed, safety, and native tool execution.
 
 ## Quick Start
 
@@ -10,13 +10,13 @@ cd rust/
 cargo build --release
 
 # Run interactive REPL
-./target/release/claw
+./target/release/pavelcode-rust
 
 # One-shot prompt
-./target/release/claw prompt "explain this codebase"
+./target/release/pavelcode-rust prompt "explain this codebase"
 
 # With specific model
-./target/release/claw --model sonnet prompt "fix the bug in main.rs"
+./target/release/pavelcode-rust --model sonnet prompt "fix the bug in main.rs"
 ```
 
 ## Configuration
@@ -32,7 +32,7 @@ export ANTHROPIC_BASE_URL="https://your-proxy.com"
 Or authenticate via OAuth:
 
 ```bash
-claw login
+pavelcode-rust login
 ```
 
 ## Mock parity harness
@@ -110,7 +110,7 @@ Short names resolve to the latest model versions:
 ## CLI Flags
 
 ```
-claw [OPTIONS] [COMMAND]
+pavelcode-rust [OPTIONS] [COMMAND]
 
 Options:
   --model MODEL                    Set the model (alias or full name)
@@ -161,7 +161,7 @@ rust/
     ├── compat-harness/     # TS manifest extraction harness
     ├── mock-anthropic-service/ # Deterministic local Anthropic-compatible mock
     ├── runtime/            # Session, config, permissions, MCP, prompts
-    ├── rusty-claude-cli/   # Main CLI binary (`claw`)
+├── rusty-claude-cli/   # Main CLI binary (`pavelcode-rust`)
     └── tools/              # Built-in tool implementations
 ```
 
@@ -179,7 +179,7 @@ rust/
 
 - **~20K lines** of Rust
 - **7 crates** in workspace
-- **Binary name:** `claw`
+- **Binary name:** `pavelcode-rust`
 - **Default model:** `claude-opus-4-6`
 - **Default permissions:** `danger-full-access`
 
