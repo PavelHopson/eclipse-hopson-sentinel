@@ -52,6 +52,7 @@ const agentsPlatform =
     : null
 /* eslint-enable @typescript-eslint/no-require-imports */
 import securityReview from './commands/security-review.js'
+import sentinelBridge from './commands/sentinel-bridge/index.js'
 import bughunter from './commands/bughunter/index.js'
 import terminalSetup from './commands/terminalSetup/index.js'
 import usage from './commands/usage/index.js'
@@ -313,6 +314,7 @@ const COMMANDS = memoize((): Command[] => [
   ultrareview,
   rewind,
   securityReview,
+  sentinelBridge,
   terminalSetup,
   upgrade,
   extraUsage,
