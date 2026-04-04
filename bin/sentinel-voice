@@ -99,6 +99,11 @@ function getSttScriptPath() {
   return resolve(currentDir, '..', 'scripts', 'sentinel-stt.ps1')
 }
 
+function getPowerShellPath() {
+  const systemRoot = process.env.SystemRoot || 'C:\\Windows'
+  return resolve(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+}
+
 async function createSession(config) {
   const response = await fetch(`${config.url}/v1/sessions`, {
     method: 'POST',
@@ -170,6 +175,7 @@ async function speakText(config, text) {
   }
 
   const scriptPath = getTtsScriptPath()
+  const powerShellPath = getPowerShellPath()
 
   await new Promise((resolvePromise, rejectPromise) => {
     const args = [
@@ -187,7 +193,7 @@ async function speakText(config, text) {
       args.push('-Voice', config.voice)
     }
 
-    const child = spawn('powershell', args, {
+    const child = spawn(powerShellPath, args, {
       stdio: 'ignore',
       windowsHide: true,
     })
@@ -207,10 +213,11 @@ async function speakText(config, text) {
 async function listVoices() {
   const command =
     "$voice = New-Object -ComObject SAPI.SpVoice; $voice.GetVoices() | ForEach-Object { $_.GetDescription() }"
+  const powerShellPath = getPowerShellPath()
 
   await new Promise((resolvePromise, rejectPromise) => {
     const child = spawn(
-      'powershell',
+      powerShellPath,
       ['-ExecutionPolicy', 'Bypass', '-Command', command],
       {
         stdio: 'inherit',
@@ -232,10 +239,11 @@ async function listVoices() {
 
 async function listenOnce(config) {
   const scriptPath = getSttScriptPath()
+  const powerShellPath = getPowerShellPath()
 
   return await new Promise((resolvePromise, rejectPromise) => {
     const child = spawn(
-      'powershell',
+      powerShellPath,
       [
         '-ExecutionPolicy',
         'Bypass',

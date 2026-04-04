@@ -75,6 +75,12 @@ List available system voices:
 node .\bin\sentinel-voice --list-voices
 ```
 
+Run voice diagnostics:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\sentinel-voice-doctor.ps1
+```
+
 You can also use environment variables:
 
 ```powershell
@@ -93,6 +99,7 @@ node .\bin\sentinel-voice
 - can optionally speak answers on Windows through local system TTS
 - can optionally capture one speech phrase on Windows through local system STT
 - has a safe terminal push-to-talk mode built on top of one-shot STT
+- includes a standalone voice doctor script for local environment diagnostics
 
 ## Not implemented yet
 

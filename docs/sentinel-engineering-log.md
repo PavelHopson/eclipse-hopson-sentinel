@@ -14,15 +14,17 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added local Windows TTS output for `Sentinel Voice MVP` via `SAPI.SpVoice`
 - added a one-shot Windows STT path for `Sentinel Voice MVP`
 - added a terminal-safe push-to-talk mode layered on top of one-shot STT
+- added a standalone `voice doctor` diagnostic flow
 
 ### What did not succeed yet
 
+- embedding `voice doctor` directly into the Node client hit `spawn EPERM` in this environment, so the reliable path is currently the standalone PowerShell script instead
 - `npm run build` could not be completed on this machine because `bun` is not currently installed or not available in `PATH`
 - end-to-end runtime verification of the new bridge and voice client is still pending until Bun is installed and the core build is runnable locally
 
 ### Current known limitations
 
-- `Sentinel Voice MVP` is text-only and does not yet capture microphone input
+- `Sentinel Voice MVP` now supports TTS, one-shot STT, and terminal push-to-talk, but not continuous background voice operation
 - no wake-word/background listener exists yet
 - the bridge currently shells out to the non-interactive CLI instead of using a richer native session API
 - the new `voice-v1` contract is designed from code inspection and partial local validation, but not yet fully smoke-tested end-to-end because the Bun-based build is still blocked
