@@ -17,6 +17,7 @@ function parseArgs(argv) {
     listVoices: false,
     stt: process.env.SENTINEL_VOICE_STT === '1',
     sttTimeoutSeconds: Number(process.env.SENTINEL_STT_TIMEOUT || '8'),
+    pushToTalk: process.env.SENTINEL_VOICE_PTT === '1',
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -77,6 +78,11 @@ function parseArgs(argv) {
         config.sttTimeoutSeconds = parsed
       }
       index += 1
+      continue
+    }
+
+    if (part === '--ptt') {
+      config.pushToTalk = true
     }
   }
 
@@ -298,11 +304,39 @@ async function main() {
   output.write(`Bridge session: ${session.id}\n`)
   output.write(`Speech output: ${config.speak ? 'enabled' : 'disabled'}\n`)
   output.write(`Speech input: ${config.stt ? 'enabled' : 'disabled'}\n`)
-  output.write("Type your request and press Enter. Type 'exit' to quit.\n\n")
+  output.write(`Push-to-talk: ${config.pushToTalk ? 'enabled' : 'disabled'}\n`)
+  output.write(
+    "Type your request and press Enter. Type 'exit' to quit. Type '/ptt' to toggle push-to-talk mode.\n\n",
+  )
 
   try {
     while (true) {
       let prompt = (await rl.question('sentinel-voice> ')).trim()
+
+      if (!prompt) {
+        if (config.pushToTalk) {
+          if (!config.stt) {
+            output.write(
+              "\n[voice] Push-to-talk needs STT. Restart with --stt or disable PTT with /ptt.\n\n",
+            )
+            continue
+          }
+
+          output.write(
+            `\n[voice] Push-to-talk listening for up to ${config.sttTimeoutSeconds} seconds...\n`,
+          )
+
+          try {
+            prompt = await listenOnce(config)
+            output.write(`[voice] Heard: ${prompt}\n\n`)
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : 'Speech recognition failed'
+            output.write(`\n[voice input error] ${message}\n\n`)
+            continue
+          }
+        }
+      }
 
       if (!prompt) {
         continue
@@ -310,6 +344,14 @@ async function main() {
 
       if (prompt.toLowerCase() === 'exit') {
         break
+      }
+
+      if (prompt.toLowerCase() === '/ptt') {
+        config.pushToTalk = !config.pushToTalk
+        output.write(
+          `\n[voice] Push-to-talk ${config.pushToTalk ? 'enabled' : 'disabled'}.\n\n`,
+        )
+        continue
       }
 
       if (prompt.toLowerCase() === '/listen') {

@@ -4,7 +4,7 @@
 
 This version is intentionally simple:
 
-- text input instead of microphone capture
+- terminal-first client with optional local speech input and output
 - localhost bridge transport
 - Node-based shell for fast local testing
 
@@ -56,6 +56,19 @@ Inside the client, type:
 
 Then the client will listen once, convert speech to text, and send the recognized prompt to `Sentinel Core`.
 
+With push-to-talk mode enabled:
+
+```powershell
+cd E:\PR-BOT\openclaude-pavel
+node .\bin\sentinel-voice --stt --ptt --speak --voice Russian
+```
+
+In push-to-talk mode:
+
+- press `Enter` on an empty prompt to trigger one listening cycle
+- type `/ptt` to toggle push-to-talk on or off
+- type `/listen` if you want to trigger a one-shot capture manually
+
 List available system voices:
 
 ```powershell
@@ -79,6 +92,7 @@ node .\bin\sentinel-voice
 - creates a bridge session and reuses the underlying Sentinel session between turns
 - can optionally speak answers on Windows through local system TTS
 - can optionally capture one speech phrase on Windows through local system STT
+- has a safe terminal push-to-talk mode built on top of one-shot STT
 
 ## Not implemented yet
 
@@ -97,7 +111,8 @@ node .\bin\sentinel-voice
 
 - Windows-only one-shot speech capture through `System.Speech.Recognition`
 - activated manually with `/listen`
-- currently optimized for safe MVP validation, not continuous listening
+- can be used through a safe push-to-talk terminal loop
+- currently optimized for safe MVP validation, not continuous background listening
 
 ## Why this stage matters
 
