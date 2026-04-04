@@ -12,6 +12,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added a stable `voice-v1` response envelope for external clients
 - added bridge-managed dialogue sessions backed by the inherited Sentinel `--resume` flow
 - added local Windows TTS output for `Sentinel Voice MVP` via `SAPI.SpVoice`
+- added a one-shot Windows STT path for `Sentinel Voice MVP`
 
 ### What did not succeed yet
 
@@ -26,6 +27,11 @@ This document records blocked checks, failed attempts, and known limitations dur
 - the new `voice-v1` contract is designed from code inspection and partial local validation, but not yet fully smoke-tested end-to-end because the Bun-based build is still blocked
 - bridge sessions are currently in-memory only, so they disappear when the bridge process stops
 - current TTS implementation is Windows-specific and depends on local SAPI voices being installed
+- current STT path is Windows-specific and depends on microphone permissions plus local speech recognition availability
+
+### Environment-specific blockers seen locally
+
+- on this machine the STT engine can be constructed, but microphone binding currently returns `Access denied`, so real microphone capture still needs Windows privacy permission to be enabled
 
 ### Next engineering targets
 

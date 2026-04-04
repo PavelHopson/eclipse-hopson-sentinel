@@ -15,6 +15,8 @@ function parseArgs(argv) {
     voice: process.env.SENTINEL_TTS_VOICE || '',
     rate: Number(process.env.SENTINEL_TTS_RATE || '0'),
     listVoices: false,
+    stt: process.env.SENTINEL_VOICE_STT === '1',
+    sttTimeoutSeconds: Number(process.env.SENTINEL_STT_TIMEOUT || '8'),
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -61,6 +63,20 @@ function parseArgs(argv) {
 
     if (part === '--list-voices') {
       config.listVoices = true
+      continue
+    }
+
+    if (part === '--stt') {
+      config.stt = true
+      continue
+    }
+
+    if (part === '--stt-timeout' && next) {
+      const parsed = Number(next)
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        config.sttTimeoutSeconds = parsed
+      }
+      index += 1
     }
   }
 
@@ -70,6 +86,11 @@ function parseArgs(argv) {
 function getTtsScriptPath() {
   const currentDir = dirname(fileURLToPath(import.meta.url))
   return resolve(currentDir, '..', 'scripts', 'sentinel-tts.ps1')
+}
+
+function getSttScriptPath() {
+  const currentDir = dirname(fileURLToPath(import.meta.url))
+  return resolve(currentDir, '..', 'scripts', 'sentinel-stt.ps1')
 }
 
 async function createSession(config) {
@@ -203,6 +224,63 @@ async function listVoices() {
   })
 }
 
+async function listenOnce(config) {
+  const scriptPath = getSttScriptPath()
+
+  return await new Promise((resolvePromise, rejectPromise) => {
+    const child = spawn(
+      'powershell',
+      [
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        scriptPath,
+        '-TimeoutSeconds',
+        String(config.sttTimeoutSeconds),
+      ],
+      {
+        windowsHide: true,
+      },
+    )
+
+    let stdout = ''
+    let stderr = ''
+
+    child.stdout.on('data', chunk => {
+      stdout += chunk.toString()
+    })
+
+    child.stderr.on('data', chunk => {
+      stderr += chunk.toString()
+    })
+
+    child.on('error', rejectPromise)
+    child.on('close', code => {
+      const raw = stdout.trim()
+
+      if (raw) {
+        try {
+          const payload = JSON.parse(raw)
+          if (payload?.ok && typeof payload.text === 'string') {
+            resolvePromise(payload.text.trim())
+            return
+          }
+
+          rejectPromise(new Error(payload?.error || 'Speech recognition failed'))
+          return
+        } catch {
+          rejectPromise(new Error(raw))
+          return
+        }
+      }
+
+      rejectPromise(
+        new Error(stderr.trim() || `Speech recognition exited with code ${code}`),
+      )
+    })
+  })
+}
+
 async function main() {
   const config = parseArgs(process.argv.slice(2))
 
@@ -219,11 +297,12 @@ async function main() {
   output.write(`Workspace: ${config.cwd}\n`)
   output.write(`Bridge session: ${session.id}\n`)
   output.write(`Speech output: ${config.speak ? 'enabled' : 'disabled'}\n`)
+  output.write(`Speech input: ${config.stt ? 'enabled' : 'disabled'}\n`)
   output.write("Type your request and press Enter. Type 'exit' to quit.\n\n")
 
   try {
     while (true) {
-      const prompt = (await rl.question('sentinel-voice> ')).trim()
+      let prompt = (await rl.question('sentinel-voice> ')).trim()
 
       if (!prompt) {
         continue
@@ -231,6 +310,29 @@ async function main() {
 
       if (prompt.toLowerCase() === 'exit') {
         break
+      }
+
+      if (prompt.toLowerCase() === '/listen') {
+        if (!config.stt) {
+          output.write(
+            "\n[voice] STT is disabled. Restart with --stt to enable microphone capture.\n\n",
+          )
+          continue
+        }
+
+        output.write(
+          `\n[voice] Listening for up to ${config.sttTimeoutSeconds} seconds...\n`,
+        )
+
+        try {
+          prompt = await listenOnce(config)
+          output.write(`[voice] Heard: ${prompt}\n\n`)
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Speech recognition failed'
+          output.write(`\n[voice input error] ${message}\n\n`)
+          continue
+        }
       }
 
       try {

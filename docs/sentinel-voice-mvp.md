@@ -41,6 +41,21 @@ cd E:\PR-BOT\openclaude-pavel
 node .\bin\sentinel-voice --speak --voice Russian --rate 1
 ```
 
+With one-shot speech input enabled:
+
+```powershell
+cd E:\PR-BOT\openclaude-pavel
+node .\bin\sentinel-voice --stt --stt-timeout 8 --speak --voice Russian
+```
+
+Inside the client, type:
+
+```text
+/listen
+```
+
+Then the client will listen once, convert speech to text, and send the recognized prompt to `Sentinel Core`.
+
 List available system voices:
 
 ```powershell
@@ -63,10 +78,10 @@ node .\bin\sentinel-voice
 - uses the stable bridge `response.reply` contract for rendering answers
 - creates a bridge session and reuses the underlying Sentinel session between turns
 - can optionally speak answers on Windows through local system TTS
+- can optionally capture one speech phrase on Windows through local system STT
 
 ## Not implemented yet
 
-- speech-to-text
 - wake word
 - background listening
 - desktop UI
@@ -77,6 +92,12 @@ node .\bin\sentinel-voice
 - Windows-only local speech output through `SAPI.SpVoice`
 - no external cloud dependency for speech
 - voice selection is substring-based, for example `Russian` or `Zira`
+
+## Current STT implementation
+
+- Windows-only one-shot speech capture through `System.Speech.Recognition`
+- activated manually with `/listen`
+- currently optimized for safe MVP validation, not continuous listening
 
 ## Why this stage matters
 
