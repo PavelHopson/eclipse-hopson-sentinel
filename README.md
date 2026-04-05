@@ -118,7 +118,6 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1
 ### Вариант 2. Запуск из репозитория
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 bun install
 bun run build
 node .\bin\sentinel

@@ -30,21 +30,18 @@ In the main Sentinel CLI:
 From another terminal:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
-node .\bin\sentinel-voice --url http://127.0.0.1:8765 --token mytoken --cwd E:\PR-BOT\openclaude-pavel
+node .\bin\sentinel-voice --url http://127.0.0.1:8765 --token mytoken --cwd .
 ```
 
 With speech output on Windows:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 node .\bin\sentinel-voice --speak --voice Russian --rate 1
 ```
 
 With one-shot speech input enabled:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 node .\bin\sentinel-voice --stt --stt-timeout 8 --speak --voice Russian
 ```
 
@@ -59,7 +56,6 @@ Then the client will listen once, convert speech to text, and send the recognize
 With push-to-talk mode enabled:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 node .\bin\sentinel-voice --stt --ptt --speak --voice Russian
 ```
 

@@ -21,14 +21,12 @@
 Только предварительная проверка:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1 -DryRun
 ```
 
 Реальная установка:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1
 ```
 

@@ -13,7 +13,6 @@
 Создать backup:
 
 ```powershell
-cd E:\PR-BOT\openclaude-pavel
 node .\scripts\sentinel-backup.mjs create
 ```
 
