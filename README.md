@@ -157,6 +157,7 @@ rust/target/release/sentinel-rust.exe
 - [Windows Quick Start](docs/quick-start-windows.md)
 - [macOS / Linux Quick Start](docs/quick-start-mac-linux.md)
 - [Hybrid Architecture](docs/hybrid-architecture.md)
+- [Sentinel Backups](docs/sentinel-backups.md)
 - [Sentinel Bridge API](docs/sentinel-bridge.md)
 - [Sentinel Config Health](docs/sentinel-config-health.md)
 - [Sentinel Voice MVP](docs/sentinel-voice-mvp.md)

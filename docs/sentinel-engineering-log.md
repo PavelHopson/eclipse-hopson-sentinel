@@ -17,6 +17,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added a standalone `voice doctor` diagnostic flow
 - added persistent bridge session storage on disk
 - added a deterministic `Sentinel Config Health` audit inspired by the strongest ideas from `ai-setup`
+- added local deterministic Sentinel backups for key config and voice surfaces
 
 ### What did not succeed yet
 
