@@ -16,6 +16,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added a terminal-safe push-to-talk mode layered on top of one-shot STT
 - added a standalone `voice doctor` diagnostic flow
 - added persistent bridge session storage on disk
+- added a deterministic `Sentinel Config Health` audit inspired by the strongest ideas from `ai-setup`
 
 ### What did not succeed yet
 
