@@ -35,7 +35,8 @@ Response:
   "ok": true,
   "service": "sentinel-bridge",
   "status": "healthy",
-  "responseFormat": "voice-v1"
+  "responseFormat": "voice-v1",
+  "persistedSessions": 2
 }
 ```
 
@@ -150,6 +151,22 @@ Authorization: Bearer <token>
 DELETE /v1/sessions/<bridge-session-id>
 Authorization: Bearer <token>
 ```
+
+## Session persistence
+
+Bridge sessions are now persisted locally on disk and restored when the bridge starts again.
+
+Default state file:
+
+```text
+.sentinel/bridge/sessions.json
+```
+
+This keeps the mapping between:
+
+- bridge session id
+- working directory
+- underlying Sentinel session id
 
 ## Current behavior
 

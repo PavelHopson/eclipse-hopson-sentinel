@@ -15,6 +15,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added a one-shot Windows STT path for `Sentinel Voice MVP`
 - added a terminal-safe push-to-talk mode layered on top of one-shot STT
 - added a standalone `voice doctor` diagnostic flow
+- added persistent bridge session storage on disk
 
 ### What did not succeed yet
 
@@ -28,10 +29,15 @@ This document records blocked checks, failed attempts, and known limitations dur
 - no wake-word/background listener exists yet
 - the bridge currently shells out to the non-interactive CLI instead of using a richer native session API
 - the new `voice-v1` contract is designed from code inspection and partial local validation, but not yet fully smoke-tested end-to-end because the Bun-based build is still blocked
-- bridge sessions are currently in-memory only, so they disappear when the bridge process stops
 - current TTS implementation is Windows-specific and depends on local SAPI voices being installed
 - current STT path is Windows-specific and depends on microphone permissions plus local speech recognition availability
 - current push-to-talk flow is terminal-driven, not a global hotkey listener
+
+### Persistence notes
+
+- bridge sessions are now stored in `.sentinel/bridge/sessions.json`
+- persistence is local and file-based for simplicity and debuggability
+- session TTL and cleanup are not implemented yet
 
 ### Environment-specific blockers seen locally
 

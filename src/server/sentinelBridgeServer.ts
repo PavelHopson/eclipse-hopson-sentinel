@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto'
 import { dirname, join, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { spawn } from 'child_process'
-import { existsSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 
 export type SentinelBridgeConfig = {
   host: string
@@ -77,6 +77,50 @@ type SentinelBridgeSessionResponse = {
     createdAt: string
     updatedAt: string
   }
+}
+
+function getBridgeStateFilePath(): string {
+  return resolve(process.cwd(), '.sentinel', 'bridge', 'sessions.json')
+}
+
+function loadPersistedSessions(): Map<string, SentinelBridgeSessionRecord> {
+  const stateFile = getBridgeStateFilePath()
+
+  if (!existsSync(stateFile)) {
+    return new Map()
+  }
+
+  try {
+    const raw = readFileSync(stateFile, 'utf8').trim()
+    if (!raw) {
+      return new Map()
+    }
+
+    const parsed = JSON.parse(raw) as { sessions?: SentinelBridgeSessionRecord[] }
+    const sessions = Array.isArray(parsed.sessions) ? parsed.sessions : []
+
+    return new Map(sessions.map(session => [session.id, session]))
+  } catch {
+    return new Map()
+  }
+}
+
+function persistSessions(sessions: Map<string, SentinelBridgeSessionRecord>): void {
+  const stateFile = getBridgeStateFilePath()
+  const stateDir = dirname(stateFile)
+
+  mkdirSync(stateDir, { recursive: true })
+  writeFileSync(
+    stateFile,
+    JSON.stringify(
+      {
+        sessions: [...sessions.values()],
+      },
+      null,
+      2,
+    ) + '\n',
+    'utf8',
+  )
 }
 
 function getCliEntrypointPath(): string {
@@ -242,7 +286,7 @@ export async function startSentinelBridgeServer(
   config: SentinelBridgeConfig,
 ): Promise<{ close: () => Promise<void>; token?: string }> {
   const token = config.token || process.env.SENTINEL_BRIDGE_TOKEN || randomUUID()
-  const sessions = new Map<string, SentinelBridgeSessionRecord>()
+  const sessions = loadPersistedSessions()
 
   const server = createServer(async (req, res) => {
     try {
@@ -264,6 +308,7 @@ export async function startSentinelBridgeServer(
           service: 'sentinel-bridge',
           status: 'healthy',
           responseFormat: 'voice-v1',
+          persistedSessions: sessions.size,
         })
         return
       }
@@ -290,6 +335,7 @@ export async function startSentinelBridgeServer(
           updatedAt: now,
         }
         sessions.set(session.id, session)
+        persistSessions(sessions)
         sendJson(res, 201, toSessionPayload(session))
         return
       }
@@ -321,6 +367,7 @@ export async function startSentinelBridgeServer(
         session.sentinelSessionId = nextSentinelSessionId
         session.updatedAt = new Date().toISOString()
         sessions.set(session.id, session)
+        persistSessions(sessions)
 
         sendJson(res, 200, {
           ...result,
@@ -352,6 +399,7 @@ export async function startSentinelBridgeServer(
 
         if (method === 'DELETE') {
           sessions.delete(session.id)
+          persistSessions(sessions)
           sendJson(res, 200, {
             ok: true,
             deleted: true,
