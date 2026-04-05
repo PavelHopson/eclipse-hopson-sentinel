@@ -1,29 +1,29 @@
 # Sentinel Backups
 
-`Sentinel Backups` is the first local backup discipline layer for `Eclipse Hopson Sentinel`.
+`Sentinel Backups` — это первый локальный слой backup discipline для `Eclipse Hopson Sentinel`.
 
-It is inspired by the strongest operational safety ideas in `ai-setup`, but implemented as a simple local snapshot system for Sentinel-owned surfaces.
+Он вдохновлён самыми полезными operational safety идеями из `ai-setup`, но реализован как простой локальный snapshot-механизм для поверхностей самого Sentinel.
 
-## Goal
+## Цель
 
-Create quick, deterministic local snapshots before larger config or voice-system changes.
+Создавать быстрые и детерминированные локальные snapshot-ы перед более крупными изменениями в конфигурации, voice-слое и operator-сценариях.
 
-## Run
+## Запуск
 
-Create a backup:
+Создать backup:
 
 ```powershell
 cd E:\PR-BOT\openclaude-pavel
 node .\scripts\sentinel-backup.mjs create
 ```
 
-Or:
+Или:
 
 ```powershell
 npm run backup:create
 ```
 
-## What gets backed up
+## Что сейчас попадает в backup
 
 - `README.md`
 - `SECURITY.md`
@@ -31,32 +31,32 @@ npm run backup:create
 - `docs/`
 - `bin/sentinel`
 - `bin/sentinel-voice`
-- voice scripts
-- config health script
-- `.sentinel/bridge` state when present
+- voice-скрипты
+- скрипт `config health`
+- состояние `.sentinel/bridge`, если оно уже существует
 
-## Storage location
+## Где хранятся backup-ы
 
-Backups are written under:
+Backup-ы пишутся в:
 
 ```text
 .sentinel/backups/
 ```
 
-Each backup gets its own timestamped snapshot directory with a `manifest.json`.
+Каждый backup получает собственную timestamp-папку и `manifest.json`.
 
-## Why this matters
+## Почему это важно
 
-This gives Sentinel the beginning of a professional safety discipline:
+Этот слой даёт Sentinel начало нормальной safety discipline:
 
-- snapshot before risky changes
-- local-only storage
-- transparent files
-- easy manual inspection
+- snapshot перед рискованными изменениями
+- только локальное хранение
+- прозрачные файлы
+- простая ручная проверка и восстановление
 
-## Planned upgrades
+## Что будет дальше
 
-- add backup index and listing metadata
-- add restore command
-- add pre-change backup flow for high-impact config updates
-- add score regression checks before accepting generated changes
+- backup index и дополнительные метаданные
+- отдельная restore-команда с более безопасным UX
+- pre-change backup flow перед high-impact изменениями конфигов
+- проверки на регрессию score перед принятием сгенерированных изменений

@@ -1,47 +1,47 @@
 # Sentinel Config Health
 
-`Sentinel Config Health` is a deterministic local audit inspired by the strongest ideas from repositories like `caliber-ai-org/ai-setup`, but tailored for `Eclipse Hopson Sentinel`.
+`Sentinel Config Health` — это детерминированный локальный аудит, вдохновлённый самыми сильными идеями из репозиториев вроде `caliber-ai-org/ai-setup`, но адаптированный под `Eclipse Hopson Sentinel`.
 
-## Goal
+## Цель
 
-Quickly answer:
+Быстро отвечать на вопросы:
 
-- is the Sentinel project surface complete enough for daily use
-- do the expected AI/operator config files exist
-- do voice-related setup files exist
-- is the repository moving toward a professional operator baseline
+- достаточно ли целостен пользовательский слой Sentinel для повседневной работы
+- присутствуют ли ожидаемые AI/operator config files
+- существуют ли voice-related setup файлы
+- движется ли репозиторий к профессиональному operator baseline
 
-## Run
+## Запуск
 
 ```powershell
 cd E:\PR-BOT\openclaude-pavel
 node .\scripts\sentinel-config-health.mjs
 ```
 
-## What it checks right now
+## Что сейчас проверяется
 
-- core files like `README.md`, `LICENSE`, `SECURITY.md`
-- bridge and voice documentation
+- базовые файлы проекта: `README.md`, `LICENSE`, `SECURITY.md`
+- документация по bridge и voice
 - voice helper scripts
-- launcher presence
-- roadmap and engineering log presence
-- launcher exposure in `package.json`
+- наличие launcher-ов
+- наличие roadmap и engineering log
+- экспорт launcher-ов в `package.json`
 
-## Why this matters
+## Почему это важно
 
-This gives `Sentinel` its own deterministic health audit instead of relying only on manual inspection.
+Этот аудит даёт `Sentinel` собственный deterministic health check вместо чисто ручной проверки.
 
-It is the first practical capability borrowed from the best ideas in `ai-setup`:
+Это первый практический слой, перенесённый из лучших идей `ai-setup`:
 
-- deterministic scoring
-- config completeness checks
-- no LLM required
-- local-only evaluation
+- детерминированный scoring
+- проверки полноты конфигурации
+- без LLM
+- полностью локальная оценка
 
-## Planned upgrades
+## Что будет дальше
 
-- add freshness checks against git history
-- add path grounding checks
-- add bridge/voice/session persistence checks
-- add runtime health checks
-- add score comparison between branches
+- freshness checks на основе git history
+- проверки корректности путей и path grounding
+- проверки bridge/voice/session persistence
+- runtime health checks
+- сравнение score между ветками и состояниями

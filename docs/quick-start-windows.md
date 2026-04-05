@@ -1,31 +1,31 @@
-# Eclipse Hopson Sentinel Quick Start for Windows
+# Eclipse Hopson Sentinel: быстрый старт для Windows
 
-## 1. Prepare the environment
+## 1. Подготовьте окружение
 
-- install Node.js 20+
-- install Bun
-- install `ripgrep` if needed
+- установите Node.js 20+
+- установите Bun
+- при необходимости установите `ripgrep`
 
-## 2. Fast installer path
+## 2. Быстрый путь через установщик
 
-From a local repository checkout:
+Из локальной копии репозитория:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1 -DryRun
 powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1
 ```
 
-Installer details:
+Подробности:
 
-- [Windows Installer](windows-installer.md)
+- [Установщик для Windows](windows-installer.md)
 
-## 3. Install the CLI
+## 3. Установка CLI
 
 ```powershell
 npm install -g @eclipse-hopson/sentinel
 ```
 
-## 4. Start with OpenAI
+## 4. Запуск через OpenAI
 
 ```powershell
 $env:CLAUDE_CODE_USE_OPENAI="1"
@@ -35,7 +35,7 @@ $env:OPENAI_MODEL="gpt-4o"
 sentinel
 ```
 
-## 5. Start with local Ollama
+## 5. Запуск через локальный Ollama
 
 ```powershell
 $env:CLAUDE_CODE_USE_OPENAI="1"
@@ -45,8 +45,8 @@ $env:OPENAI_MODEL="qwen2.5-coder:7b"
 sentinel
 ```
 
-## 6. If the command is not found
+## 6. Если команда не находится
 
-- reopen the terminal
-- check `npm prefix -g`
-- make sure the npm global binaries path is in `PATH`
+- перезапустите терминал
+- проверьте `npm prefix -g`
+- убедитесь, что путь к глобальным npm-бинарникам есть в `PATH`

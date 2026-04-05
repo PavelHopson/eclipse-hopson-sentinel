@@ -1,47 +1,47 @@
-# Sentinel Windows Installer
+# Установщик Sentinel для Windows
 
-`Eclipse Hopson Sentinel` now includes a first Windows installer flow for local setup.
+В `Eclipse Hopson Sentinel` уже включён первый установочный flow для Windows.
 
-## Goal
+## Цель
 
-Give users a repeatable install path with minimal manual steps.
+Дать пользователю повторяемый путь установки с минимальным количеством ручных шагов.
 
-## What the installer does
+## Что делает установщик
 
-- verifies `node` exists
-- verifies `bun` exists
-- runs `bun install`
-- runs `bun run build`
-- creates `sentinel.cmd`
-- creates `sentinel-voice.cmd`
-- adds the installer bin directory to the user `PATH`
+- проверяет наличие `node`
+- проверяет наличие `bun`
+- запускает `bun install`
+- запускает `bun run build`
+- создаёт `sentinel.cmd`
+- создаёт `sentinel-voice.cmd`
+- добавляет каталог с launcher-ами в пользовательский `PATH`
 
-## Run
+## Запуск
 
-Preview only:
+Только предварительная проверка:
 
 ```powershell
 cd E:\PR-BOT\openclaude-pavel
 powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1 -DryRun
 ```
 
-Real install:
+Реальная установка:
 
 ```powershell
 cd E:\PR-BOT\openclaude-pavel
 powershell -ExecutionPolicy Bypass -File .\scripts\install-sentinel-windows.ps1
 ```
 
-## Installed location
+## Куда устанавливаются launcher-ы
 
-The launcher shims are written to:
+Launcher-ы создаются в:
 
 ```text
 %LOCALAPPDATA%\EclipseHopsonSentinel\bin
 ```
 
-## Notes
+## Примечания
 
-- open a new terminal after install so the updated `PATH` is available
-- this installer currently expects a local repository checkout
-- in future versions this flow can evolve into a packaged installer
+- после установки откройте новый терминал, чтобы обновлённый `PATH` начал работать
+- текущий установщик рассчитан на локальную копию репозитория
+- в следующих версиях этот flow можно превратить в полноценный packaged installer
