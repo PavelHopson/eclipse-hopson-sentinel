@@ -160,6 +160,7 @@ rust/target/release/sentinel-rust.exe
 - [Sentinel Backups](docs/sentinel-backups.md)
 - [Sentinel Bridge API](docs/sentinel-bridge.md)
 - [Sentinel Config Health](docs/sentinel-config-health.md)
+- [Windows Installer](docs/windows-installer.md)
 - [Sentinel Voice MVP](docs/sentinel-voice-mvp.md)
 - [Engineering Log](docs/sentinel-engineering-log.md)
 - [Sentinel Roadmap](docs/sentinel-roadmap.md)

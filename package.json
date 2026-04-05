@@ -46,6 +46,7 @@
     "doctor:config": "node ./scripts/sentinel-config-health.mjs",
     "backup:create": "node ./scripts/sentinel-backup.mjs create",
     "backup:list": "node ./scripts/sentinel-backup.mjs list",
+    "backup:restore": "node ./scripts/sentinel-backup.mjs restore",
     "hardening:check": "bun run smoke && bun run doctor:runtime",
     "hardening:strict": "bun run typecheck && bun run hardening:check",
     "prepack": "npm run build"

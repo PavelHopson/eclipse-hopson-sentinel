@@ -18,6 +18,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - added persistent bridge session storage on disk
 - added a deterministic `Sentinel Config Health` audit inspired by the strongest ideas from `ai-setup`
 - added local deterministic Sentinel backups for key config and voice surfaces
+- added a first Windows installer flow with dry-run support
 
 ### What did not succeed yet
 
@@ -34,6 +35,7 @@ This document records blocked checks, failed attempts, and known limitations dur
 - current TTS implementation is Windows-specific and depends on local SAPI voices being installed
 - current STT path is Windows-specific and depends on microphone permissions plus local speech recognition availability
 - current push-to-talk flow is terminal-driven, not a global hotkey listener
+- restore currently overwrites tracked Sentinel surfaces directly and should be used carefully until a safer interactive restore flow exists
 
 ### Persistence notes
 
