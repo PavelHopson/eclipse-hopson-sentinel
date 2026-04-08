@@ -196,6 +196,58 @@ Maps to:
 
 ---
 
+## 5. WhisperLiveKit — Real-Time STT with Speaker Diarization
+
+[WhisperLiveKit](https://github.com/QuentinFuxa/WhisperLiveKit) is a self-hosted real-time speech-to-text system with speaker identification. Uses Whisper + Sortformer/Diart diarization, runs locally via FastAPI + WebSocket.
+
+### Why for Sentinel
+Sentinel Voice currently uses one-shot STT (record → transcribe → done). WhisperLiveKit brings:
+- **Streaming transcription** — words appear as you speak, not after
+- **Speaker diarization** — knows who said what (critical for meetings/pair programming)
+- **200+ languages** via NLLB translation
+- **Multiple backends** — Faster-Whisper (GPU), MLX (Apple Silicon), Voxtral
+- **OpenAI-compatible API** — drop-in replacement for existing STT calls
+
+### Setup
+
+```bash
+# Install
+pip install whisperlivekit[gpu]  # or [mlx] for Apple Silicon
+
+# Run server
+wlk-server --port 8000
+# Web UI at http://localhost:8000
+# WebSocket at ws://localhost:8000/asr
+# OpenAI-compatible API at http://localhost:8000/v1/audio/transcriptions
+```
+
+### Integration with Sentinel Voice
+
+```
+Microphone (continuous)
+    ↓
+WhisperLiveKit (localhost:8000/asr via WebSocket)
+    ↓ streaming text + speaker labels
+Sentinel Voice client
+    ↓ parsed command
+Sentinel Core (executes)
+    ↓ response text
+TTS (TADA or Windows SAPI)
+```
+
+Key upgrade over current STT:
+- Current: push-to-talk → record → one-shot transcribe → act
+- With WLK: continuous listening → streaming transcription → instant action
+
+### Roadmap Alignment
+Maps directly to:
+- "improve STT error messages and microphone setup guidance"
+- "add STT language selection and locale profiles"
+- "add confidence-based STT handling"
+- "add wake-word research spike" (continuous listening enables wake-word detection)
+
+---
+
 ## Integration Priority
 
 | Integration | Impact | Effort | Priority |
@@ -203,6 +255,7 @@ Maps to:
 | ClawRouter | High — instant cost savings | Low — env vars only | **P1** |
 | MetaClaw | High — auto-learning | Low — env vars only | **P1** |
 | TADA TTS | Medium — voice quality leap | Medium — Python server + adapter | **P2** |
+| WhisperLiveKit | High — streaming STT + diarization | Medium — WebSocket adapter | **P2** |
 | Telegram/Discord | High — remote access | Medium — bridge adapter + bot | **P2** |
 
 P1 items work today with zero code changes — just set environment variables.
