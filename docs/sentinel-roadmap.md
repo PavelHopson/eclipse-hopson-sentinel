@@ -187,6 +187,7 @@ These are good ideas to borrow conceptually without copying code directly:
 
 - [TADA TTS](https://huggingface.co/collections/HumeAI/tada) — replace Windows SAPI with expressive open-source TTS (700s speech, 5x faster)
 - [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) — Alibaba TTS with Russian support, 49 voices, 97ms latency, voice cloning (TADA alternative)
+- [CosyVoice 3](https://github.com/FunAudioLLM/CosyVoice) — 0.5B mini TTS, Russian, zero-shot voice cloning in 3 sec, runs on weak hardware (best for low-resource Sentinel setups)
 - [WhisperLiveKit](https://github.com/QuentinFuxa/WhisperLiveKit) — streaming STT with speaker diarization, replaces one-shot STT with continuous WebSocket transcription
 - Telegram/Discord bots — remote Sentinel control via messenger, leveraging Bridge API
 
