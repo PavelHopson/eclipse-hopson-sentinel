@@ -171,6 +171,22 @@ These are good ideas to borrow conceptually without copying code directly:
 - measure latency and quality per provider in voice workflows
 - add model routing rules for spoken interactions vs deep coding tasks
 - add safer defaults for long-context and voice-oriented exchanges
+- integrate [ClawRouter](https://github.com/BlockRunAI/ClawRouter) as smart auto-routing provider (55+ models, <1ms, up to 92% savings)
+- integrate [MetaClaw](https://github.com/aiming-lab/MetaClaw) as meta-learning proxy (auto-skills from sessions, no GPU in skills_only mode)
+
+## External integrations
+
+> See [sentinel-integrations.md](sentinel-integrations.md) for full setup guides.
+
+### P1: Zero-code integrations (env vars only)
+
+- ClawRouter — auto-select optimal model by request complexity (`blockrun/auto`)
+- MetaClaw — create skills from Sentinel sessions, inject into future prompts (`metaclaw/auto`)
+
+### P2: Adapters required
+
+- [TADA TTS](https://huggingface.co/collections/HumeAI/tada) — replace Windows SAPI with expressive open-source TTS (700s speech, 5x faster)
+- Telegram/Discord bots — remote Sentinel control via messenger, leveraging Bridge API
 
 ## Operational excellence
 

@@ -144,11 +144,35 @@ sentinel
 ### Ollama
 
 ```powershell
-$env:CLAUDE_CODE_USE_OPENAI="1"
-$env:OPENAI_BASE_URL="http://localhost:11434/v1"
-$env:OPENAI_MODEL="qwen2.5-coder:7b"
+$env:CLAUDE_CODE_USE_OPENAI=”1”
+$env:OPENAI_BASE_URL=”http://localhost:11434/v1”
+$env:OPENAI_MODEL=”qwen2.5-coder:7b”
 sentinel
 ```
+
+### ClawRouter (авто-роутинг 55+ моделей)
+
+```powershell
+# npx @blockrun/clawrouter  ← запустить отдельно
+$env:CLAUDE_CODE_USE_OPENAI=”1”
+$env:OPENAI_BASE_URL=”http://localhost:8402/v1”
+$env:OPENAI_API_KEY=”x402”
+$env:OPENAI_MODEL=”blockrun/auto”
+sentinel
+```
+
+### MetaClaw (авто-скиллы из сессий)
+
+```powershell
+# metaclaw start  ← запустить отдельно
+$env:CLAUDE_CODE_USE_OPENAI=”1”
+$env:OPENAI_BASE_URL=”http://127.0.0.1:30000/v1”
+$env:OPENAI_API_KEY=”metaclaw”
+$env:OPENAI_MODEL=”your-model-id”
+sentinel
+```
+
+> Подробнее обо всех интеграциях: [docs/sentinel-integrations.md](docs/sentinel-integrations.md)
 
 ## Почему это сильнее обычного “ещё одного AI CLI”
 
