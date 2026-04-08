@@ -186,6 +186,7 @@ These are good ideas to borrow conceptually without copying code directly:
 ### P2: Adapters required
 
 - [TADA TTS](https://huggingface.co/collections/HumeAI/tada) — replace Windows SAPI with expressive open-source TTS (700s speech, 5x faster)
+- [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) — Alibaba TTS with Russian support, 49 voices, 97ms latency, voice cloning (TADA alternative)
 - [WhisperLiveKit](https://github.com/QuentinFuxa/WhisperLiveKit) — streaming STT with speaker diarization, replaces one-shot STT with continuous WebSocket transcription
 - Telegram/Discord bots — remote Sentinel control via messenger, leveraging Bridge API
 

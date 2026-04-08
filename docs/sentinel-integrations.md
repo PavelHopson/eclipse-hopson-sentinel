@@ -255,6 +255,7 @@ Maps directly to:
 | ClawRouter | High — instant cost savings | Low — env vars only | **P1** |
 | MetaClaw | High — auto-learning | Low — env vars only | **P1** |
 | TADA TTS | Medium — voice quality leap | Medium — Python server + adapter | **P2** |
+| Qwen3-TTS | High — русский язык + 49 голосов + клонирование | Medium — Python server + adapter | **P2** |
 | WhisperLiveKit | High — streaming STT + diarization | Medium — WebSocket adapter | **P2** |
 | Telegram/Discord | High — remote access | Medium — bridge adapter + bot | **P2** |
 
