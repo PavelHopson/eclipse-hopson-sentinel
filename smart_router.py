@@ -113,12 +113,20 @@ def build_default_providers() -> list[Provider]:
             small_model=small if "gemini" in small else "gemini-2.0-flash",
         ),
         Provider(
+            name="openrouter",
+            ping_url="https://openrouter.ai/api/v1/models",
+            api_key_env="OPENROUTER_API_KEY",
+            cost_per_1k_tokens=0.0,   # free tier models
+            big_model="qwen/qwen3.6-plus-preview:free",
+            small_model="qwen/qwen3.6-plus-preview:free",
+        ),
+        Provider(
             name="ollama",
             ping_url=f"{ollama_url}/api/tags",
             api_key_env="",
             cost_per_1k_tokens=0.0,   # free — local
-            big_model=big if "gemini" not in big and "gpt" not in big else "llama3:8b",
-            small_model=small if "gemini" not in small and "gpt" not in small else "llama3:8b",
+            big_model=big if "gemini" not in big and "gpt" not in big else "huihui-ai/Huihui-Qwen3.5-35B-A3B-abliterated",
+            small_model=small if "gemini" not in small and "gpt" not in small else "qwen2.5-coder:7b",
         ),
         Provider(
             name="atomic-chat",
