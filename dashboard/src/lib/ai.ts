@@ -4,8 +4,8 @@ export interface Message {
 }
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const API_KEY = import.meta.env.VITE_OPENROUTER_KEY || '';
-const MODEL = 'google/gemma-4-26b-a4b-it:free';
+const API_KEY = import.meta.env.VITE_OPENROUTER_KEY || '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';
+const MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
 
 export async function sendMessage(
   messages: Message[],
