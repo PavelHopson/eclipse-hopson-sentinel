@@ -117,8 +117,8 @@ def build_default_providers() -> list[Provider]:
             ping_url="https://openrouter.ai/api/v1/models",
             api_key_env="OPENROUTER_API_KEY",
             cost_per_1k_tokens=0.0,   # free tier models
-            big_model="qwen/qwen3.6-plus-preview:free",
-            small_model="qwen/qwen3.6-plus-preview:free",
+            big_model="google/gemma-4-26b-a4b-it:free",
+            small_model="nvidia/nemotron-3-nano-30b-a3b:free",
         ),
         Provider(
             name="ollama",

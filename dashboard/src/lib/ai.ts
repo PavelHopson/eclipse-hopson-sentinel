@@ -5,7 +5,7 @@ export interface Message {
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = import.meta.env.VITE_OPENROUTER_KEY || '';
-const MODEL = 'qwen/qwen3.6-plus-preview:free';
+const MODEL = 'google/gemma-4-26b-a4b-it:free';
 
 export async function sendMessage(
   messages: Message[],
