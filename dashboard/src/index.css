@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #05070A;
+  --color-panel: #0B0F14;
+  --color-card: #11161C;
+  --color-border: #1A2230;
+  --color-accent: #6BA3FF;
+  --color-accent-dim: #4A7FD4;
+  --color-text-1: #F0F4F8;
+  --color-text-2: #B0BEC9;
+  --color-text-3: #6B7A8A;
+  --color-live: #4AE6A0;
+}
+
+body {
+  margin: 0;
+  background: #05070A;
+  color: #F0F4F8;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(107,163,255,0.2); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1A2230; border-radius: 2px; }
+
+/* Chat input */
+.chat-input:focus { outline: none; box-shadow: 0 0 0 1px rgba(107,163,255,0.3); }
