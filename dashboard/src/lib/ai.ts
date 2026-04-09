@@ -12,28 +12,16 @@ export interface ChatSession {
 }
 
 export const MODELS = [
-  { id: 'minimax/minimax-m2.5:free', name: 'MiniMax M2.5', desc: 'Стабильная, быстрая' },
-  { id: 'arcee-ai/trinity-large-preview:free', name: 'Trinity Large', desc: 'Arcee AI, мощная' },
-  { id: 'liquid/lfm-2.5-1.2b-instruct:free', name: 'Liquid LFM', desc: 'Лёгкая, быстрая' },
-  { id: 'google/gemma-4-26b-a4b-it:free', name: 'Gemma 4 26B', desc: 'Google, сильная' },
-  { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 30B', desc: 'Nvidia, бесплатная' },
-  { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 120B', desc: 'Nvidia, мощная' },
+  { id: 'qwen3:32b', name: 'Qwen 3 32B', desc: 'Мощная, локальная' },
+  { id: 'qwen3:8b', name: 'Qwen 3 8B', desc: 'Быстрая, локальная' },
+  { id: 'llama3:8b', name: 'Llama 3 8B', desc: 'Meta, локальная' },
+  { id: 'deepseek-coder-v2:16b', name: 'DeepSeek Coder', desc: 'Для кода' },
 ] as const;
 
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const FALLBACK_KEY = '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';
-
-export function getApiKey(): string {
-  return localStorage.getItem('sentinel-api-key') || import.meta.env.VITE_OPENROUTER_KEY || FALLBACK_KEY;
-}
-
-export function setApiKey(key: string) {
-  localStorage.setItem('sentinel-api-key', key);
-}
+const OLLAMA_URL = 'http://localhost:11434/v1/chat/completions';
 
 export function getSelectedModel(): string {
   const saved = localStorage.getItem('sentinel-model');
-  // Validate saved model still exists in list
   if (saved && MODELS.some(m => m.id === saved)) return saved;
   return MODELS[0].id;
 }
@@ -69,13 +57,11 @@ export async function sendMessage(
   signal?: AbortSignal,
   model?: string,
 ): Promise<void> {
-  const resp = await fetch(API_URL, {
+  const resp = await fetch(OLLAMA_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getApiKey()}`,
-      'HTTP-Referer': 'https://eclipse-forge.dev',
-      'X-Title': 'Eclipse Sentinel',
+      'Authorization': 'Bearer ollama',
     },
     body: JSON.stringify({
       model: model || getSelectedModel(),
@@ -91,7 +77,7 @@ export async function sendMessage(
 
   if (!resp.ok) {
     const err = await resp.text();
-    throw new Error(`API error ${resp.status}: ${err}`);
+    throw new Error(`Ollama error ${resp.status}: ${err}`);
   }
 
   const reader = resp.body?.getReader();
@@ -127,12 +113,17 @@ export async function checkProviderStatus(model?: string): Promise<{
   const m = model || getSelectedModel();
   const start = performance.now();
   try {
-    // Just ping the models endpoint — no tokens used, no rate limit
-    const resp = await fetch('https://openrouter.ai/api/v1/models', {
-      headers: { 'Authorization': `Bearer ${getApiKey()}` },
-    });
-    return { provider: 'OpenRouter', model: m, healthy: resp.ok, latency: Math.round(performance.now() - start) };
+    const resp = await fetch('http://localhost:11434/api/tags');
+    const data = await resp.json();
+    const models = data.models?.map((x: any) => x.name) || [];
+    const hasModel = models.some((n: string) => n.startsWith(m.split(':')[0]));
+    return {
+      provider: 'Ollama (локально)',
+      model: m,
+      healthy: resp.ok && hasModel,
+      latency: Math.round(performance.now() - start),
+    };
   } catch {
-    return { provider: 'OpenRouter', model: m, healthy: false, latency: -1 };
+    return { provider: 'Ollama (локально)', model: m, healthy: false, latency: -1 };
   }
 }
