@@ -30,3 +30,15 @@ body {
 
 /* Chat input */
 .chat-input:focus { outline: none; box-shadow: 0 0 0 1px rgba(107,163,255,0.3); }
+
+/* Markdown prose */
+.prose-sentinel p { margin-bottom: 0.5rem; }
+.prose-sentinel p:last-child { margin-bottom: 0; }
+.prose-sentinel pre { margin: 0; }
+.prose-sentinel code { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+.prose-sentinel a { color: #6BA3FF; }
+.prose-sentinel a:hover { text-decoration: underline; }
+.prose-sentinel hr { border-color: #1A2230; margin: 0.75rem 0; }
+.prose-sentinel table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+.prose-sentinel th, .prose-sentinel td { border: 1px solid #1A2230; padding: 0.4rem 0.6rem; text-align: left; font-size: 0.8rem; }
+.prose-sentinel th { background: #0B0F14; color: #B0BEC9; }

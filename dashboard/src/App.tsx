@@ -10,6 +10,7 @@ export default function App() {
   const [activeId, setActiveId] = useState<string | null>(sessions[0]?.id || null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(() => !localStorage.getItem('sentinel-guide-dismissed'));
+  const [autoSpeak] = useState(() => localStorage.getItem('sentinel-auto-speak') === '1');
 
   const activeSession = sessions.find(s => s.id === activeId) || null;
 
@@ -96,6 +97,7 @@ export default function App() {
               messages={activeSession?.messages || []}
               onMessagesChange={handleMessagesChange}
               showGuide={showGuide}
+              autoSpeak={autoSpeak}
             />
           </div>
 
