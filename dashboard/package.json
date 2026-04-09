@@ -1,13 +1,39 @@
 {
-  "name": "dashboard",
+  "name": "eclipse-sentinel",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Eclipse Sentinel — AI operator desktop app",
+  "author": "Eclipse Forge <hello@eclipseforge.dev>",
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "vite & sleep 2 && electron .",
+    "electron:build": "npm run build && electron-builder",
+    "lint": "eslint ."
+  },
+  "build": {
+    "appId": "dev.eclipseforge.sentinel",
+    "productName": "Eclipse Sentinel",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/favicon.svg"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -22,6 +48,8 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
