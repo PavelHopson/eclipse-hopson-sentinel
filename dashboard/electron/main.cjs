@@ -1,24 +1,32 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, Menu } = require('electron');
 const path = require('path');
 
 const isDev = !app.isPackaged;
 
+// Remove default menu
+Menu.setApplicationMenu(null);
+
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1280,
+    height: 860,
     minWidth: 800,
     minHeight: 600,
     title: 'Eclipse Sentinel',
     backgroundColor: '#05070A',
-    titleBarStyle: 'hiddenInset',
+    frame: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#05070A',
+      symbolColor: '#6B7A8A',
+      height: 40,
+    },
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
-  // Open external links in browser
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
@@ -26,7 +34,6 @@ function createWindow() {
 
   if (isDev) {
     win.loadURL('http://localhost:3939');
-    // win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
   }
