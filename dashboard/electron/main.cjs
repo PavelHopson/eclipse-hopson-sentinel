@@ -35,6 +35,15 @@ function createWindow() {
     return { action: 'deny' };
   });
 
+  // Allow microphone access
+  win.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media' || permission === 'microphone') {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
   win.once('ready-to-show', () => win.show());
 
   // Minimize to tray instead of closing

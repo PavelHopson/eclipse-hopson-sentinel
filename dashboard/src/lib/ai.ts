@@ -12,12 +12,12 @@ export interface ChatSession {
 }
 
 export const MODELS = [
-  { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 120B', desc: 'Мощная, бесплатная' },
-  { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 30B', desc: 'Быстрая, бесплатная' },
-  { id: 'google/gemma-4-26b-a4b-it:free', name: 'Gemma 4 26B', desc: 'Google, бесплатная' },
-  { id: 'google/gemma-4-31b-it:free', name: 'Gemma 4 31B', desc: 'Google, бесплатная' },
-  { id: 'minimax/minimax-m2.5:free', name: 'MiniMax M2.5', desc: 'Быстрая, бесплатная' },
-  { id: 'arcee-ai/trinity-large-preview:free', name: 'Trinity Large', desc: 'Arcee AI, бесплатная' },
+  { id: 'minimax/minimax-m2.5:free', name: 'MiniMax M2.5', desc: 'Стабильная, быстрая' },
+  { id: 'arcee-ai/trinity-large-preview:free', name: 'Trinity Large', desc: 'Arcee AI, мощная' },
+  { id: 'liquid/lfm-2.5-1.2b-instruct:free', name: 'Liquid LFM', desc: 'Лёгкая, быстрая' },
+  { id: 'google/gemma-4-26b-a4b-it:free', name: 'Gemma 4 26B', desc: 'Google, сильная' },
+  { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 30B', desc: 'Nvidia, бесплатная' },
+  { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 120B', desc: 'Nvidia, мощная' },
 ] as const;
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -32,7 +32,10 @@ export function setApiKey(key: string) {
 }
 
 export function getSelectedModel(): string {
-  return localStorage.getItem('sentinel-model') || MODELS[0].id;
+  const saved = localStorage.getItem('sentinel-model');
+  // Validate saved model still exists in list
+  if (saved && MODELS.some(m => m.id === saved)) return saved;
+  return MODELS[0].id;
 }
 
 export function setSelectedModel(id: string) {
