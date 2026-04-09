@@ -9,7 +9,7 @@ export default function App() {
   const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
   const [activeId, setActiveId] = useState<string | null>(sessions[0]?.id || null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [showGuide, setShowGuide] = useState(() => !localStorage.getItem('sentinel-guide-dismissed'));
+  const [showGuide, setShowGuide] = useState(false);
   const [autoSpeak] = useState(() => localStorage.getItem('sentinel-auto-speak') === '1');
 
   const activeSession = sessions.find(s => s.id === activeId) || null;

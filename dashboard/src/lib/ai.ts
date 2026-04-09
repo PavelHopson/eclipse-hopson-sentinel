@@ -127,13 +127,9 @@ export async function checkProviderStatus(model?: string): Promise<{
   const m = model || getSelectedModel();
   const start = performance.now();
   try {
-    const resp = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getApiKey()}`,
-      },
-      body: JSON.stringify({ model: m, messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 }),
+    // Just ping the models endpoint — no tokens used, no rate limit
+    const resp = await fetch('https://openrouter.ai/api/v1/models', {
+      headers: { 'Authorization': `Bearer ${getApiKey()}` },
     });
     return { provider: 'OpenRouter', model: m, healthy: resp.ok, latency: Math.round(performance.now() - start) };
   } catch {
