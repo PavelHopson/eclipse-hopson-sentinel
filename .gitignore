@@ -9,3 +9,4 @@ reports/
 .sentinel/
 dashboard/release/
 dashboard/release2/
+__pycache__/
