@@ -10,3 +10,10 @@ reports/
 dashboard/release/
 dashboard/release2/
 __pycache__/
+
+# Locally-cloned Claude Code skill marketplaces (each имеет свой .git):
+# Claude-BugHunter, и т.п. Re-clone:
+#   git clone --depth 1 https://github.com/elementalsouls/Claude-BugHunter.git \
+#     .claude/skills/Claude-BugHunter
+.claude/plugins/
+.claude/skills/
