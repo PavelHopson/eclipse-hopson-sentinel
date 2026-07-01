@@ -9,6 +9,29 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 3. reduce inherited upstream risk through cleanup, testing, and clear contracts
 4. create a stable product foundation before chasing advanced assistant features
 
+## Research intake - 2026-07-01
+
+Source: [Eclipse Library · July 2026 project integration](https://library.eclipse-forge.ru/#guide/july-2026-project-integration).
+These are references and backlog candidates, not implemented capabilities.
+
+### Operator memory
+
+- evaluate **OpenHuman** as a reference for long-lived local operator memory: user habits, cwd/session context, docs/logs, goals, consent scopes, audit trail, and memory deletion
+- keep memory local-first by default; remote sync must be opt-in and scoped
+- add a future design note for "what the operator can remember" vs "what must stay ephemeral"
+
+### Mobile control plane
+
+- evaluate **OpenClaw Mobile** as a UX reference for remote approval/control: agent proposes action -> user confirms from phone
+- require explicit permissions for camera, geolocation, voice, screen context, and command execution
+- add a mobile approval mode only after local bridge auth, token rotation, and audit logging are stable
+
+### Model routing
+
+- evaluate **OmniRoute** as a reference for a safe model-router: local/cloud providers, fallback order, context compression, cost/error/latency metrics
+- production rule: only legal keys, owned quotas, and ToS-safe providers; no "free token bypass" dependency
+- first POC should expose one OpenAI-compatible endpoint with two providers and clear failure logs
+
 ## Immediate priorities
 
 ### P0: Reliability and unblockers
