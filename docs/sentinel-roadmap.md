@@ -32,6 +32,40 @@ These are references and backlog candidates, not implemented capabilities.
 - production rule: only legal keys, owned quotas, and ToS-safe providers; no "free token bypass" dependency
 - first POC should expose one OpenAI-compatible endpoint with two providers and clear failure logs
 
+## Research intake - 2026-07-13
+
+Source: [Eclipse Library · Applied project plan](https://library.eclipse-forge.ru/#guide/applied-project-plan-2026-07-13).
+These items are product directions and safety references, not installed runtime dependencies.
+
+### Agent safety and shell guardrails
+
+- evaluate **Destructive Command Guard** as a pre-command safety layer for autonomous shell actions
+- add a local `sentinel doctor safety` concept: risky command detection, safer alternatives, audit output
+- never execute destructive command rewrites silently; user confirmation remains mandatory
+
+### Workstation doctor
+
+- use **privacy.sexy** as a reference checklist for OS/browser telemetry and privacy posture
+- use **Fast File Explorer** as a reference for fast file search, preview and checksum UX
+- use **NtWarden** only as lab/VM reference for Windows security diagnostics; never require kernel-driver tools for normal users
+
+### Voice and live operator
+
+- evaluate **Voicetypr** for local STT and transcript cleanup
+- evaluate **Sokuji** for live translation/subtitles and virtual microphone patterns
+- evaluate **Fish Audio** only for consent-safe voice/TTS experiments
+
+### Mobile control plane
+
+- use **PCLink** and OpenClaw Mobile patterns for phone approvals: PC proposes action -> phone confirms -> bridge logs the decision
+- remote control must require localhost/VPN, auth tokens, rotation, and visible audit trail
+
+### Token economy
+
+- use installed Codex skills (`context-compression`, `ponytail-review`, `loopy`, `caveman-compress`) as development workflow helpers
+- benchmark `sqz` separately before adopting any dedup/MCP layer
+- do not use lossy image-context approaches for code, secrets, migrations or exact logs
+
 ## Immediate priorities
 
 ### P0: Reliability and unblockers
