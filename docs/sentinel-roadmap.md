@@ -66,6 +66,13 @@ These items are product directions and safety references, not installed runtime 
 - benchmark `sqz` separately before adopting any dedup/MCP layer
 - do not use lossy image-context approaches for code, secrets, migrations or exact logs
 
+### Local model runtime R&D
+
+- use **Colibri** as an architecture reference for disk-streamed MoE local runtimes, not as a default dependency
+- extract the `plan` / `doctor` pattern into a future `sentinel doctor model` command: RAM, disk, provider reachability, model path, expected speed and safe next action
+- document the reality check clearly: a 744B model can be made runnable on consumer hardware, but cold decode is disk-bound and not a production-speed promise
+- see [sentinel-local-model-runtime-rd.md](sentinel-local-model-runtime-rd.md) for the first research contract
+
 ## Immediate priorities
 
 ### P0: Reliability and unblockers

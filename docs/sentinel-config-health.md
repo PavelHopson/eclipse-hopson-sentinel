@@ -43,4 +43,9 @@ node .\scripts\sentinel-config-health.mjs
 - проверки корректности путей и path grounding
 - проверки bridge/voice/session persistence
 - runtime health checks
+- model provider readiness checks: endpoint reachable, model path exists, RAM/disk budget, expected latency tier, safe next action
 - сравнение score между ветками и состояниями
+
+## Связанный R&D
+
+- [sentinel-local-model-runtime-rd.md](sentinel-local-model-runtime-rd.md) — Colibri-inspired `sentinel doctor model` concept: local provider planning, RAM/disk doctor, disk-streamed model warnings.
