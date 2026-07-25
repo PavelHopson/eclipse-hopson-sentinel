@@ -42,6 +42,7 @@ These items are product directions and safety references, not installed runtime 
 - evaluate **Destructive Command Guard** as a pre-command safety layer for autonomous shell actions
 - add a local `sentinel doctor safety` concept: risky command detection, safer alternatives, audit output
 - never execute destructive command rewrites silently; user confirmation remains mandatory
+- [x] pin AgentShield `1.4.0` in the local and CI agent-config security gates instead of executing an unreviewed latest package
 
 ### Workstation doctor
 

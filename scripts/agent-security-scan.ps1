@@ -8,7 +8,7 @@ param(
   [switch]$Opus
 )
 
-Write-Host "== AgentShield (static, 102 rules) ==" -ForegroundColor Cyan
+Write-Host "== AgentShield 1.4.0 (static, 102 rules) ==" -ForegroundColor Cyan
 $ashArgs = @("scan", "--path", $Path)
 if ($Opus) {
   if (-not $env:ANTHROPIC_API_KEY) {
@@ -17,7 +17,7 @@ if ($Opus) {
     $ashArgs += @("--opus", "--stream")
   }
 }
-npx --yes ecc-agentshield @ashArgs
+npx --yes ecc-agentshield@1.4.0 @ashArgs
 
 Write-Host "`n== SkillSpector (static, --no-llm) ==" -ForegroundColor Cyan
 if (Get-Command skillspector -ErrorAction SilentlyContinue) {
