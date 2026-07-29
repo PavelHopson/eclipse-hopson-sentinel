@@ -140,6 +140,7 @@ import { validateUuid } from './utils/uuid.js';
 
 import { registerMcpAddCommand } from 'src/commands/mcp/addCommand.js';
 import { registerMcpDoctorCommand } from 'src/commands/mcp/doctorCommand.js';
+import { registerMcpPresetCommand } from 'src/commands/mcp/presetCommand.js';
 import { registerMcpXaaIdpCommand } from 'src/commands/mcp/xaaIdpCommand.js';
 import { logPermissionContextForAnts } from 'src/services/internalLogging.js';
 import { fetchClaudeAIMcpConfigsIfEligible } from 'src/services/mcp/claudeai.js';
@@ -3893,6 +3894,7 @@ async function run(): Promise<CommanderCommand> {
   // Register the mcp add subcommand (extracted for testability)
   registerMcpAddCommand(mcp);
   registerMcpDoctorCommand(mcp);
+  registerMcpPresetCommand(mcp);
   if (isXaaEnabled()) {
     registerMcpXaaIdpCommand(mcp);
   }

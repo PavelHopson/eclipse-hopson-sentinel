@@ -174,6 +174,28 @@ sentinel
 
 > Подробнее обо всех интеграциях: [docs/sentinel-integrations.md](docs/sentinel-integrations.md)
 
+### Безопасные MCP-пресеты
+
+Sentinel умеет добавить три проверенных MCP-интеграции с ограниченными настройками по умолчанию:
+
+```powershell
+# Документация библиотек. Работает без ключа; ключ можно настроить отдельно для повышенных лимитов.
+sentinel mcp add-preset context7 --scope project
+
+# Доступ только к одной указанной папке. Не передавайте домашнюю папку или весь диск.
+sentinel mcp add-preset filesystem --path . --scope project
+
+# Только чтение GitHub. Токен не записывается в конфиг.
+$env:GITHUB_PERSONAL_ACCESS_TOKEN="github_pat_your_fine_grained_token"
+sentinel mcp add-preset github-readonly --scope project
+
+sentinel mcp doctor --config-only
+```
+
+Все presets закрепляют версии, GitHub запускается в read-only + lockdown режиме, а Filesystem требует
+одну существующую allowed directory. Перед первым использованием проверьте список и описания tools:
+MCP metadata считается недоверенным вводом даже для официального сервера.
+
 ## Почему это сильнее обычного “ещё одного AI CLI”
 
 - у проекта есть не только runtime, но и operator-архитектура

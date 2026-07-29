@@ -9,6 +9,13 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 3. reduce inherited upstream risk through cleanup, testing, and clear contracts
 4. create a stable product foundation before chasing advanced assistant features
 
+## Secure MCP baseline - 2026-07-29
+
+- [x] add version-pinned `context7`, `filesystem`, and `github-readonly` presets to the real Sentinel MCP CLI
+- [x] require one explicit existing directory for Filesystem instead of broad implicit access
+- [x] keep GitHub credentials in the process environment and enable read-only, lockdown, and limited toolsets
+- [ ] add scheduled tool-description hash verification after the first approved runtime scan
+
 ## Research intake - 2026-07-01
 
 Source: [Eclipse Library · July 2026 project integration](https://library.eclipse-forge.ru/#guide/july-2026-project-integration).
