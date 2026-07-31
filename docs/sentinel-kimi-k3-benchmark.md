@@ -26,11 +26,19 @@ Kimi K3 is not added to a Sentinel provider preset until:
 
 1. the Sentinel suite passes twice with a pinned model and reasoning setting;
 2. the result is compared with the current approved coding profile;
-3. direct Kimi Terms, privacy, retention, region, subprocessors, and DPA requirements are reviewed;
+3. direct Kimi Terms, privacy, retention, region, subprocessors, and DPA requirements are accepted
+   for the intended data class; official API docs say inputs/outputs are not used for training,
+   but do not establish zero retention, one fixed retention period, or a complete self-service
+   DPA/subprocessor package;
 4. a dedicated Sentinel identity, rate limit, budget, timeout, and rollback path exist;
 5. keys remain in the process environment or a server-side secret store and never enter config, logs, Bridge messages, or desktop state.
 
 TokenRouter is not an alternative benchmark path. It remains blocked until its owner, Terms, DPA, routing providers, retention, subprocessors, and promotion conditions are verified.
+
+As of 31.07.2026 the dry-run harness is green, but no dedicated low-limit `KIMI_API_KEY` is
+present. Only synthetic prompts may be used when that key and a provider-side spending cap
+exist. Production code, user memory, voice data, client documents and personal data remain
+blocked pending DPA, residency, retention and deletion-process approval.
 
 ## Decision after benchmark
 

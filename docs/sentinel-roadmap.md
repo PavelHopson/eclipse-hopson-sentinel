@@ -16,6 +16,34 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 - [x] keep GitHub credentials in the process environment and enable read-only, lockdown, and limited toolsets
 - [ ] add scheduled tool-description hash verification after the first approved runtime scan
 
+## TypeScript baseline - 2026-07-31
+
+- [x] verify the shipped Bun build and CLI smoke: `0.1.7` builds and reports its version
+- [x] verify provider tests: 47 focused tests pass
+- [x] measure the inherited strict TypeScript baseline without weakening `tsconfig`: 4,504
+      errors across 832 files
+- [ ] restore a truthful `npm run typecheck` gate as a dedicated XL cleanup track. Start with
+      generated/internal module resolution (`TS2307`), then missing runtime symbols, then implicit
+      `any`; do not hide the baseline with broad excludes, `skipLibCheck`, or relaxed strictness
+
+The largest groups are `TS7006` (2,140), `TS2307` (576), `TS2339` (442), `TS18046`
+(199), `TS2304` (187), `TS2345` (155), and `TS2322` (130). Build success does not make
+these type errors acceptable: the current Bun build uses project macros/stubs that the plain
+TypeScript program cannot resolve consistently.
+
+## Research intake - 2026-07-31
+
+### Agent capability health
+
+- keep **Agent Reach** as an architecture reference for capability registry, read-only `doctor`,
+  visible failure reasons, and deterministic fallback order
+- do not install its mutable multi-tool stack, reuse primary browser cookies, or let an agent
+  self-install global packages
+- any future Sentinel connector registry requires signed/pinned entries, least privilege,
+  explicit egress, isolated execution, prompt-injection boundaries, and an audit log
+- first design step: render synthetic connector health and a safe next action without making
+  network requests
+
 ## Research intake - 2026-07-01
 
 Source: [Eclipse Library · July 2026 project integration](https://library.eclipse-forge.ru/#guide/july-2026-project-integration).
