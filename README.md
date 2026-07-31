@@ -213,6 +213,7 @@ MCP metadata считается недоверенным вводом даже �
 - [Sentinel Bridge API](docs/sentinel-bridge.md)
 - [Sentinel Voice MVP](docs/sentinel-voice-mvp.md)
 - [Sentinel Config Health](docs/sentinel-config-health.md)
+- [Kimi K3 benchmark track](docs/sentinel-kimi-k3-benchmark.md)
 - [Sentinel Backups](docs/sentinel-backups.md)
 - [Инженерный журнал](docs/sentinel-engineering-log.md)
 - [Master Roadmap Sentinel](docs/sentinel-roadmap.md)

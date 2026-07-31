@@ -67,6 +67,7 @@ These items are product directions and safety references, not installed runtime 
 
 - use **PCLink** and OpenClaw Mobile patterns for phone approvals: PC proposes action -> phone confirms -> bridge logs the decision
 - remote control must require localhost/VPN, auth tokens, rotation, and visible audit trail
+- keep **VCamdroid** as a camera-input architecture and permission-UX reference only; do not install its admin DLL/APK/ADB stack on the primary workstation. Any future proof of concept requires a disposable Windows VM, a separate Android device, pinned-source audit and an explicit camera use case.
 
 ### Token economy
 
@@ -238,6 +239,8 @@ These are good ideas to borrow conceptually without copying code directly:
 ## Model and provider strategy
 
 - formalize OpenRouter profiles for coding and fast responses
+- [ ] Run the network-gated direct Kimi K3 `sentinel` synthetic suite from Eclipse AI Hub twice; record safety score, latency, tokens and cost before considering a provider preset. See [sentinel-kimi-k3-benchmark.md](sentinel-kimi-k3-benchmark.md).
+- [ ] Keep TokenRouter rejected until owner, Terms, DPA, routing providers, retention, subprocessors and promotion limits are verified; never use it as a shortcut to the direct benchmark.
 - keep Ollama as the offline/local fallback
 - add clear provider presets: `fast`, `code`, `voice`, `offline`
 - measure latency and quality per provider in voice workflows
