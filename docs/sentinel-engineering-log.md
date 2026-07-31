@@ -2,6 +2,35 @@
 
 This document records blocked checks, failed attempts, and known limitations during the build-out of `Eclipse Hopson Sentinel`.
 
+## 2026-07-31
+
+### Verified progress
+
+- restored 125 SDK core aliases and 41 control-protocol aliases directly from the
+  repository's existing Zod schemas
+- restored normalized SDK usage/settings helpers, query-source and immutable utility types,
+  build macro declarations, and an ES2023 TypeScript library baseline
+- reduced strict typecheck errors from 4,504 to 3,982 without excluding files, relaxing
+  `strict`, or adding broad `any` declarations
+- completed a Bun production build and focused provider tests after the changes
+- disabled auto-update and npm publish paths for the private distribution
+
+### High-risk provenance finding
+
+- Gitlawb/openclaude now states that its base layer derives from proprietary Anthropic
+  Claude Code code and that the project does not have authorization to distribute that
+  underlying source
+- Sentinel's initial import did not record the exact upstream commit, so repository-wide
+  MIT redistribution cannot be supported by the current evidence
+- `package.json` is now private and the repository license explains the unresolved boundary
+
+### Remaining blocker
+
+- 517 strict errors are unresolved module imports; 177 of those reference the missing central
+  message contract and 17 reference the missing tool-progress contract
+- missing internal modules must not be reconstructed from unofficial mirrors until provenance
+  and redistribution rights are established
+
 ## 2026-04-03
 
 ### Verified progress

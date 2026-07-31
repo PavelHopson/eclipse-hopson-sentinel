@@ -1,21 +1,20 @@
-MIT License
+Eclipse Hopson Sentinel — distribution status
 
-Copyright (c) 2026 PavelHopson
+This repository combines original Eclipse Hopson work with components imported
+from third-party projects.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The TypeScript CLI was adapted from Gitlawb/openclaude. That upstream project
+states that its base layer derives from Anthropic's proprietary Claude Code
+software and that only contributor modifications are offered under MIT where
+legally permissible. The original import commit was not recorded here, so the
+applicable boundary cannot currently be reconstructed with confidence.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Original Eclipse Hopson modifications are offered under the MIT License only
+to the extent that the author has the right to license them. This statement
+does not grant rights to third-party code.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The repository as a whole is not offered for public redistribution, package
+publication, sublicensing, or sale until exact upstream revisions and license
+obligations are documented and reviewed.
+
+See THIRD_PARTY_NOTICES.md for component provenance.

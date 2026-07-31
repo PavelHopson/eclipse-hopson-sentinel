@@ -60,8 +60,12 @@ const result = await Bun.build({
     'MACRO.DISPLAY_VERSION': JSON.stringify(version),
     'MACRO.BUILD_TIME': JSON.stringify(new Date().toISOString()),
     'MACRO.ISSUES_EXPLAINER':
-      JSON.stringify('report the issue at https://github.com/anthropics/claude-code/issues'),
-    'MACRO.PACKAGE_URL': JSON.stringify('@gitlawb/openclaude'),
+      JSON.stringify('report the issue at https://github.com/PavelHopson/eclipse-hopson-sentinel/issues'),
+    'MACRO.FEEDBACK_CHANNEL':
+      JSON.stringify('https://github.com/PavelHopson/eclipse-hopson-sentinel/issues'),
+    'MACRO.VERSION_CHANGELOG': JSON.stringify(''),
+    'MACRO.AUTOUPDATES_ENABLED': 'false',
+    'MACRO.PACKAGE_URL': JSON.stringify('@eclipse-hopson/sentinel'),
     'MACRO.NATIVE_PACKAGE_URL': 'undefined',
   },
   plugins: [

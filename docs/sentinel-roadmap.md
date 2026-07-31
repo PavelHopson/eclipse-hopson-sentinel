@@ -22,14 +22,28 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 - [x] verify provider tests: 47 focused tests pass
 - [x] measure the inherited strict TypeScript baseline without weakening `tsconfig`: 4,504
       errors across 832 files
+- [x] restore schema-derived SDK core/control aliases, normalized usage/settings types,
+      build macro declarations, and the ES2023 library contract; strict errors now total
+      3,982 (522 fewer) and the restored surface adds no new errors
 - [ ] restore a truthful `npm run typecheck` gate as a dedicated XL cleanup track. Start with
       generated/internal module resolution (`TS2307`), then missing runtime symbols, then implicit
-      `any`; do not hide the baseline with broad excludes, `skipLibCheck`, or relaxed strictness
+      `any`; do not hide the baseline with broad excludes, new `any` stubs, or relaxed strictness
 
-The largest groups are `TS7006` (2,140), `TS2307` (576), `TS2339` (442), `TS18046`
-(199), `TS2304` (187), `TS2345` (155), and `TS2322` (130). Build success does not make
+The current largest groups are `TS7006` (2,013), `TS2307` (517), `TS2339` (434),
+`TS18046` (182), `TS2345` (169), and `TS2322` (141). Build success does not make
 these type errors acceptable: the current Bun build uses project macros/stubs that the plain
 TypeScript program cannot resolve consistently.
+
+## Distribution provenance gate - 2026-07-31
+
+- [x] replace the inaccurate repository-wide MIT claim with a mixed-provenance notice
+- [x] mark the npm package private and remove public publish configuration
+- [x] disable automatic and manual package updates in the private build so Sentinel cannot
+      silently replace itself with Gitlawb/OpenClaude or Anthropic artifacts
+- [ ] identify the exact Gitlawb/openclaude commit used by the initial import
+- [ ] obtain legal clearance before public redistribution, package publication, sublicensing,
+      or sale of the inherited TypeScript CLI
+- [ ] record the exact Rust parity import SHA and confirm its license at that revision
 
 ## Research intake - 2026-07-31
 
