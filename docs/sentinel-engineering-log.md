@@ -83,3 +83,10 @@ This document records blocked checks, failed attempts, and known limitations dur
 - smoke-test `/sentinel-bridge`
 - smoke-test `bin/sentinel-voice`
 - design a richer response contract for voice-friendly replies
+# 2026-08-02 — guarded browser and advertising operators
+
+- Added standalone, dependency-free browser capability policy: public HTTPS allowlist, private
+  IPv4/IPv6 and URL-credential rejection, no cookies/telemetry, no browser mutations.
+- Added read-only advertising spend anomaly detection with a bounded input and `notify_only` output.
+- Added focused tests and a deployment boundary document. These contracts are not yet wired into
+  the inherited planner; production enablement remains a separate reviewed step.

@@ -9,6 +9,14 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 3. reduce inherited upstream risk through cleanup, testing, and clear contracts
 4. create a stable product foundation before chasing advanced assistant features
 
+## Read-only browser and ads operator boundary - 2026-08-02
+
+- [x] add a fail-closed browser capability policy for HTTPS, public, allowlisted, read-only pages
+- [x] reject private IPv4/IPv6 destinations, URL credentials, cookie import, external telemetry and all browser mutations
+- [x] provide a telemetry-off loopback Camofox-compatible environment contract without installing the community wrapper
+- [x] add a bounded spend anomaly detector that can only return `notify_only`
+- [ ] wire both policies into the production planner/scheduler after the inherited TypeScript baseline is restored and the isolated worker receives a dedicated container security review
+
 ## Secure MCP baseline - 2026-07-29
 
 - [x] add version-pinned `context7`, `filesystem`, and `github-readonly` presets to the real Sentinel MCP CLI
