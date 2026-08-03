@@ -196,6 +196,32 @@ sentinel mcp doctor --config-only
 одну существующую allowed directory. Перед первым использованием проверьте список и описания tools:
 MCP metadata считается недоверенным вводом даже для официального сервера.
 
+### Изолированный browser read worker
+
+`BrowserRead` появляется в списке tools только при полной fail-closed конфигурации. Обычный
+`WebFetch` остаётся первым способом чтения; browser нужен лишь для публичной JS-heavy страницы.
+Sentinel не устанавливает Camofox и не запускает его на основной машине.
+
+Обязательная граница запуска:
+
+```powershell
+$env:SENTINEL_CAMOFOX_ISOLATED="true"              # отдельный container/VM без workspace и secrets
+$env:CAMOFOX_CRASH_REPORT_ENABLED="false"         # telemetry off в worker
+$env:SENTINEL_CAMOFOX_PERSISTENCE_DISABLED="true" # persistence plugin disabled in camofox.config.json
+$env:CAMOFOX_ACCESS_KEY="32+ random characters"
+$env:SENTINEL_CAMOFOX_ENDPOINT="http://127.0.0.1:9377"
+$env:SENTINEL_BROWSER_ALLOWED_DOMAINS="docs.example.com,example.com"
+sentinel
+```
+
+До запуска удалите/выключите upstream persistence plugin в `camofox.config.json`: attestation env
+не меняет конфиг автоматически, а заставляет оператора подтвердить эту границу. Tool создаёт
+одноразовую вкладку, читает accessibility snapshot и закрывает session. Он не
+экспонирует click, type, cookie import, downloads, payment, publish или account changes.
+Все URL до и после navigation проходят allowlist, а содержимое страницы возвращается с явной
+меткой `UNTRUSTED WEB CONTENT`. DNS/public-only egress всё равно должен ограничиваться на уровне
+контейнера: application allowlist не заменяет network sandbox.
+
 ## Почему это сильнее обычного “ещё одного AI CLI”
 
 - у проекта есть не только runtime, но и operator-архитектура

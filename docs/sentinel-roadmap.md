@@ -14,8 +14,10 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 - [x] add a fail-closed browser capability policy for HTTPS, public, allowlisted, read-only pages
 - [x] reject private IPv4/IPv6 destinations, URL credentials, cookie import, external telemetry and all browser mutations
 - [x] provide a telemetry-off loopback Camofox-compatible environment contract without installing the community wrapper
+- [x] wire the policy into an env-gated `BrowserRead` tool that exposes only disposable create/snapshot/stats/close calls
 - [x] add a bounded spend anomaly detector that can only return `notify_only`
-- [ ] wire both policies into the production planner/scheduler after the inherited TypeScript baseline is restored and the isolated worker receives a dedicated container security review
+- [ ] complete a dedicated container/network security review and real runtime smoke before enabling BrowserRead in production profiles
+- [ ] wire notify-only ads anomalies into the production scheduler after the inherited TypeScript baseline is restored
 
 ## Secure MCP baseline - 2026-07-29
 

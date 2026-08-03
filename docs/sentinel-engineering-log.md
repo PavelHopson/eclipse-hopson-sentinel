@@ -90,3 +90,16 @@ This document records blocked checks, failed attempts, and known limitations dur
 - Added read-only advertising spend anomaly detection with a bounded input and `notify_only` output.
 - Added focused tests and a deployment boundary document. These contracts are not yet wired into
   the inherited planner; production enablement remains a separate reviewed step.
+
+# 2026-08-03 — browser policy wired fail-closed
+
+- Added `BrowserRead` to the real tool registry behind explicit isolation, telemetry-off,
+  disabled upstream profile persistence, loopback endpoint, strong access-key and domain-allowlist configuration.
+- Executor exposes only create tab, accessibility snapshot, stats validation and disposable
+  close. It has no click/type/cookie/download/payment/publish surface.
+- Every requested, returned and stats-observed HTTP URL is checked against the read-only policy;
+  page output is labelled untrusted to preserve the planner/executor prompt-injection boundary.
+- Camofox remains uninstalled. A separate container/network review and runtime smoke are still
+  required before a production profile may enable the tool.
+- Full strict typecheck remains at the pre-existing 3,982-error baseline; the new source adds no
+  TypeScript errors. Bun tests remain blocked locally because `bun.exe` is not executable here.
