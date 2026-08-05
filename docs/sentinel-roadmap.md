@@ -108,6 +108,10 @@ These items are product directions and safety references, not installed runtime 
 - use **privacy.sexy** as a reference checklist for OS/browser telemetry and privacy posture
 - use **Fast File Explorer** as a reference for fast file search, preview and checksum UX
 - use **NtWarden** only as lab/VM reference for Windows security diagnostics; never require kernel-driver tools for normal users
+- [x] ship a standalone read-only Windows Doctor for Secure Boot, TPM, Defender, Firewall, UAC, disk encryption, SMBv1, RDP, Windows Update, restart state, telemetry policy and persistent PowerShell policy
+- [x] expose stable `windows-doctor-v1` JSON without device identity, secrets or automatic remediation
+- [x] add a dependency-free synthetic self-test and Windows CI gate
+- [ ] add a reviewed desktop summary after the existing desktop shell has a stable security boundary; keep every remediation behind an explicit diff and user confirmation
 
 ### Voice and live operator
 

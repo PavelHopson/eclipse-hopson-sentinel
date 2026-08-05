@@ -65,6 +65,20 @@ const checks = [
     pass: existsSync(resolve(repoRoot, 'scripts', 'sentinel-stt.ps1')),
   },
   {
+    category: 'Workstation',
+    points: 10,
+    id: 'windows-doctor',
+    description: 'Read-only Windows Doctor script exists',
+    pass: existsSync(resolve(repoRoot, 'scripts', 'sentinel-windows-doctor.ps1')),
+  },
+  {
+    category: 'Workstation',
+    points: 10,
+    id: 'windows-doctor-docs',
+    description: 'Windows Doctor safety documentation exists',
+    pass: existsSync(resolve(repoRoot, 'docs', 'sentinel-windows-doctor.md')),
+  },
+  {
     category: 'Launchers',
     points: 10,
     id: 'sentinel-bin',

@@ -103,3 +103,13 @@ This document records blocked checks, failed attempts, and known limitations dur
   required before a production profile may enable the tool.
 - Full strict typecheck remains at the pre-existing 3,982-error baseline; the new source adds no
   TypeScript errors. Bun tests remain blocked locally because `bun.exe` is not executable here.
+
+# 2026-08-05 — read-only Windows Doctor
+
+- Added a standalone Windows security posture audit with plain-language results and one bounded
+  next action. It checks built-in Windows controls without admin-only mutations, network calls,
+  third-party installers, kernel drivers or imported NtWarden code.
+- Added the stable `windows-doctor-v1` JSON contract. Reports omit username, hostname, serial
+  numbers, recovery keys, secrets and profile paths; file output occurs only with explicit `-Out`.
+- Added a dependency-free synthetic self-test, Config Health coverage, documentation and a Windows
+  CI gate. Missing commands or permissions remain `unknown` instead of producing false failures.

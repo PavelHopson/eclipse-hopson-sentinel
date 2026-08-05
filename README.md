@@ -76,6 +76,7 @@
 - backup перед изменениями
 - config health scoring
 - voice diagnostics
+- read-only Windows security posture audit
 - session persistence
 
 ## Архитектура
@@ -239,6 +240,7 @@ sentinel
 - [Sentinel Bridge API](docs/sentinel-bridge.md)
 - [Sentinel Voice MVP](docs/sentinel-voice-mvp.md)
 - [Sentinel Config Health](docs/sentinel-config-health.md)
+- [Sentinel Windows Doctor](docs/sentinel-windows-doctor.md)
 - [Kimi K3 benchmark track](docs/sentinel-kimi-k3-benchmark.md)
 - [Sentinel Backups](docs/sentinel-backups.md)
 - [Инженерный журнал](docs/sentinel-engineering-log.md)
