@@ -2,6 +2,35 @@
 
 This document records blocked checks, failed attempts, and known limitations during the build-out of `Eclipse Hopson Sentinel`.
 
+## 2026-07-31
+
+### Verified progress
+
+- restored 125 SDK core aliases and 41 control-protocol aliases directly from the
+  repository's existing Zod schemas
+- restored normalized SDK usage/settings helpers, query-source and immutable utility types,
+  build macro declarations, and an ES2023 TypeScript library baseline
+- reduced strict typecheck errors from 4,504 to 3,982 without excluding files, relaxing
+  `strict`, or adding broad `any` declarations
+- completed a Bun production build and focused provider tests after the changes
+- disabled auto-update and npm publish paths for the private distribution
+
+### High-risk provenance finding
+
+- Gitlawb/openclaude now states that its base layer derives from proprietary Anthropic
+  Claude Code code and that the project does not have authorization to distribute that
+  underlying source
+- Sentinel's initial import did not record the exact upstream commit, so repository-wide
+  MIT redistribution cannot be supported by the current evidence
+- `package.json` is now private and the repository license explains the unresolved boundary
+
+### Remaining blocker
+
+- 517 strict errors are unresolved module imports; 177 of those reference the missing central
+  message contract and 17 reference the missing tool-progress contract
+- missing internal modules must not be reconstructed from unofficial mirrors until provenance
+  and redistribution rights are established
+
 ## 2026-04-03
 
 ### Verified progress
@@ -54,3 +83,33 @@ This document records blocked checks, failed attempts, and known limitations dur
 - smoke-test `/sentinel-bridge`
 - smoke-test `bin/sentinel-voice`
 - design a richer response contract for voice-friendly replies
+# 2026-08-02 — guarded browser and advertising operators
+
+- Added standalone, dependency-free browser capability policy: public HTTPS allowlist, private
+  IPv4/IPv6 and URL-credential rejection, no cookies/telemetry, no browser mutations.
+- Added read-only advertising spend anomaly detection with a bounded input and `notify_only` output.
+- Added focused tests and a deployment boundary document. These contracts are not yet wired into
+  the inherited planner; production enablement remains a separate reviewed step.
+
+# 2026-08-03 — browser policy wired fail-closed
+
+- Added `BrowserRead` to the real tool registry behind explicit isolation, telemetry-off,
+  disabled upstream profile persistence, loopback endpoint, strong access-key and domain-allowlist configuration.
+- Executor exposes only create tab, accessibility snapshot, stats validation and disposable
+  close. It has no click/type/cookie/download/payment/publish surface.
+- Every requested, returned and stats-observed HTTP URL is checked against the read-only policy;
+  page output is labelled untrusted to preserve the planner/executor prompt-injection boundary.
+- Camofox remains uninstalled. A separate container/network review and runtime smoke are still
+  required before a production profile may enable the tool.
+- Full strict typecheck remains at the pre-existing 3,982-error baseline; the new source adds no
+  TypeScript errors. Bun tests remain blocked locally because `bun.exe` is not executable here.
+
+# 2026-08-05 — read-only Windows Doctor
+
+- Added a standalone Windows security posture audit with plain-language results and one bounded
+  next action. It checks built-in Windows controls without admin-only mutations, network calls,
+  third-party installers, kernel drivers or imported NtWarden code.
+- Added the stable `windows-doctor-v1` JSON contract. Reports omit username, hostname, serial
+  numbers, recovery keys, secrets and profile paths; file output occurs only with explicit `-Out`.
+- Added a dependency-free synthetic self-test, Config Health coverage, documentation and a Windows
+  CI gate. Missing commands or permissions remain `unknown` instead of producing false failures.

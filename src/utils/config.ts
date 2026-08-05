@@ -1723,6 +1723,7 @@ export function shouldSkipPluginAutoupdate(): boolean {
 }
 
 export type AutoUpdaterDisabledReason =
+  | { type: 'distribution' }
   | { type: 'development' }
   | { type: 'env'; envVar: string }
   | { type: 'config' }
@@ -1731,6 +1732,8 @@ export function formatAutoUpdaterDisabledReason(
   reason: AutoUpdaterDisabledReason,
 ): string {
   switch (reason.type) {
+    case 'distribution':
+      return 'private distribution build'
     case 'development':
       return 'development build'
     case 'env':
@@ -1741,6 +1744,9 @@ export function formatAutoUpdaterDisabledReason(
 }
 
 export function getAutoUpdaterDisabledReason(): AutoUpdaterDisabledReason | null {
+  if (!MACRO.AUTOUPDATES_ENABLED) {
+    return { type: 'distribution' }
+  }
   if (process.env.NODE_ENV === 'development') {
     return { type: 'development' }
   }

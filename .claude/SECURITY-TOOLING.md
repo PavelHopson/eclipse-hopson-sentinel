@@ -13,12 +13,14 @@ Pre-tool hook ловит 25 vuln-паттернов при Write/Edit в Claude 
 ```
 Docs: https://code.claude.com/docs/en/security-guidance
 
-## 2. AgentShield — скан `.claude/` (102 правила, без ключа)
+## 2. AgentShield 1.4.0 — скан `.claude/` (102 правила, без ключа)
 ```powershell
 .\scripts\agent-security-scan.ps1            # static
 .\scripts\agent-security-scan.ps1 -Opus      # + Opus 4.6 deep-scan (нужен $env:ANTHROPIC_API_KEY)
 ```
-CI: `.github/workflows/agent-security.yml` — авто-скан на PR в `.claude/**` (report-only).
+Версия scanner закреплена в локальном скрипте и CI: обновлять её нужно отдельным
+reviewed-изменением, а не автоматически при каждом запуске. CI:
+`.github/workflows/agent-security.yml` — авто-скан на PR в `.claude/**` (report-only).
 Репо: https://github.com/affaan-m/agentshield
 
 ## 3. SkillSpector (NVIDIA) — gate перед install внешних скиллов

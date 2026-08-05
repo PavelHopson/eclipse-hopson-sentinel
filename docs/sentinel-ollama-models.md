@@ -102,3 +102,18 @@ OPENROUTER_API_KEY=sk-or-v1-ваш-ключ
 - **Без цензуры** — модель не отказывает в задачах
 - **Без интернета** — работает полностью офлайн
 - **Бесплатно** — никаких API-ключей и подписок
+
+## R&D: Colibri и disk-streamed MoE
+
+[Colibri](https://github.com/JustVugg/colibri) показывает другой класс локального runtime: GLM-5.2 744B MoE запускается через pure C engine, dense-часть держится в RAM, а expert-блоки стримятся с диска.
+
+Для Sentinel это **не замена Ollama сейчас**, а reference для будущего `sentinel doctor model`:
+
+- заранее считать RAM / disk / VRAM budget
+- предупреждать, если модель физически запускается, но будет очень медленной
+- показывать safe next action вместо “магической” кнопки запуска
+- отдавать machine-readable JSON для desktop shell и bridge-клиентов
+
+Reality check: по данным проекта Colibri, int4 модель занимает сотни GB на диске, а cold decode упирается в скорость чтения. Поэтому не скачиваем и не включаем в обычный setup без отдельного hardware/time плана.
+
+Подробнее: [sentinel-local-model-runtime-rd.md](sentinel-local-model-runtime-rd.md).

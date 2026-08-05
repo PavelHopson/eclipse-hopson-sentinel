@@ -29,6 +29,15 @@ import { gte } from 'src/utils/semver.js'
 import { getInitialSettings } from 'src/utils/settings/settings.js'
 
 export async function update() {
+  if (!MACRO.AUTOUPDATES_ENABLED) {
+    writeToStdout(
+      chalk.yellow('Auto-update is disabled for this private Sentinel build.\n') +
+      'Update only from the reviewed repository checkout after verifying provenance.\n',
+    )
+    await gracefulShutdown(0)
+    return
+  }
+
   // Block updates for third-party providers. The update mechanism downloads
   // from Anthropic's distribution bucket, which would silently replace the
   // OpenClaude build (with the OpenAI shim) with the upstream Claude Code
@@ -39,6 +48,7 @@ export async function update() {
       'To update, pull the latest source from the repository and rebuild:\n' +
       '  git pull && bun install && bun run build\n',
     )
+    await gracefulShutdown(0)
     return
   }
 

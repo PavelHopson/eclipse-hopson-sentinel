@@ -1586,7 +1586,11 @@ export function Config({
     }} hideBorder hideInputGuide>
           {autoUpdaterDisabledReason?.type !== 'config' ? <>
               <Text>
-                {autoUpdaterDisabledReason?.type === 'env' ? 'Auto-updates are controlled by an environment variable and cannot be changed here.' : 'Auto-updates are disabled in development builds.'}
+                {autoUpdaterDisabledReason?.type === 'env'
+                  ? 'Auto-updates are controlled by an environment variable and cannot be changed here.'
+                  : autoUpdaterDisabledReason?.type === 'distribution'
+                    ? 'Auto-updates are disabled until third-party provenance and distribution rights are verified.'
+                    : 'Auto-updates are disabled in development builds.'}
               </Text>
               {autoUpdaterDisabledReason?.type === 'env' && <Text dimColor>
                   Unset {autoUpdaterDisabledReason.envVar} to re-enable

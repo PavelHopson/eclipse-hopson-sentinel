@@ -76,6 +76,7 @@
 - backup перед изменениями
 - config health scoring
 - voice diagnostics
+- read-only Windows security posture audit
 - session persistence
 
 ## Архитектура
@@ -174,6 +175,54 @@ sentinel
 
 > Подробнее обо всех интеграциях: [docs/sentinel-integrations.md](docs/sentinel-integrations.md)
 
+### Безопасные MCP-пресеты
+
+Sentinel умеет добавить три проверенных MCP-интеграции с ограниченными настройками по умолчанию:
+
+```powershell
+# Документация библиотек. Работает без ключа; ключ можно настроить отдельно для повышенных лимитов.
+sentinel mcp add-preset context7 --scope project
+
+# Доступ только к одной указанной папке. Не передавайте домашнюю папку или весь диск.
+sentinel mcp add-preset filesystem --path . --scope project
+
+# Только чтение GitHub. Токен не записывается в конфиг.
+$env:GITHUB_PERSONAL_ACCESS_TOKEN="github_pat_your_fine_grained_token"
+sentinel mcp add-preset github-readonly --scope project
+
+sentinel mcp doctor --config-only
+```
+
+Все presets закрепляют версии, GitHub запускается в read-only + lockdown режиме, а Filesystem требует
+одну существующую allowed directory. Перед первым использованием проверьте список и описания tools:
+MCP metadata считается недоверенным вводом даже для официального сервера.
+
+### Изолированный browser read worker
+
+`BrowserRead` появляется в списке tools только при полной fail-closed конфигурации. Обычный
+`WebFetch` остаётся первым способом чтения; browser нужен лишь для публичной JS-heavy страницы.
+Sentinel не устанавливает Camofox и не запускает его на основной машине.
+
+Обязательная граница запуска:
+
+```powershell
+$env:SENTINEL_CAMOFOX_ISOLATED="true"              # отдельный container/VM без workspace и secrets
+$env:CAMOFOX_CRASH_REPORT_ENABLED="false"         # telemetry off в worker
+$env:SENTINEL_CAMOFOX_PERSISTENCE_DISABLED="true" # persistence plugin disabled in camofox.config.json
+$env:CAMOFOX_ACCESS_KEY="32+ random characters"
+$env:SENTINEL_CAMOFOX_ENDPOINT="http://127.0.0.1:9377"
+$env:SENTINEL_BROWSER_ALLOWED_DOMAINS="docs.example.com,example.com"
+sentinel
+```
+
+До запуска удалите/выключите upstream persistence plugin в `camofox.config.json`: attestation env
+не меняет конфиг автоматически, а заставляет оператора подтвердить эту границу. Tool создаёт
+одноразовую вкладку, читает accessibility snapshot и закрывает session. Он не
+экспонирует click, type, cookie import, downloads, payment, publish или account changes.
+Все URL до и после navigation проходят allowlist, а содержимое страницы возвращается с явной
+меткой `UNTRUSTED WEB CONTENT`. DNS/public-only egress всё равно должен ограничиваться на уровне
+контейнера: application allowlist не заменяет network sandbox.
+
 ## Почему это сильнее обычного “ещё одного AI CLI”
 
 - у проекта есть не только runtime, но и operator-архитектура
@@ -191,6 +240,8 @@ sentinel
 - [Sentinel Bridge API](docs/sentinel-bridge.md)
 - [Sentinel Voice MVP](docs/sentinel-voice-mvp.md)
 - [Sentinel Config Health](docs/sentinel-config-health.md)
+- [Sentinel Windows Doctor](docs/sentinel-windows-doctor.md)
+- [Kimi K3 benchmark track](docs/sentinel-kimi-k3-benchmark.md)
 - [Sentinel Backups](docs/sentinel-backups.md)
 - [Инженерный журнал](docs/sentinel-engineering-log.md)
 - [Master Roadmap Sentinel](docs/sentinel-roadmap.md)
@@ -233,4 +284,11 @@ sentinel
 
 ## Лицензия
 
-MIT
+Репозиторий пока не готов к публичному распространению как MIT-пакет.
+Собственные изменения Eclipse Hopson доступны на условиях MIT только там,
+где это не конфликтует с правами на импортированные компоненты. Базовый
+CLI-слой имеет неразрешённое смешанное происхождение; npm publish отключён
+до фиксации точных upstream commit SHA и юридической проверки.
+
+Подробности: [LICENSE](LICENSE) и
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

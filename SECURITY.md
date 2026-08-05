@@ -35,3 +35,15 @@
 - проверить, не раскрываются ли секреты, токены и приватные пути
 
 После исправления можно оформить публичный advisory или issue с описанием уже закрытой проблемы.
+
+## Browser worker boundary
+
+- `BrowserRead` выключен, пока оператор явно не подтвердит isolated worker, telemetry-off,
+  отключённый Camofox persistence plugin, loopback endpoint, strong access key и непустой domain allowlist.
+- Worker должен работать в отдельном container/VM без mounts рабочего каталога, SSH keys,
+  browser cookies и production secrets. Upstream profile persistence должен быть выключен в
+  `camofox.config.json`; одной переменной-attestation недостаточно. Public-only egress и DNS rebinding protection
+  обеспечиваются network policy контейнера.
+- Page snapshots считаются недоверенным вводом и могут содержать prompt injection.
+- Sentinel не предоставляет browser mutation endpoints. Human approval не превращает read-only
+  capability в право нажимать кнопки, вводить данные, публиковать или проводить платежи.

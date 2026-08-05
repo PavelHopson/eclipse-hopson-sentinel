@@ -9,6 +9,135 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 3. reduce inherited upstream risk through cleanup, testing, and clear contracts
 4. create a stable product foundation before chasing advanced assistant features
 
+## Read-only browser and ads operator boundary - 2026-08-02
+
+- [x] add a fail-closed browser capability policy for HTTPS, public, allowlisted, read-only pages
+- [x] reject private IPv4/IPv6 destinations, URL credentials, cookie import, external telemetry and all browser mutations
+- [x] provide a telemetry-off loopback Camofox-compatible environment contract without installing the community wrapper
+- [x] wire the policy into an env-gated `BrowserRead` tool that exposes only disposable create/snapshot/stats/close calls
+- [x] add a bounded spend anomaly detector that can only return `notify_only`
+- [ ] complete a dedicated container/network security review and real runtime smoke before enabling BrowserRead in production profiles
+- [ ] wire notify-only ads anomalies into the production scheduler after the inherited TypeScript baseline is restored
+
+## Secure MCP baseline - 2026-07-29
+
+- [x] add version-pinned `context7`, `filesystem`, and `github-readonly` presets to the real Sentinel MCP CLI
+- [x] require one explicit existing directory for Filesystem instead of broad implicit access
+- [x] keep GitHub credentials in the process environment and enable read-only, lockdown, and limited toolsets
+- [ ] add scheduled tool-description hash verification after the first approved runtime scan
+
+## TypeScript baseline - 2026-07-31
+
+- [x] verify the shipped Bun build and CLI smoke: `0.1.7` builds and reports its version
+- [x] verify provider tests: 47 focused tests pass
+- [x] measure the inherited strict TypeScript baseline without weakening `tsconfig`: 4,504
+      errors across 832 files
+- [x] restore schema-derived SDK core/control aliases, normalized usage/settings types,
+      build macro declarations, and the ES2023 library contract; strict errors now total
+      3,982 (522 fewer) and the restored surface adds no new errors
+- [ ] restore a truthful `npm run typecheck` gate as a dedicated XL cleanup track. Start with
+      generated/internal module resolution (`TS2307`), then missing runtime symbols, then implicit
+      `any`; do not hide the baseline with broad excludes, new `any` stubs, or relaxed strictness
+
+The current largest groups are `TS7006` (2,013), `TS2307` (517), `TS2339` (434),
+`TS18046` (182), `TS2345` (169), and `TS2322` (141). Build success does not make
+these type errors acceptable: the current Bun build uses project macros/stubs that the plain
+TypeScript program cannot resolve consistently.
+
+## Distribution provenance gate - 2026-07-31
+
+- [x] replace the inaccurate repository-wide MIT claim with a mixed-provenance notice
+- [x] mark the npm package private and remove public publish configuration
+- [x] disable automatic and manual package updates in the private build so Sentinel cannot
+      silently replace itself with Gitlawb/OpenClaude or Anthropic artifacts
+- [ ] identify the exact Gitlawb/openclaude commit used by the initial import
+- [ ] obtain legal clearance before public redistribution, package publication, sublicensing,
+      or sale of the inherited TypeScript CLI
+- [ ] record the exact Rust parity import SHA and confirm its license at that revision
+
+## Research intake - 2026-07-31
+
+### Agent capability health
+
+- keep **Agent Reach** as an architecture reference for capability registry, read-only `doctor`,
+  visible failure reasons, and deterministic fallback order
+- do not install its mutable multi-tool stack, reuse primary browser cookies, or let an agent
+  self-install global packages
+- any future Sentinel connector registry requires signed/pinned entries, least privilege,
+  explicit egress, isolated execution, prompt-injection boundaries, and an audit log
+- first design step: render synthetic connector health and a safe next action without making
+  network requests
+
+## Research intake - 2026-07-01
+
+Source: [Eclipse Library · July 2026 project integration](https://library.eclipse-forge.ru/#guide/july-2026-project-integration).
+These are references and backlog candidates, not implemented capabilities.
+
+### Operator memory
+
+- evaluate **OpenHuman** as a reference for long-lived local operator memory: user habits, cwd/session context, docs/logs, goals, consent scopes, audit trail, and memory deletion
+- keep memory local-first by default; remote sync must be opt-in and scoped
+- add a future design note for "what the operator can remember" vs "what must stay ephemeral"
+
+### Mobile control plane
+
+- evaluate **OpenClaw Mobile** as a UX reference for remote approval/control: agent proposes action -> user confirms from phone
+- require explicit permissions for camera, geolocation, voice, screen context, and command execution
+- add a mobile approval mode only after local bridge auth, token rotation, and audit logging are stable
+
+### Model routing
+
+- evaluate **OmniRoute** as a reference for a safe model-router: local/cloud providers, fallback order, context compression, cost/error/latency metrics
+- production rule: only legal keys, owned quotas, and ToS-safe providers; no "free token bypass" dependency
+- first POC should expose one OpenAI-compatible endpoint with two providers and clear failure logs
+
+## Research intake - 2026-07-13
+
+Source: [Eclipse Library · Applied project plan](https://library.eclipse-forge.ru/#guide/applied-project-plan-2026-07-13).
+These items are product directions and safety references, not installed runtime dependencies.
+
+### Agent safety and shell guardrails
+
+- evaluate **Destructive Command Guard** as a pre-command safety layer for autonomous shell actions
+- add a local `sentinel doctor safety` concept: risky command detection, safer alternatives, audit output
+- never execute destructive command rewrites silently; user confirmation remains mandatory
+- [x] pin AgentShield `1.4.0` in the local and CI agent-config security gates instead of executing an unreviewed latest package
+
+### Workstation doctor
+
+- use **privacy.sexy** as a reference checklist for OS/browser telemetry and privacy posture
+- use **Fast File Explorer** as a reference for fast file search, preview and checksum UX
+- use **NtWarden** only as lab/VM reference for Windows security diagnostics; never require kernel-driver tools for normal users
+- [x] ship a standalone read-only Windows Doctor for Secure Boot, TPM, Defender, Firewall, UAC, disk encryption, SMBv1, RDP, Windows Update, restart state, telemetry policy and persistent PowerShell policy
+- [x] expose stable `windows-doctor-v1` JSON without device identity, secrets or automatic remediation
+- [x] add a dependency-free synthetic self-test and Windows CI gate
+- [ ] add a reviewed desktop summary after the existing desktop shell has a stable security boundary; keep every remediation behind an explicit diff and user confirmation
+
+### Voice and live operator
+
+- evaluate **Voicetypr** for local STT and transcript cleanup
+- evaluate **Sokuji** for live translation/subtitles and virtual microphone patterns
+- evaluate **Fish Audio** only for consent-safe voice/TTS experiments
+
+### Mobile control plane
+
+- use **PCLink** and OpenClaw Mobile patterns for phone approvals: PC proposes action -> phone confirms -> bridge logs the decision
+- remote control must require localhost/VPN, auth tokens, rotation, and visible audit trail
+- keep **VCamdroid** as a camera-input architecture and permission-UX reference only; do not install its admin DLL/APK/ADB stack on the primary workstation. Any future proof of concept requires a disposable Windows VM, a separate Android device, pinned-source audit and an explicit camera use case.
+
+### Token economy
+
+- use installed Codex skills (`context-compression`, `ponytail-review`, `loopy`, `caveman-compress`) as development workflow helpers
+- benchmark `sqz` separately before adopting any dedup/MCP layer
+- do not use lossy image-context approaches for code, secrets, migrations or exact logs
+
+### Local model runtime R&D
+
+- use **Colibri** as an architecture reference for disk-streamed MoE local runtimes, not as a default dependency
+- extract the `plan` / `doctor` pattern into a future `sentinel doctor model` command: RAM, disk, provider reachability, model path, expected speed and safe next action
+- document the reality check clearly: a 744B model can be made runnable on consumer hardware, but cold decode is disk-bound and not a production-speed promise
+- see [sentinel-local-model-runtime-rd.md](sentinel-local-model-runtime-rd.md) for the first research contract
+
 ## Immediate priorities
 
 ### P0: Reliability and unblockers
@@ -166,6 +295,8 @@ These are good ideas to borrow conceptually without copying code directly:
 ## Model and provider strategy
 
 - formalize OpenRouter profiles for coding and fast responses
+- [ ] Run the network-gated direct Kimi K3 `sentinel` synthetic suite from Eclipse AI Hub twice; record safety score, latency, tokens and cost before considering a provider preset. See [sentinel-kimi-k3-benchmark.md](sentinel-kimi-k3-benchmark.md).
+- [ ] Keep TokenRouter rejected until owner, Terms, DPA, routing providers, retention, subprocessors and promotion limits are verified; never use it as a shortcut to the direct benchmark.
 - keep Ollama as the offline/local fallback
 - add clear provider presets: `fast`, `code`, `voice`, `offline`
 - measure latency and quality per provider in voice workflows
