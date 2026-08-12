@@ -455,8 +455,8 @@ const darkTheme: Theme = {
   inactive: 'rgb(153,153,153)', // Light gray
   inactiveShimmer: 'rgb(193,193,193)', // Lighter gray for shimmer effect
   subtle: 'rgb(80,80,80)', // Dark gray
-  suggestion: 'rgb(177,185,249)', // Light blue-purple
-  remember: 'rgb(177,185,249)', // Light blue-purple
+  suggestion: 'rgb(107,163,255)', // Eclipse signal blue
+  remember: 'rgb(107,163,255)', // Eclipse signal blue
   background: 'rgb(0,204,204)', // Bright cyan
   success: 'rgb(78,186,101)', // Bright green
   error: 'rgb(255,107,128)', // Bright red
@@ -492,7 +492,7 @@ const darkTheme: Theme = {
   bashMessageBackgroundColor: 'rgb(65, 60, 65)',
 
   memoryBackgroundColor: 'rgb(55, 65, 70)',
-  rate_limit_fill: 'rgb(177,185,249)', // Light blue-purple
+  rate_limit_fill: 'rgb(107,163,255)', // Eclipse signal blue
   rate_limit_empty: 'rgb(80,83,112)', // Medium blue-purple
   fastMode: 'rgb(255,120,20)', // Electric orange for dark bg
   fastModeShimmer: 'rgb(255,165,70)', // Lighter orange for shimmer

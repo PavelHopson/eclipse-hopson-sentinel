@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": "eclipse-forge.visual-system.v1",
+  "name": "Eclipse Forge",
+  "principle": "Cinematic systems engineering",
+  "colors": {
+    "dark": {
+      "background": "#05070A",
+      "backgroundAlt": "#080C12",
+      "surface": "#0C1117",
+      "surfaceHover": "#111820",
+      "textPrimary": "#F2F5F9",
+      "textSecondary": "#C4CED8",
+      "textMuted": "#94A3B8",
+      "line": "#1C2536",
+      "signal": "#6BA3FF",
+      "gold": "#D4AF37"
+    },
+    "light": {
+      "background": "#F5F2EB",
+      "backgroundAlt": "#EDE9E0",
+      "surface": "#FFFFFF",
+      "surfaceHover": "#FFFDF8",
+      "textPrimary": "#07070A",
+      "textSecondary": "#1F1F24",
+      "textMuted": "#3E3E46",
+      "line": "#D4D0C6",
+      "signal": "#1E56E8",
+      "gold": "#B88A18"
+    }
+  },
+  "typography": {
+    "display": "Outfit",
+    "body": "Inter",
+    "mono": "JetBrains Mono"
+  },
+  "motion": {
+    "easePresence": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "easeInterface": "cubic-bezier(0.22, 0.61, 0.36, 1)",
+    "durationFastMs": 160,
+    "durationBaseMs": 240,
+    "durationRevealMs": 700,
+    "reducedMotionRequired": true
+  },
+  "intensityProfiles": ["cinematic", "product", "operational"]
+}

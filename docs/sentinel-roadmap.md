@@ -383,3 +383,10 @@ The next milestone should not be considered complete until all of the following 
 - `voice doctor` gives actionable setup information
 - known blockers are documented and reproducible
 - the main product can be demoed end-to-end without hand-waving
+## Operational visual contract pilot - 2026-08-12
+
+- [x] Add a typed, dependency-free `eclipse-forge.visual-system.v1` contract and local JSON snapshot.
+- [x] Rebrand the startup status and move the terminal gradient from upstream orange to Eclipse gold -> signal blue.
+- [x] Map suggestion, memory and rate-limit progress to the shared signal color.
+- [x] Pass the focused contract test and production build. The inherited full TypeScript baseline still fails on missing upstream modules and legacy typing errors.
+- [ ] Block release promotion until the inherited Bun dependency graph is remediated: audit currently reports 2 critical and 33 high advisories, including shell-quote and protobufjs chains.

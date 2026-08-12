@@ -292,3 +292,6 @@ CLI-слой имеет неразрешённое смешанное проис
 
 Подробности: [LICENSE](LICENSE) и
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+## Eclipse Forge visual contract
+
+Sentinel uses the local `eclipse-forge.visual-system.v1` snapshot in the `operational` profile. Its TUI maps the shared signal-blue, warm-gold, text, muted and status colors without adding animation loops or weakening terminal readability.

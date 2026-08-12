@@ -5,6 +5,8 @@
  * Addresses: https://github.com/Gitlawb/openclaude/issues/55
  */
 
+import { ECLIPSE_FORGE_VISUAL } from '../design/eclipseForgeVisual.js'
+
 declare const MACRO: { VERSION: string; DISPLAY_VERSION?: string }
 
 const ESC = '\x1b['
@@ -43,18 +45,16 @@ function paintLine(text: string, stops: RGB[], lineT: number): string {
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
 const SUNSET_GRAD: RGB[] = [
-  [255, 180, 100],
-  [240, 140, 80],
-  [217, 119, 87],
-  [193, 95, 60],
-  [160, 75, 55],
-  [130, 60, 50],
+  [...ECLIPSE_FORGE_VISUAL.colors.gold],
+  [180, 159, 79],
+  [137, 154, 149],
+  [...ECLIPSE_FORGE_VISUAL.colors.signal],
 ]
 
-const ACCENT: RGB = [240, 148, 100]
-const CREAM: RGB = [220, 195, 170]
-const DIMCOL: RGB = [120, 100, 82]
-const BORDER: RGB = [100, 80, 65]
+const ACCENT: RGB = [...ECLIPSE_FORGE_VISUAL.colors.signal]
+const CREAM: RGB = [...ECLIPSE_FORGE_VISUAL.colors.text]
+const DIMCOL: RGB = [...ECLIPSE_FORGE_VISUAL.colors.muted]
+const BORDER: RGB = [...ECLIPSE_FORGE_VISUAL.colors.line]
 
 // ─── Filled Block Text Logo ───────────────────────────────────────────────────
 
@@ -177,7 +177,7 @@ export function printStartupScreen(): void {
   out.push('')
 
   // Tagline
-  out.push(`  ${rgb(...ACCENT)}\u2726${RESET} ${rgb(...CREAM)}Any model. Every tool. Zero limits.${RESET} ${rgb(...ACCENT)}\u2726${RESET}`)
+  out.push(`  ${rgb(...ACCENT)}\u2726${RESET} ${rgb(...CREAM)}Eclipse Hopson Sentinel · local operator${RESET} ${rgb(...ACCENT)}\u2726${RESET}`)
   out.push('')
 
   // Provider info box
@@ -206,7 +206,7 @@ export function printStartupScreen(): void {
   out.push(boxRow(sRow, W, sLen))
 
   out.push(`${rgb(...BORDER)}\u255a${'\u2550'.repeat(W - 2)}\u255d${RESET}`)
-  out.push(`  ${DIM}${rgb(...DIMCOL)}openclaude ${RESET}${rgb(...ACCENT)}v${MACRO.DISPLAY_VERSION ?? MACRO.VERSION}${RESET}`)
+  out.push(`  ${DIM}${rgb(...DIMCOL)}sentinel ${RESET}${rgb(...ACCENT)}v${MACRO.DISPLAY_VERSION ?? MACRO.VERSION}${RESET}`)
   out.push('')
 
   process.stdout.write(out.join('\n') + '\n')
