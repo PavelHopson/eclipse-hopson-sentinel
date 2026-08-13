@@ -36,6 +36,8 @@
     "start": "node dist/cli.mjs",
     "test:provider-recommendation": "bun test src/utils/providerRecommendation.test.ts src/utils/providerProfile.test.ts",
     "typecheck": "tsc --noEmit",
+    "typecheck:supported": "tsc --noEmit -p tsconfig.supported.json",
+    "typecheck:debt": "node scripts/audit-typecheck-debt.mjs",
     "smoke": "bun run build && node dist/cli.mjs --version",
     "rust:build": "cargo build --release --manifest-path rust/Cargo.toml",
     "rust:test": "cargo test --manifest-path rust/Cargo.toml",

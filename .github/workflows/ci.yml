@@ -25,7 +25,13 @@ jobs:
         run: bun run build
 
       - name: Test (TypeScript)
-        run: bun test || echo "::warning::Some TS tests failed — known regressions tracked"
+        run: bun test
+
+      - name: Typecheck supported Eclipse contracts
+        run: bun run typecheck:supported
+
+      - name: Audit inherited TypeScript debt
+        run: bun run typecheck:debt
 
   python-tests:
     runs-on: ubuntu-latest

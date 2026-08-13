@@ -2,6 +2,25 @@
 
 This document records blocked checks, failed attempts, and known limitations during the build-out of `Eclipse Hopson Sentinel`.
 
+## 2026-08-13
+
+### CI truthfulness and TypeScript containment
+
+- Made all 216 Bun tests blocking in CI and corrected the stale fail-closed BrowserRead assertion.
+- Added strict typechecking for maintained, self-contained Eclipse contracts covering the browser
+  capability policy, notify-only advertising anomaly detector and provider recommendation logic.
+- Added a reproducible full-program debt audit. It records 3,995 diagnostics, 517 `TS2307`
+  diagnostics and 196 unique missing module specifiers, and fails CI if any aggregate grows.
+- Kept repository-wide `strict` settings intact. No broad excludes, generated `any` stubs or false
+  claim of a green full typecheck were introduced.
+- Verified build, CLI smoke, private distribution guard, Windows Doctor, 216 Bun tests, 44 Python
+  tests and a zero-advisory Bun audit.
+
+### Remaining blocker
+
+- The first public source snapshot omitted central message, transport, plugin and wizard contracts.
+  Full strict restoration remains an XL reconstruction track and must use lawful, reviewable source
+  rather than unverified mirrors of the disputed upstream code.
 ## 2026-07-31
 
 ### Verified progress

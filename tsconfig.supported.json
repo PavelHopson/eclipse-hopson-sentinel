@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true
+  },
+  "include": [
+    "src/security/browserCapabilityPolicy.ts",
+    "src/security/browserCapabilityPolicy.test.ts",
+    "src/operations/adsSpendAnomaly.ts",
+    "src/operations/adsSpendAnomaly.test.ts",
+    "src/utils/providerRecommendation.ts",
+    "src/utils/providerRecommendation.test.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

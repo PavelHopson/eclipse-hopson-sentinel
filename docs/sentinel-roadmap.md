@@ -35,14 +35,18 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
 - [x] restore schema-derived SDK core/control aliases, normalized usage/settings types,
       build macro declarations, and the ES2023 library contract; strict errors now total
       3,982 (522 fewer) and the restored surface adds no new errors
-- [ ] restore a truthful `npm run typecheck` gate as a dedicated XL cleanup track. Start with
-      generated/internal module resolution (`TS2307`), then missing runtime symbols, then implicit
-      `any`; do not hide the baseline with broad excludes, new `any` stubs, or relaxed strictness
+- [x] make the entire 216-test Bun suite blocking in CI instead of reducing failures to warnings
+- [x] add a strict `typecheck:supported` gate for maintained, self-contained Eclipse contracts
+- [x] add a reproducible debt audit that fails when the inherited full-program baseline grows
+- [ ] restore a fully green `npm run typecheck` as a dedicated XL cleanup track. Start with
+      lawful reconstruction of generated/internal message, transport, plugin and wizard contracts,
+      then runtime symbols and implicit `any`; do not hide the baseline with broad excludes,
+      generated `any` stubs or relaxed strictness
 
-The current largest groups are `TS7006` (2,013), `TS2307` (517), `TS2339` (434),
-`TS18046` (182), `TS2345` (169), and `TS2322` (141). Build success does not make
-these type errors acceptable: the current Bun build uses project macros/stubs that the plain
-TypeScript program cannot resolve consistently.
+The reproducible 2026-08-13 baseline is 3,995 diagnostics, including 517 `TS2307`
+diagnostics across 196 unique missing module specifiers. Build success does not make these errors
+acceptable. CI now contains the debt while the strict supported-contract gate protects new Eclipse
+work; the baseline must be reduced in reviewed slices and deleted once the full program is green.
 
 ## Distribution provenance gate - 2026-07-31
 
@@ -389,4 +393,4 @@ The next milestone should not be considered complete until all of the following 
 - [x] Rebrand the startup status and move the terminal gradient from upstream orange to Eclipse gold -> signal blue.
 - [x] Map suggestion, memory and rate-limit progress to the shared signal color.
 - [x] Pass the focused contract test and production build. The inherited full TypeScript baseline still fails on missing upstream modules and legacy typing errors.
-- [ ] Block release promotion until the inherited Bun dependency graph is remediated: audit currently reports 2 critical and 33 high advisories, including shell-quote and protobufjs chains.
+- [x] Remediate the inherited Bun dependency graph; the 2026-08-13 `bun audit` reports zero advisories, while lifecycle scripts remain blocked and package publishing stays disabled.

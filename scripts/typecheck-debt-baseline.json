@@ -1,0 +1,9 @@
+{
+  "capturedAt": "2026-08-13",
+  "reason": "The first public Sentinel source snapshot omitted internal message, transport, plugin and wizard contracts. Full strict restoration requires a staged source reconstruction rather than generated any stubs or disabling strict mode.",
+  "maximum": {
+    "totalErrors": 3995,
+    "missingModuleErrors": 517,
+    "uniqueMissingModules": 196
+  }
+}

@@ -32,7 +32,7 @@ describe('BrowserRead tool', () => {
     expect(BrowserReadTool.isEnabled()).toBe(true)
     delete process.env.SENTINEL_CAMOFOX_ISOLATED
     expect(BrowserReadTool.isEnabled()).toBe(false)
-    expect(() => getBrowserReadConfig()).toThrow('isolated')
+    expect(() => getBrowserReadConfig()).toThrow('SENTINEL_CAMOFOX_ISOLATED=true')
     configure()
     delete process.env.SENTINEL_CAMOFOX_PERSISTENCE_DISABLED
     expect(BrowserReadTool.isEnabled()).toBe(false)

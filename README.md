@@ -303,4 +303,4 @@ Sentinel uses the local `eclipse-forge.visual-system.v1` snapshot in the `operat
 - Added explicit transitive overrides for gRPC, Hono, URL/XML parsing, protobuf and UUID packages where upstream ranges otherwise retained known Critical/High advisories.
 - Provider SDKs and the OpenTelemetry stack are version-aligned, and the post-remediation Bun audit reports zero advisories.
 - Dependency lifecycle scripts remain blocked by Bun; no newly downloaded install script was trusted or executed.
-- Build, CLI smoke, distribution guard and targeted provider/MCP suites pass. The repository-wide typecheck remains blocked by inherited missing internal modules and existing type errors outside this dependency-only runtime change.
+- Build, CLI smoke, distribution guard, Windows Doctor, all 216 Bun tests and all 44 Python provider tests pass. CI strictly typechecks maintained Eclipse contracts and rejects growth beyond the documented 3,995-diagnostic inherited full-program baseline.
