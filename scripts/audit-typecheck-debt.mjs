@@ -36,14 +36,18 @@ const current = {
   missingModuleErrors: codeCounts.get("TS2307") ?? 0,
   uniqueMissingModules: missingModules.size,
 };
-const regressions = Object.entries(baseline.maximum).filter(
-  ([key, maximum]) => current[key] > maximum,
+const maximum = baseline.maximumByPlatform?.[process.platform];
+if (!maximum) {
+  throw new Error(`No inherited typecheck baseline is defined for ${process.platform}.`);
+}
+const regressions = Object.entries(maximum).filter(
+  ([key, ceiling]) => current[key] > ceiling,
 );
 
 if (regressions.length > 0) {
   throw new Error(
     `Inherited typecheck debt regressed: ${regressions
-      .map(([key, maximum]) => `${key}=${current[key]} (max ${maximum})`)
+      .map(([key, ceiling]) => `${key}=${current[key]} (max ${ceiling})`)
       .join(", ")}`,
   );
 }
@@ -54,7 +58,7 @@ if (result.status === 0 && current.totalErrors === 0) {
 }
 
 console.log(
-  `Inherited TypeScript debt is contained: ${current.totalErrors} errors, ` +
+  `Inherited TypeScript debt is contained on ${process.platform}: ${current.totalErrors} errors, ` +
     `${current.missingModuleErrors} TS2307 errors across ${current.uniqueMissingModules} unique module specifiers. ` +
     "Supported Eclipse contracts are checked separately by typecheck:supported.",
 );

@@ -43,7 +43,8 @@ This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` in
       then runtime symbols and implicit `any`; do not hide the baseline with broad excludes,
       generated `any` stubs or relaxed strictness
 
-The reproducible 2026-08-13 baseline is 3,995 diagnostics, including 517 `TS2307`
+The reproducible 2026-08-13 baseline is 3,995 diagnostics on Windows and 4,291 on Linux CI.
+The Windows profile includes 517 `TS2307`
 diagnostics across 196 unique missing module specifiers. Build success does not make these errors
 acceptable. CI now contains the debt while the strict supported-contract gate protects new Eclipse
 work; the baseline must be reduced in reviewed slices and deleted once the full program is green.

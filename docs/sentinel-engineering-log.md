@@ -9,7 +9,8 @@ This document records blocked checks, failed attempts, and known limitations dur
 - Made all 216 Bun tests blocking in CI and corrected the stale fail-closed BrowserRead assertion.
 - Added strict typechecking for maintained, self-contained Eclipse contracts covering the browser
   capability policy, notify-only advertising anomaly detector and provider recommendation logic.
-- Added a reproducible full-program debt audit. It records 3,995 diagnostics, 517 `TS2307`
+- Added a reproducible full-program debt audit. It records platform-specific ceilings: 3,995
+  diagnostics on Windows and 4,291 on Linux CI. The Windows profile includes 517 `TS2307`
   diagnostics and 196 unique missing module specifiers, and fails CI if any aggregate grows.
 - Kept repository-wide `strict` settings intact. No broad excludes, generated `any` stubs or false
   claim of a green full typecheck were introduced.
