@@ -1,4 +1,4 @@
-import { describe, expect, test, afterEach } from 'bun:test'
+import { describe, expect, test, afterEach, beforeEach } from 'bun:test'
 import { getRateLimitResetDelayMs, parseOpenAIDuration } from './withRetry.js'
 import { APIError } from '@anthropic-ai/sdk'
 
@@ -16,15 +16,20 @@ function makeError(headers: Record<string, string>): APIError {
 
 // Save/restore env vars between tests
 const originalEnv = { ...process.env }
+const providerFlags = [
+  'CLAUDE_CODE_USE_OPENAI',
+  'CLAUDE_CODE_USE_GEMINI',
+  'CLAUDE_CODE_USE_GITHUB',
+  'CLAUDE_CODE_USE_BEDROCK',
+  'CLAUDE_CODE_USE_VERTEX',
+  'CLAUDE_CODE_USE_FOUNDRY',
+] as const
+
+beforeEach(() => {
+  for (const key of providerFlags) delete process.env[key]
+})
 afterEach(() => {
-  for (const key of [
-    'CLAUDE_CODE_USE_OPENAI',
-    'CLAUDE_CODE_USE_GEMINI',
-    'CLAUDE_CODE_USE_GITHUB',
-    'CLAUDE_CODE_USE_BEDROCK',
-    'CLAUDE_CODE_USE_VERTEX',
-    'CLAUDE_CODE_USE_FOUNDRY',
-  ]) {
+  for (const key of providerFlags) {
     if (originalEnv[key] === undefined) delete process.env[key]
     else process.env[key] = originalEnv[key]
   }

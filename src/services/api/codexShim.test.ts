@@ -47,7 +47,7 @@ async function collectStreamEventTypes(responseText: string): Promise<string[]> 
 
 describe('Codex provider config', () => {
   test('resolves codexplan alias to Codex transport with reasoning', () => {
-    const resolved = resolveProviderRequest({ model: 'codexplan' })
+    const resolved = resolveProviderRequest({ model: 'codexplan', baseUrl: '' })
     expect(resolved.transport).toBe('codex_responses')
     expect(resolved.resolvedModel).toBe('gpt-5.4')
     expect(resolved.reasoning).toEqual({ effort: 'high' })

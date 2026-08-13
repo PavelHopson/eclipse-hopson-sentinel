@@ -295,3 +295,12 @@ CLI-слой имеет неразрешённое смешанное проис
 ## Eclipse Forge visual contract
 
 Sentinel uses the local `eclipse-forge.visual-system.v1` snapshot in the `operational` profile. Its TUI maps the shared signal-blue, warm-gold, text, muted and status colors without adding animation loops or weakening terminal readability.
+
+
+## Dependency hardening — 2026-08-13
+
+- Updated the command parser, network, WebSocket, MCP, Anthropic SDK and Firecrawl dependency surfaces to fixed releases.
+- Added explicit transitive overrides for gRPC, Hono, URL/XML parsing, protobuf and UUID packages where upstream ranges otherwise retained known Critical/High advisories.
+- Provider SDKs and the OpenTelemetry stack are version-aligned, and the post-remediation Bun audit reports zero advisories.
+- Dependency lifecycle scripts remain blocked by Bun; no newly downloaded install script was trusted or executed.
+- Build, CLI smoke, distribution guard and targeted provider/MCP suites pass. The repository-wide typecheck remains blocked by inherited missing internal modules and existing type errors outside this dependency-only runtime change.
