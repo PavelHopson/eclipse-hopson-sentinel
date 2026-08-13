@@ -94,7 +94,10 @@ function resolveEngine(argv) {
 
 const { engine, args } = resolveEngine(process.argv.slice(2));
 
-if (engine === 'rust') {
+if (engine === 'ts' && args[0] === 'spec' && args[1] === 'verify') {
+  const { runSpecGateCli } = await import('../scripts/spec-gate-verify.mjs');
+  process.exitCode = await runSpecGateCli(args.slice(2));
+} else if (engine === 'rust') {
   runRust(args);
 } else if (engine === 'ts') {
   if (existsSync(distPath)) {

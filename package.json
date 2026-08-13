@@ -12,6 +12,7 @@
   "files": [
     "bin/",
     "dist/cli.mjs",
+    "scripts/spec-gate-verify.mjs",
     "README.md"
   ],
   "scripts": {
@@ -56,6 +57,7 @@
     "backup:restore": "node ./scripts/sentinel-backup.mjs restore",
     "hardening:check": "bun run smoke && bun run doctor:runtime",
     "hardening:strict": "bun run typecheck && bun run hardening:check",
+    "spec:verify": "node ./scripts/spec-gate-verify.mjs",
     "prepack": "npm run build"
   },
   "dependencies": {

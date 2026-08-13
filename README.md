@@ -292,6 +292,17 @@ CLI-слой имеет неразрешённое смешанное проис
 
 Подробности: [LICENSE](LICENSE) и
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+## Offline Spec Gate verification
+
+Sentinel can verify an approved eclipse.spec-gate.v1 artifact without network access or command execution.
+
+Command: sentinel spec verify --spec PATH_TO_SPEC_JSON --workspace PATH_TO_REPOSITORY
+
+Add --json to receive the machine-readable eclipse.spec-verification.v1 report. The verifier
+rejects policy escalation, stage drift, path traversal, .git access, symlinks and missing evidence.
+It only hashes local evidence files. A PASS confirms artifact shape and evidence presence; it does
+not prove behavior and does not authorize implementation, shell, GitHub or deployment.
+
 ## Eclipse Forge visual contract
 
 Sentinel uses the local `eclipse-forge.visual-system.v1` snapshot in the `operational` profile. Its TUI maps the shared signal-blue, warm-gold, text, muted and status colors without adding animation loops or weakening terminal readability.

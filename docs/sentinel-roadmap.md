@@ -2,6 +2,14 @@
 
 This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` into a professional local operator platform under the `Eclipse Hopson` brand.
 
+## Offline Spec Gate verifier - 2026-08-13
+
+- [x] expose sentinel spec verify before the inherited runtime starts
+- [x] require the exact approved eclipse.spec-gate.v1 shape while keeping implement blocked
+- [x] reject absolute, traversal and .git paths, symlinks, workspace escape and policy escalation
+- [x] hash local evidence in read-only mode without network, shell or artifact commands
+- [x] cover valid input, traversal and symlink escape with regression tests
+- [ ] add semantic evidence evaluators only as separately reviewed, fail-closed plugins
 ## Strategic priorities
 
 1. make `Sentinel Core` trustworthy for daily coding work
