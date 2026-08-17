@@ -46,6 +46,29 @@ async function collectStreamEventTypes(responseText: string): Promise<string[]> 
 }
 
 describe('Codex provider config', () => {
+  test.each([
+    ['gpt56fast', 'gpt-5.6-luna', 'low'],
+    ['gpt-5.6-luna', 'gpt-5.6-luna', 'low'],
+    ['gpt56balanced', 'gpt-5.6-terra', 'medium'],
+    ['gpt-5.6-terra', 'gpt-5.6-terra', 'medium'],
+    ['gpt56deep', 'gpt-5.6-sol', 'high'],
+    ['gpt-5.6', 'gpt-5.6-sol', 'high'],
+    ['gpt-5.6-sol', 'gpt-5.6-sol', 'high'],
+  ])('routes %s through Codex Responses as %s with %s reasoning', (alias, model, effort) => {
+    const resolved = resolveProviderRequest({ model: alias, baseUrl: '' })
+    expect(resolved.transport).toBe('codex_responses')
+    expect(resolved.resolvedModel).toBe(model)
+    expect(resolved.reasoning).toEqual({ effort })
+  })
+
+  test('allows an explicit bounded reasoning override for GPT-5.6 aliases', () => {
+    const resolved = resolveProviderRequest({
+      model: 'gpt56deep?reasoning=medium',
+      baseUrl: '',
+    })
+    expect(resolved.resolvedModel).toBe('gpt-5.6-sol')
+    expect(resolved.reasoning).toEqual({ effort: 'medium' })
+  })
   test('resolves codexplan alias to Codex transport with reasoning', () => {
     const resolved = resolveProviderRequest({ model: 'codexplan', baseUrl: '' })
     expect(resolved.transport).toBe('codex_responses')

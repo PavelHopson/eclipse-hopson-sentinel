@@ -60,3 +60,21 @@ bun run smoke
 ## Compatibility Notes
 
 Some inherited names and environment variables are still preserved for runtime stability while the rebrand is in progress.
+
+## GPT-5.6 routing profiles
+
+Sentinel can route fixed aliases through the existing Codex Responses transport:
+
+| Alias | Model | Default reasoning | Use |
+|-------|-------|-------------------|-----|
+| gpt56fast | gpt-5.6-luna | low | short bounded and high-volume work |
+| gpt56balanced | gpt-5.6-terra | medium | normal product work |
+| gpt56deep | gpt-5.6-sol | high | architecture and difficult reviews |
+
+The explicit model IDs work as aliases too. gpt-5.6 maps to gpt-5.6-sol with high reasoning.
+A bounded query override remains available, for example gpt56deep?reasoning=medium.
+
+This only changes request routing. It does not grant autonomy, approve tools, or move secrets
+into project configuration. Use the existing authenticated Codex credential path, keep external
+actions behind confirmation, and evaluate quality, latency, and usage before changing a production
+default.

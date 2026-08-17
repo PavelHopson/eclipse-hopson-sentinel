@@ -403,3 +403,9 @@ The next milestone should not be considered complete until all of the following 
 - [x] Map suggestion, memory and rate-limit progress to the shared signal color.
 - [x] Pass the focused contract test and production build. The inherited full TypeScript baseline still fails on missing upstream modules and legacy typing errors.
 - [x] Remediate the inherited Bun dependency graph; the 2026-08-13 `bun audit` reports zero advisories, while lifecycle scripts remain blocked and package publishing stays disabled.
+
+### GPT-5.6 fixed-profile rollout — 2026-08-17
+
+- [x] Add fast, balanced, and deep aliases for Luna, Terra, and Sol through the existing Codex Responses transport.
+- [x] Keep model choice and reasoning defaults explicit and covered by focused provider tests.
+- [ ] Run production-like quality, latency, and usage evals before changing any default or enabling autonomous tools.

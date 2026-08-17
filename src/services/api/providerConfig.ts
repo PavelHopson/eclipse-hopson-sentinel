@@ -17,6 +17,34 @@ const CODEX_ALIAS_MODELS: Record<
     reasoningEffort?: ReasoningEffort
   }
 > = {
+  gpt56fast: {
+    model: 'gpt-5.6-luna',
+    reasoningEffort: 'low',
+  },
+  'gpt-5.6-luna': {
+    model: 'gpt-5.6-luna',
+    reasoningEffort: 'low',
+  },
+  gpt56balanced: {
+    model: 'gpt-5.6-terra',
+    reasoningEffort: 'medium',
+  },
+  'gpt-5.6-terra': {
+    model: 'gpt-5.6-terra',
+    reasoningEffort: 'medium',
+  },
+  gpt56deep: {
+    model: 'gpt-5.6-sol',
+    reasoningEffort: 'high',
+  },
+  'gpt-5.6': {
+    model: 'gpt-5.6-sol',
+    reasoningEffort: 'high',
+  },
+  'gpt-5.6-sol': {
+    model: 'gpt-5.6-sol',
+    reasoningEffort: 'high',
+  },
   codexplan: {
     model: 'gpt-5.4',
     reasoningEffort: 'high',
