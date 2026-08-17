@@ -46,7 +46,7 @@ async function collectStreamEventTypes(responseText: string): Promise<string[]> 
 }
 
 describe('Codex provider config', () => {
-  test.each([
+  test.each<[string, string, 'low' | 'medium' | 'high']>([
     ['gpt56fast', 'gpt-5.6-luna', 'low'],
     ['gpt-5.6-luna', 'gpt-5.6-luna', 'low'],
     ['gpt56balanced', 'gpt-5.6-terra', 'medium'],
