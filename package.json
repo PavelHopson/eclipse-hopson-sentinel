@@ -45,6 +45,7 @@
     "rust:check": "cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets -- -D warnings",
     "test:provider": "bun test src/services/api/*.test.ts src/utils/context.test.ts",
     "test:distribution-guard": "bun run build && node scripts/verify-private-distribution.mjs",
+    "test:dashboard-security": "node --test scripts/dashboard-security.test.mjs",
     "doctor:runtime": "bun run scripts/system-check.ts",
     "doctor:runtime:json": "bun run scripts/system-check.ts --json",
     "doctor:report": "bun run scripts/system-check.ts --out reports/doctor-runtime.json",

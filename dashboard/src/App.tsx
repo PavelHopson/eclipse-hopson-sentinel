@@ -3,6 +3,7 @@ import { Chat } from './components/Chat';
 import { Sidebar } from './components/Sidebar';
 import { StatusPanel } from './components/StatusPanel';
 import { SettingsPanel } from './components/SettingsPanel';
+import { VoiceCommandRoom } from './components/VoiceCommandRoom';
 import { type ChatSession, type Message, loadSessions, saveSessions, createSession, getSelectedModel } from './lib/ai';
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [autoSpeak] = useState(() => localStorage.getItem('sentinel-auto-speak') === '1');
+  const [surface, setSurface] = useState<'chat' | 'voice'>('voice');
 
   const activeSession = sessions.find(s => s.id === activeId) || null;
 
@@ -81,8 +83,12 @@ export default function App() {
               <span className="text-[10px] uppercase tracking-[0.2em] text-text-2">Sentinel</span>
             </div>
             <span className="text-[11px] text-text-3">
-              {activeSession?.title || 'AI Chat'}
+              {surface === 'voice' ? 'Voice Command Room' : activeSession?.title || 'AI Chat'}
             </span>
+            <nav className="surface-switcher" aria-label="Рабочая поверхность">
+              <button type="button" aria-pressed={surface === 'voice'} onClick={() => setSurface('voice')}>Команды</button>
+              <button type="button" aria-pressed={surface === 'chat'} onClick={() => setSurface('chat')}>Чат</button>
+            </nav>
           </div>
           <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
             <div className="w-1.5 h-1.5 rounded-full bg-live animate-pulse" />
@@ -93,12 +99,12 @@ export default function App() {
         {/* Chat area */}
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 overflow-hidden">
-            <Chat
+            {surface === 'voice' ? <VoiceCommandRoom /> : <Chat
               messages={activeSession?.messages || []}
               onMessagesChange={handleMessagesChange}
               showGuide={showGuide}
               autoSpeak={autoSpeak}
-            />
+            />}
           </div>
 
           {/* Right panel — status (desktop) */}

@@ -1,5 +1,13 @@
 # Eclipse Hopson Sentinel Roadmap
 
+## Safe Voice Command Room — 2026-08-20
+
+- [x] add a calm desktop HUD with explicit microphone, speaker, local voice and execution states
+- [x] keep microphone permission fail-closed and classify browser Web Speech as unverified, not local STT/TTS
+- [x] expose a fixed read-only skill allowlist and block shell, writes, installs, deploy and secrets
+- [x] require plan -> diff -> approval -> one-shot execute -> receipt, with a session kill switch engaged by default
+- [x] represent Markdown memory as preview-only until a separately reviewed local persistence contract exists
+
 This roadmap is the working master plan for turning `Eclipse Hopson Sentinel` into a professional local operator platform under the `Eclipse Hopson` brand.
 
 ## Offline Spec Gate verifier - 2026-08-13

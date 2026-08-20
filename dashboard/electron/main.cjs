@@ -35,13 +35,10 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // Allow microphone access
-  win.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
-    if (permission === 'media' || permission === 'microphone') {
-      callback(true);
-    } else {
-      callback(false);
-    }
+  // Voice devices stay fail-closed until the dedicated hardware/dependency
+  // audit can bind permission to an explicit operator action.
+  win.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
   });
 
   win.once('ready-to-show', () => win.show());
