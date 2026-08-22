@@ -315,3 +315,5 @@ Sentinel uses the local `eclipse-forge.visual-system.v1` snapshot in the `operat
 - Provider SDKs and the OpenTelemetry stack are version-aligned, and the post-remediation Bun audit reports zero advisories.
 - Dependency lifecycle scripts remain blocked by Bun; no newly downloaded install script was trusted or executed.
 - Build, CLI smoke, distribution guard, Windows Doctor, all 216 Bun tests and all 44 Python provider tests pass. CI strictly typechecks maintained Eclipse contracts and rejects growth beyond the documented platform-specific inherited full-program baseline (3,995 diagnostics on Windows; 4,291 on Linux CI).
+
+The dashboard now declares the same `operational` profile explicitly: flat task surfaces, a single signal line and color-only interaction feedback. Production build passes; no scanning, provider, secret or authorization behavior changed.

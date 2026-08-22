@@ -59,7 +59,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen flex bg-bg overflow-hidden">
+    <div className="h-screen flex bg-bg overflow-hidden sentinel-shell" data-visual-profile="operational">
       {/* Sidebar */}
       <Sidebar
         sessions={sessions}

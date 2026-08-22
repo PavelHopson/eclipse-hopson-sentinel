@@ -74,3 +74,23 @@ body {
 @media (max-width: 900px) { .voice-room { padding: 14px; }.voice-room__header { flex-direction: column; }.kill-switch { width: 100%; }.voice-hud { grid-template-columns: 1fr 1fr; }.voice-room__grid { grid-template-columns: 1fr; }.plan-diff { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .voice-hud { grid-template-columns: 1fr; }.flow-steps { grid-template-columns: 1fr 1fr; }.command-actions { align-items: stretch; flex-direction: column; }.primary-action { width: 100%; }.surface-switcher { display: none; } }
 @media (prefers-reduced-motion: reduce) { .voice-room *, .voice-room *::before, .voice-room *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+/* Visual profile: quiet operational console. */
+.sentinel-shell[data-visual-profile="operational"] {
+  position: relative;
+  isolation: isolate;
+  background: #05070a;
+}
+.sentinel-shell[data-visual-profile="operational"]::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: 1px;
+  z-index: 80;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(107,163,255,.62), transparent);
+}
+.sentinel-shell[data-visual-profile="operational"] :focus-visible { outline: 2px solid #6ba3ff; outline-offset: 2px; }
+.sentinel-shell[data-visual-profile="operational"] button { transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease; }
+.sentinel-shell[data-visual-profile="operational"] .skill-panel,
+.sentinel-shell[data-visual-profile="operational"] .command-flow { box-shadow: 0 18px 48px -44px rgba(107,163,255,.55); }
