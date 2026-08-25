@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml)
 ![Desktop](https://img.shields.io/badge/Desktop-Windows-111318?style=flat-square&logo=windows11&logoColor=F3F5F7)
-![Release](https://img.shields.io/badge/Ultron-1.2.7-8E1024?style=flat-square)
+![Release](https://img.shields.io/badge/Ultron-1.2.8-8E1024?style=flat-square)
 ![Runtime](https://img.shields.io/badge/Sentinel-0.1.7-15181D?style=flat-square)
 ![Local first](https://img.shields.io/badge/data-local--first-45D89A?style=flat-square)
 ![Policy](https://img.shields.io/badge/execution-human%20approved-F2C94C?style=flat-square)
@@ -103,14 +103,15 @@ npm run dev
 4. runtime выполняет один разрешённый handler;
 5. интерфейс возвращает проверяемый receipt.
 
-Это не обещание автономного «управления всем компьютером». Текущий desktop-контур намеренно
-ограничен read-only навыками, ручным approval и локальным STOP.
+Это не обещание автономного «управления всем компьютером». Текущий desktop-контур ограничен
+read-only диагностикой и отдельными least-privilege actions с preview, ручным approval и receipt.
 
 ## Что уже работает
 
 | Поверхность | Что даёт | Текущая граница |
 | --- | --- | --- |
 | **Альтрон** | центральный voice-first диалог: явный live STT, потоковый локальный ответ и быстрый neural TTS | без text composer, wake word и автозапуска микрофона |
+| **Voice Actions** | «Открой YouTube» через deterministic intent, preview и one-shot receipt | только fixed `https://www.youtube.com/`; произвольные URL запрещены |
 | **Operator** | command room с plan, diff, approval и receipt | execute требует отдельного approval и снятия STOP |
 | **Ultron Lab** | изолированный инвентарь 27B research-моделей | не участвует в живом голосе; без tools, shell, filesystem, network и execute |
 | **Sentinel CLI** | coding-agent, provider routing, bridge и MCP contracts | расширенные права зависят от явной конфигурации |
@@ -146,9 +147,10 @@ explicit live start
           └─> whisper.cpp + large-v3-turbo-q5_0
                 └─> transcript in memory
                       └─> fixed Qwen 3 8B streaming answer
-                            └─> first complete sentence → Piper Dmitri
+                            └─> first complete sentence → Piper Denis · Brutal
                                   └─> ephemeral E-drive WAV → validate → delete → memory playback
 
+Voice Action: deterministic intent → fixed target preview → manual approval → browser → receipt
 Operator: explicit dictation → editable command → plan → diff → approval → receipt
 ```
 
@@ -160,8 +162,8 @@ Operator: explicit dictation → editable command → plan → diff → approval
   диске E:, проверяет его размер/RIFF и удаляет сразу после чтения;
 - визуальные состояния `listening / thinking / speaking / success / error` синхронизированы с turn;
 - production TTS ограничен 400 символами, 12 MiB WAV и 8 секундами process time; голос можно остановить вручную;
-- основной voice — CC0 Piper `ru_RU-dmitri-medium` без renderer pitch/time processing; проверенный Windows voice остаётся fallback;
-- измеренный Piper path генерирует 4.74 сек аудио за 0.59 сек, тогда как Qwen3-TTS 0.6B warm test занял 13.21 сек для 2.96 сек аудио и оставлен только в Studio/Lab;
+- основной voice — более низкий CC0 Piper `ru_RU-denis-medium` без renderer pitch/time processing; проверенный Windows voice остаётся fallback;
+- измеренный Piper path генерирует 5.39 сек аудио за 0.67 сек, тогда как Qwen3-TTS 0.6B warm test занял 13.21 сек для 2.96 сек аудио и оставлен только в Studio/Lab;
 - модель прогревается при старте, получает восемь последних сообщений, отвечает до 120 токенов и начинает говорить по первой законченной фразе;
 - wake word, startup capture и standing microphone authorization отсутствуют.
 
@@ -216,7 +218,8 @@ flowchart LR
 | Local endpoints | Ollama profiles слушают только loopback |
 | Lab isolation | abliterated model получает chat completion, но не tools |
 | Office transport | bounded signed events, nonce/replay protection, explicit opt-in |
-| Browser boundary | read-only worker требует отдельной изоляции и allowlist |
+| Browser action | fixed YouTube target, expiring preview, exact one-shot approval и receipt; model/user URL не принимается |
+| Browser worker | произвольный read-only browsing требует отдельной изоляции и allowlist |
 
 > Ответ любой модели считается недоверенным текстом. Наличие локальной модели не превращает
 > её в policy engine и не даёт прав на shell, secrets, install, deploy или изменение файлов.

@@ -19,7 +19,7 @@ E:\ADMIN_HOPSON_PC\Программы\Eclipse AI Runtime
 | whisper.cpp | release `b4938`, CUDA 12.4 | offline STT | `ggml-org/whisper.cpp` |
 | Whisper | `large-v3-turbo-q5_0` | русское распознавание речи | `ggerganov/whisper.cpp` |
 | Piper | `2023.11.14-2`, Windows amd64 | быстрый offline TTS runtime | `rhasspy/piper` |
-| Piper voice | `ru_RU-dmitri-medium`, CC0 dataset | основной русский мужской голос | `rhasspy/piper-voices` |
+| Piper voice | `ru_RU-denis-medium`, CC0 dataset | низкий русский профиль `Brutal` | `rhasspy/piper-voices` |
 | Qwen3-TTS | `0.6B CustomVoice`, CUDA | установленный Studio/Lab benchmark, не real-time default | `Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice` |
 | Python | `3.12.14`, portable via uv `0.12.5` | изолированный Qwen3-TTS runtime | `astral-sh/uv` |
 | Ollama | `0.32.15`, portable Windows amd64 | локальный model server | `ollama/ollama` |
@@ -42,8 +42,8 @@ a1d11d46a944f9c7521f5e9a3a5db51cd3365401da627d96c204698fc6914ff9
 piper_windows_amd64-2023.11.14-2.zip
 f3c58906402b24f3a96d92145f58acba6d86c9b5db896d207f78dc80811efcea
 
-ru_RU-dmitri-medium.onnx (MD5 из official voices.json)
-589ccc91745a1e2353508ff62c5941b7
+ru_RU-denis-medium.onnx (MD5 из official voices.json)
+76c2f14e521fef3ed574f97ad492728e
 ```
 
 Digest архивов получен из официальных GitHub Releases. Digest Whisper-модели получен
@@ -118,7 +118,7 @@ Portable Lab server запускается только на loopback. Он ис
 
 | Контур | Тест | Wall time | Audio | Решение |
 | --- | --- | ---: | ---: | --- |
-| Piper Dmitri medium | русская реплика | 0.59 сек | 4.74 сек | production default |
+| Piper Denis medium | русская реплика | 0.67 сек | 5.39 сек | production default · Brutal |
 | Qwen3-TTS 0.6B | warm короткая реплика | 13.21 сек | 2.96 сек | Studio/Lab only |
 | Qwen3-TTS 0.6B | первая реплика | около 62 сек | 9.04 сек | исключён из real-time path |
 

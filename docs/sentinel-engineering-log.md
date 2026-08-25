@@ -391,3 +391,15 @@ This document records blocked checks, failed attempts, and known limitations dur
   ten minutes on next start so a concurrent fresh synthesis cannot be removed.
 - Added regression coverage for exact RIFF acceptance, CRLF-corruption rejection, size bounds, immediate
   deletion and prefix-scoped startup cleanup. No renderer-controlled path or new dependency was introduced.
+
+# 2026-08-25 — first approved voice action and Brutal profile
+
+- Added deterministic Russian/English matching for the exact intent «Открой YouTube». Compound commands,
+  arbitrary domains and shell/program requests stay outside the action route and are never converted to URLs.
+- Added a fixed Electron policy for `https://www.youtube.com/`: trusted IPC creates a two-minute preview with
+  data disclosure, expected result and rollback. Execution requires an exact one-shot approval tied to the
+  preview request ID; the preview is consumed before `shell.openExternal`, then a bounded receipt is returned.
+- Added a voice-first approval card with explicit confirm/cancel actions. The model receives no browser tool,
+  cannot choose the target and cannot claim success; the receipt records browser dispatch, not page load.
+- Switched clean Piper transport to the objectively lower `ru_RU-denis-medium` voice as the `Brutal` default.
+  No Web Audio pitch shift, distortion effect, cloud TTS, new executable or dependency was introduced.

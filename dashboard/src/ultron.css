@@ -252,6 +252,37 @@ body {
 .ultron-voice__dialog button:hover:not(:disabled) { border-color: rgba(255, 48, 74, 0.34); color: var(--ultron-signal-soft); }
 .ultron-voice__thinking { display: flex; align-items: center; gap: 4px; height: 32px; margin-top: 6px; }
 .ultron-voice__thinking i { width: 4px; height: 4px; border-radius: 50%; background: var(--ultron-signal); opacity: 0.32; }
+.ultron-voice__action-preview {
+  width: min(840px, 100%);
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px solid rgba(242, 201, 76, 0.28);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(242, 201, 76, 0.055), rgba(10, 11, 14, 0.92) 36%);
+  box-shadow: 0 20px 48px -42px rgba(242, 201, 76, 0.62);
+}
+.ultron-voice__action-preview > header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.ultron-voice__action-preview > header > svg { color: #f2c94c; }
+.ultron-voice__action-preview > header span { color: #c6a83d; font: 700 8px ui-monospace, Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+.ultron-voice__action-preview h2 { margin: 2px 0 0; color: var(--ultron-silver); font-size: 13px; }
+.ultron-voice__action-preview code,
+.ultron-voice__action-receipt code { color: var(--ultron-muted); font: 8px ui-monospace, Consolas, monospace; }
+.ultron-voice__action-target { margin: 12px 0 0; padding: 8px 10px; border: 1px solid var(--ultron-line); border-radius: 6px; color: var(--ultron-silver-2); font: 9px ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.ultron-voice__action-preview dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 12px 0 0; }
+.ultron-voice__action-preview dl > div { min-width: 0; }
+.ultron-voice__action-preview dt { color: var(--ultron-muted); font: 700 8px ui-monospace, Consolas, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+.ultron-voice__action-preview dd { margin: 4px 0 0; color: var(--ultron-silver-2); font-size: 9px; line-height: 1.45; }
+.ultron-voice__action-controls { display: flex; gap: 7px; margin-top: 14px; }
+.ultron-voice__action-controls button { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; border: 1px solid var(--ultron-line); border-radius: 7px; background: rgba(10, 11, 14, 0.84); color: var(--ultron-muted); font-size: 9px; cursor: pointer; }
+.ultron-voice__action-controls button.is-primary { border-color: rgba(242, 201, 76, 0.36); background: rgba(242, 201, 76, 0.1); color: #f5d971; }
+.ultron-voice__action-controls button:hover:not(:disabled) { border-color: rgba(242, 201, 76, 0.62); color: #ffe48a; }
+.ultron-voice__action-controls button:focus-visible { outline: 2px solid #f2c94c; outline-offset: 2px; }
+.ultron-voice__action-controls button:disabled { opacity: 0.42; cursor: not-allowed; }
+.ultron-voice__action-receipt { width: min(840px, 100%); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-top: 10px; padding: 11px 14px; border: 1px solid rgba(69, 216, 154, 0.24); border-radius: 9px; background: rgba(69, 216, 154, 0.055); }
+.ultron-voice__action-receipt > svg { color: var(--ultron-success); }
+.ultron-voice__action-receipt > div { display: grid; gap: 2px; min-width: 0; }
+.ultron-voice__action-receipt span { color: var(--ultron-success); font: 700 8px ui-monospace, Consolas, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+.ultron-voice__action-receipt strong { color: var(--ultron-silver-2); font-size: 9px; overflow-wrap: anywhere; }
 .ultron-voice__error { width: min(840px, 100%); margin: 10px 0 0; padding: 9px 12px; border: 1px solid rgba(255, 48, 74, 0.28); border-radius: 8px; background: rgba(142, 16, 36, 0.1); color: var(--ultron-signal-soft); font-size: 9px; text-align: center; }
 .ultron-voice__footer { width: min(840px, 100%); display: flex; justify-content: space-between; gap: 16px; margin-top: auto; padding-top: 18px; color: var(--ultron-muted); font-size: 8px; }
 .ultron-voice__footer span { display: flex; align-items: center; gap: 5px; }
@@ -279,6 +310,9 @@ body {
   .ultron-voice__header h1 { font-size: 32px; }
   .ultron-voice__dialog { grid-template-columns: 1fr; }
   .ultron-voice__dialog section[data-speaker] { min-height: 82px; border-radius: 10px; }
+  .ultron-voice__action-preview dl { grid-template-columns: 1fr; gap: 8px; }
+  .ultron-voice__action-controls { align-items: stretch; flex-direction: column; }
+  .ultron-voice__action-controls button { min-height: 44px; }
   .ultron-voice__footer { align-items: flex-start; flex-direction: column; gap: 6px; }
 }
 

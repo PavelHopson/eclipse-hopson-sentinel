@@ -95,7 +95,7 @@ export function UsageGuide({
             <p className="usage-guide-eyebrow"><BookOpen size={13} /> Eclipse Forge · быстрый старт</p>
             <h2 id="usage-guide-title">Как пользоваться Eclipse Ultron</h2>
             <p id="usage-guide-description">
-              Живой локальный голосовой ассистент и отдельный Operator для проверяемых read-only действий.
+              Живой локальный ассистент, безопасные browser actions и отдельный Operator для read-only диагностики.
             </p>
           </div>
           <button
@@ -130,7 +130,7 @@ export function UsageGuide({
               <span className="usage-guide-step-number">01</span>
               <div>
                 <p className="usage-guide-step-title"><Settings2 size={15} /> Проверьте локальный контур</p>
-                <p>Основной голос — локальный Piper Dmitri без дополнительного цифрового ускорения. В настройках можно выбрать и настроить резервный Windows-голос.</p>
+                <p>Основной голос — низкий локальный Piper Denis без цифрового pitch-shift. В настройках можно выбрать и настроить резервный Windows-голос.</p>
                 <button type="button" className="usage-guide-action" onClick={onOpenSettings}>
                   Открыть настройки <ArrowRight size={13} />
                 </button>
@@ -140,7 +140,7 @@ export function UsageGuide({
               <span className="usage-guide-step-number">02</span>
               <div>
                 <p className="usage-guide-step-title"><Mic size={15} /> Поговорите с Альтроном</p>
-                <p>Нажмите «Включить живой разговор» один раз и говорите свободно. Альтрон временно приглушает микрофон, пока отвечает; остановка всегда доступна одной кнопкой и через tray.</p>
+                <p>Нажмите «Включить живой разговор» один раз и говорите свободно; остановка всегда доступна кнопкой и через tray. Команда «Открой YouTube» сначала покажет точный адрес, данные и откат — браузер откроется только после нажатия подтверждения.</p>
                 <button type="button" className="usage-guide-action" onClick={onOpenVoice}>
                   Открыть голос Альтрона <ArrowRight size={13} />
                 </button>

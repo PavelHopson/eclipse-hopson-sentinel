@@ -141,7 +141,7 @@ test('Ultron fast TTS uses fixed Piper runtime with bounded ephemeral WAV transp
   assert.match(main, /PIPER_TTS_OUTPUT_LIMIT_BYTES = 12 \* 1024 \* 1024/)
   assert.match(main, /PIPER_TTS_TIMEOUT_MS = 8_000/)
   assert.match(main, /piperTtsModelRelative = path\.join\('\.\.', '\.\.', 'voices'/)
-  assert.match(main, /'dmitri', 'medium', 'ru_RU-dmitri-medium\.onnx'/)
+  assert.match(main, /'denis', 'medium', 'ru_RU-denis-medium\.onnx'/)
   assert.match(main, /'--espeak_data', path\.join\('\.', 'espeak-ng-data'\)/)
   assert.match(main, /'--output_file', temporaryOutput\.filePath/)
   assert.match(main, /stdio: \['pipe', 'ignore', 'pipe'\]/)

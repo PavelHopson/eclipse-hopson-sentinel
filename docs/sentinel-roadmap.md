@@ -10,8 +10,10 @@
 - [x] preserve one-shot capture and add an explicit cancellable live session; keep wake word, startup capture and standing authorization absent
 - [x] keep one persistent Whisper process during live mode, pause transcript delivery during TTS and suppress immediate echo/duplicates
 - [x] start speaking after the first complete generated sentence instead of waiting for the full model response
-- [x] replace the robotic SAPI default with bounded Piper Dmitri IPC; retain Windows TTS only as fallback
+- [x] replace the robotic SAPI default with bounded Piper Denis IPC; retain Windows TTS only as fallback
 - [x] eliminate Windows Piper stdout corruption with validated ephemeral E-drive WAV transport and startup cleanup
+- [x] switch the clean TTS transport to the lower Piper Denis `Brutal` profile without renderer pitch processing
+- [x] add the first least-privilege voice action: fixed YouTube preview -> manual approval -> browser dispatch -> receipt
 - [x] install and benchmark Qwen3-TTS 0.6B on E:, then exclude it from real-time default after measured 13.21-second warm latency
 - [x] verify desktop normal-motion and mobile reduced-motion layouts with zero overflow and browser errors
 - [x] evaluate OrcaRouter and AEON Qwen3.8 27B variants against hardware, provenance and safety boundaries
@@ -29,8 +31,9 @@
 - [x] fix FIFINE USB microphone capture by pinning the trusted Whisper child to SDL DirectSound
 - [x] split Ultron Core voice UX into an obvious spoken question path and explicit operator dictation
 - [x] add a local TTS voice inventory, Russian voice selection, bounded speed control and testable preview
-- [x] evaluate local TTS candidates against the system Pavel baseline and select Piper Dmitri for real-time latency; keep Qwen3-TTS as Studio/Lab evidence
+- [x] evaluate local TTS candidates against the system Pavel baseline and select the lower Piper Denis profile for real-time latency; keep Qwen3-TTS as Studio/Lab evidence
 - [ ] evaluate compact always-on-top mode without enabling wake word or background listening
+- [ ] expand browser actions one capability at a time; every target needs a fixed policy, preview, manual approval and receipt
 
 ## Retired persistent contact experiment — 2026-08-25
 

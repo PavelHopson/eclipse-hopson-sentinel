@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Mic, Radio, RotateCcw, ShieldCheck, Square, Volume2 } from 'lucide-react';
+import { ExternalLink, Globe2, Mic, Radio, RotateCcw, ShieldCheck, Square, Volume2, X } from 'lucide-react';
 import { sendMessage, type Message, VOICE_MODEL_ID, warmVoiceModel } from '../lib/ai';
 import {
   isLiveSTTSupported,
@@ -16,6 +16,14 @@ import {
   type LiveVoiceStateName,
 } from '../lib/voice';
 import { type ContactTurn, ULTRON_PRESENCE_COPY, type UltronPresenceState } from '../lib/ultronPresence';
+import {
+  cancelVoiceAction,
+  detectVoiceAction,
+  executeVoiceAction,
+  previewVoiceAction,
+  type VoiceActionPreview,
+  type VoiceActionReceipt,
+} from '../lib/voiceActions';
 import { UltronAvatar } from './UltronAvatar';
 
 const VOICE_SYSTEM_PROMPT = [
@@ -50,23 +58,43 @@ export function UltronVoiceConversation({
   const [speaking, setSpeaking] = useState(false);
   const [liveState, setLiveState] = useState<LiveVoiceStateName>('idle');
   const [error, setError] = useState('');
+  const [pendingAction, setPendingAction] = useState<VoiceActionPreview | null>(null);
+  const [actionReceipt, setActionReceipt] = useState<VoiceActionReceipt | null>(null);
+  const [actionExecuting, setActionExecuting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const turnSequenceRef = useRef(0);
   const appliedTurnRef = useRef<number | null>(null);
   const liveRequestedRef = useRef(false);
   const busyRef = useRef(false);
   const messagesRef = useRef(messages);
+  const pendingActionRef = useRef<VoiceActionPreview | null>(null);
+  const actionPreviewRef = useRef<HTMLElement | null>(null);
   const respondRef = useRef<(text: string) => Promise<void>>(async () => {});
   const localVoiceAvailable = isLocalSTTSupported();
   const liveVoiceAvailable = isLiveSTTSupported();
   const ttsAvailable = isTTSSupported();
   const presenceCopy = ULTRON_PRESENCE_COPY[presence];
-  const busy = capturing || streaming || speaking;
+  const busy = capturing || streaming || speaking || actionExecuting;
   const liveActive = liveState === 'starting' || liveState === 'listening' || liveState === 'paused';
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    pendingActionRef.current = pendingAction;
+  }, [pendingAction]);
+
+  useEffect(() => {
+    if (!pendingAction) return;
+    const frameId = window.requestAnimationFrame(() => {
+      actionPreviewRef.current?.scrollIntoView({
+        behavior: motionEnabled ? 'smooth' : 'auto',
+        block: 'center',
+      });
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [motionEnabled, pendingAction]);
 
   useEffect(() => {
     busyRef.current = busy;
@@ -112,6 +140,44 @@ export function UltronVoiceConversation({
     busyRef.current = true;
     if (liveRequestedRef.current) await pauseLiveLocal();
     stopSpeaking();
+
+    const previousPreview = pendingActionRef.current;
+    if (previousPreview) await cancelVoiceAction(previousPreview);
+    pendingActionRef.current = null;
+    setPendingAction(null);
+    setActionReceipt(null);
+
+    const actionId = detectVoiceAction(text);
+    if (actionId) {
+      const userMessage: Message = { role: 'user', content: text };
+      const actionMessages = [...messagesRef.current.slice(-8), userMessage];
+      setError('');
+      onPresenceChange('thinking');
+      try {
+        const result = await previewVoiceAction(actionId);
+        if (!result.ok) throw new Error(result.error.message);
+        const preview = result.preview;
+        pendingActionRef.current = preview;
+        setPendingAction(preview);
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: `Готов открыть YouTube. Проверьте адрес и подтвердите действие на экране.`,
+        };
+        onMessagesChange([...actionMessages, assistantMessage]);
+        setSpeaking(true);
+        onPresenceChange('speaking');
+        await speak('Готов открыть YouTube. Проверьте адрес и подтвердите действие на экране.');
+        onPresenceChange('success');
+      } catch (actionError: unknown) {
+        setError(actionError instanceof Error ? actionError.message : 'Не удалось подготовить действие.');
+        onPresenceChange('error');
+      } finally {
+        setSpeaking(false);
+        busyRef.current = false;
+        await resumeLiveAfterTurn();
+      }
+      return;
+    }
 
     const turnId = ++turnSequenceRef.current;
     const userMessage: Message = { role: 'user', content: text };
@@ -284,6 +350,55 @@ export function UltronVoiceConversation({
     }
   };
 
+  const approvePendingAction = async () => {
+    const preview = pendingActionRef.current;
+    if (!preview || busyRef.current) return;
+    busyRef.current = true;
+    if (liveRequestedRef.current) await pauseLiveLocal();
+    stopSpeaking();
+    setActionExecuting(true);
+    setError('');
+    onPresenceChange('thinking');
+    try {
+      const result = await executeVoiceAction(preview);
+      pendingActionRef.current = null;
+      setPendingAction(null);
+      if (!result.ok) throw new Error(result.error.message);
+      setActionReceipt(result.receipt);
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: 'Команда передана браузеру. YouTube должен открыться в новой вкладке.',
+      };
+      onMessagesChange([...messagesRef.current.slice(-9), assistantMessage]);
+      setSpeaking(true);
+      onPresenceChange('speaking');
+      await speak('Команда передана браузеру.');
+      onPresenceChange('success');
+    } catch (actionError: unknown) {
+      pendingActionRef.current = null;
+      setPendingAction(null);
+      setError(actionError instanceof Error ? actionError.message : 'Не удалось открыть YouTube.');
+      onPresenceChange('error');
+    } finally {
+      setActionExecuting(false);
+      setSpeaking(false);
+      busyRef.current = false;
+      await resumeLiveAfterTurn();
+    }
+  };
+
+  const cancelPendingAction = async () => {
+    const preview = pendingActionRef.current;
+    if (!preview || actionExecuting) return;
+    await cancelVoiceAction(preview);
+    pendingActionRef.current = null;
+    setPendingAction(null);
+    setActionReceipt(null);
+    const assistantMessage: Message = { role: 'assistant', content: 'Действие отменено. Ничего не открыто.' };
+    onMessagesChange([...messagesRef.current.slice(-9), assistantMessage]);
+    onPresenceChange(liveRequestedRef.current ? 'listening' : 'idle');
+  };
+
   useEffect(() => {
     if (!externalTurn || externalTurn.mode !== 'voice' || appliedTurnRef.current === externalTurn.id) return;
     appliedTurnRef.current = externalTurn.id;
@@ -293,6 +408,7 @@ export function UltronVoiceConversation({
 
   useEffect(() => () => {
     abortRef.current?.abort();
+    if (pendingActionRef.current) void cancelVoiceAction(pendingActionRef.current);
     stopSpeaking();
     busyRef.current = false;
     onPresenceChange('idle');
@@ -363,6 +479,39 @@ export function UltronVoiceConversation({
           )}
         </section>
       </div>
+
+      {pendingAction && (
+        <section ref={actionPreviewRef} className="ultron-voice__action-preview" aria-labelledby="voice-action-title" aria-live="polite">
+          <header>
+            <Globe2 size={18} aria-hidden="true" />
+            <div><span>Нужно подтверждение</span><h2 id="voice-action-title">{pendingAction.label}</h2></div>
+            <code>preview</code>
+          </header>
+          <p className="ultron-voice__action-target">{pendingAction.target}</p>
+          <dl>
+            <div><dt>Данные</dt><dd>{pendingAction.dataDisclosure}</dd></div>
+            <div><dt>Результат</dt><dd>{pendingAction.expectedResult}</dd></div>
+            <div><dt>Откат</dt><dd>{pendingAction.rollback}</dd></div>
+          </dl>
+          <div className="ultron-voice__action-controls">
+            <button type="button" className="is-primary" disabled={busy} onClick={() => void approvePendingAction()}>
+              <ExternalLink size={14} aria-hidden="true" />
+              {actionExecuting ? 'Открываю…' : 'Открыть YouTube'}
+            </button>
+            <button type="button" disabled={actionExecuting} onClick={() => void cancelPendingAction()}>
+              <X size={14} aria-hidden="true" /> Отменить
+            </button>
+          </div>
+        </section>
+      )}
+
+      {actionReceipt && !pendingAction && (
+        <section className="ultron-voice__action-receipt" aria-live="polite">
+          <ShieldCheck size={16} aria-hidden="true" />
+          <div><span>Receipt · команда передана браузеру</span><strong>{actionReceipt.target}</strong></div>
+          <code>{actionReceipt.requestId.slice(0, 8)}</code>
+        </section>
+      )}
 
       {error && <p className="ultron-voice__error" role="alert">{error}</p>}
 

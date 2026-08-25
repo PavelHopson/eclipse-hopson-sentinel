@@ -10,6 +10,9 @@ const VOICE_LIVE_STATE_EVENT = 'sentinel:voice:live-state';
 const VOICE_LIVE_TRANSCRIPT_EVENT = 'sentinel:voice:live-transcript';
 const VOICE_TTS_SYNTHESIZE_CHANNEL = 'sentinel:voice:tts-synthesize';
 const VOICE_TTS_STOP_CHANNEL = 'sentinel:voice:tts-stop';
+const VOICE_ACTION_PREVIEW_CHANNEL = 'sentinel:voice:action-preview';
+const VOICE_ACTION_EXECUTE_CHANNEL = 'sentinel:voice:action-execute';
+const VOICE_ACTION_CANCEL_CHANNEL = 'sentinel:voice:action-cancel';
 const liveListeners = new Map();
 let nextLiveListenerId = 1;
 
@@ -37,6 +40,15 @@ contextBridge.exposeInMainWorld('ultronVoice', Object.freeze({
   },
   stopSpeech() {
     return ipcRenderer.invoke(VOICE_TTS_STOP_CHANNEL);
+  },
+  previewAction(actionId) {
+    return ipcRenderer.invoke(VOICE_ACTION_PREVIEW_CHANNEL, actionId);
+  },
+  executeAction(approval) {
+    return ipcRenderer.invoke(VOICE_ACTION_EXECUTE_CHANNEL, approval);
+  },
+  cancelAction(requestId) {
+    return ipcRenderer.invoke(VOICE_ACTION_CANCEL_CHANNEL, requestId);
   },
   startLive() {
     return ipcRenderer.invoke(VOICE_LIVE_START_CHANNEL);

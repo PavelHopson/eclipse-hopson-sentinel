@@ -53,7 +53,7 @@ export interface LiveVoiceTranscript {
 }
 
 type FastSpeechResult =
-  | { ok: true; audio: Uint8Array; engine: 'piper-dmitri-medium' }
+  | { ok: true; audio: Uint8Array; engine: 'piper-denis-medium' }
   | { ok: false; error?: { code: string; message: string } };
 
 type UltronVoiceWindow = Window & {

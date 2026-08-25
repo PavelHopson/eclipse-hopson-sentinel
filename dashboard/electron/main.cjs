@@ -12,6 +12,11 @@ const {
   readBoundedPcmWav,
   removeEphemeralTtsFile,
 } = require('./tts-wav-transport.cjs');
+const {
+  approveVoiceAction,
+  createVoiceActionPreview,
+  createVoiceActionReceipt,
+} = require('./voice-action-policy.cjs');
 
 // The desktop product was renamed to Eclipse Ultron, but the existing local
 // Chromium profile remains the stable data boundary for sessions and settings.
@@ -24,6 +29,8 @@ let tray = null;
 let safeOperatorExecutor = null;
 let labOllamaProcess = null;
 let liveVoiceManager = null;
+let pendingVoiceActionPreview = null;
+let voiceActionLastExecutedAt = 0;
 const EXECUTE_CHANNEL = 'sentinel:operator:execute';
 const VOICE_LISTEN_CHANNEL = 'sentinel:voice:listen-once';
 const VOICE_LIVE_START_CHANNEL = 'sentinel:voice:live-start';
@@ -32,11 +39,15 @@ const VOICE_LIVE_PAUSE_CHANNEL = 'sentinel:voice:live-pause';
 const VOICE_LIVE_RESUME_CHANNEL = 'sentinel:voice:live-resume';
 const VOICE_TTS_SYNTHESIZE_CHANNEL = 'sentinel:voice:tts-synthesize';
 const VOICE_TTS_STOP_CHANNEL = 'sentinel:voice:tts-stop';
+const VOICE_ACTION_PREVIEW_CHANNEL = 'sentinel:voice:action-preview';
+const VOICE_ACTION_EXECUTE_CHANNEL = 'sentinel:voice:action-execute';
+const VOICE_ACTION_CANCEL_CHANNEL = 'sentinel:voice:action-cancel';
 const VOICE_OUTPUT_LIMIT_BYTES = 8 * 1024;
 const VOICE_PROCESS_TIMEOUT_MS = 25_000;
 const VOICE_RATE_LIMIT_MS = 1_500;
 const VOICE_MODEL_WARMUP_URL = 'http://127.0.0.1:11434/api/generate';
 const VOICE_MODEL_WARMUP_TIMEOUT_MS = 120_000;
+const VOICE_ACTION_RATE_LIMIT_MS = 1_000;
 let voiceListenInFlight = false;
 let voiceLastStartedAt = 0;
 let piperTtsProcess = null;
@@ -74,7 +85,7 @@ const labOllamaExecutable = path.join(eclipseAiRuntimeRoot, 'ollama', 'ollama.ex
 const labOllamaModels = path.join(eclipseAiRuntimeRoot, 'models', 'ollama');
 const piperTtsDirectory = path.join(eclipseAiRuntimeRoot, 'tts', 'piper', 'runtime', 'piper');
 const piperTtsExecutable = path.join(piperTtsDirectory, 'piper.exe');
-const piperTtsModelRelative = path.join('..', '..', 'voices', 'ru', 'ru_RU', 'dmitri', 'medium', 'ru_RU-dmitri-medium.onnx');
+const piperTtsModelRelative = path.join('..', '..', 'voices', 'ru', 'ru_RU', 'denis', 'medium', 'ru_RU-denis-medium.onnx');
 const piperTtsTempDirectory = path.join(eclipseAiRuntimeRoot, 'temp', 'tts');
 
 function sendVoiceEvent(channel, payload) {
@@ -215,6 +226,56 @@ ipcMain.handle(EXECUTE_CHANNEL, async (event, request) => {
         message: error instanceof SafeOperatorError ? error.message : 'Safe operator failed',
       },
     };
+  }
+});
+
+ipcMain.handle(VOICE_ACTION_PREVIEW_CHANNEL, (event, ...args) => {
+  if (!isTrustedOperatorSender(event)) {
+    return { ok: false, error: { code: 'UNTRUSTED_SENDER', message: 'IPC sender is not trusted' } };
+  }
+  if (args.length !== 1 || typeof args[0] !== 'string') {
+    return { ok: false, error: { code: 'ACTION_INPUT_REJECTED', message: 'Действие не прошло проверку.' } };
+  }
+  const preview = createVoiceActionPreview(args[0]);
+  if (!preview) {
+    return { ok: false, error: { code: 'ACTION_NOT_ALLOWED', message: 'Это действие не входит в allowlist Альтрона.' } };
+  }
+  pendingVoiceActionPreview = preview;
+  return { ok: true, preview };
+});
+
+ipcMain.handle(VOICE_ACTION_CANCEL_CHANNEL, (event, ...args) => {
+  if (!isTrustedOperatorSender(event) || args.length !== 1 || typeof args[0] !== 'string') return false;
+  if (pendingVoiceActionPreview?.requestId !== args[0]) return false;
+  pendingVoiceActionPreview = null;
+  return true;
+});
+
+ipcMain.handle(VOICE_ACTION_EXECUTE_CHANNEL, async (event, ...args) => {
+  if (!isTrustedOperatorSender(event)) {
+    return { ok: false, error: { code: 'UNTRUSTED_SENDER', message: 'IPC sender is not trusted' } };
+  }
+  if (args.length !== 1) {
+    return { ok: false, error: { code: 'ACTION_INPUT_REJECTED', message: 'Подтверждение не прошло проверку.' } };
+  }
+
+  const preview = pendingVoiceActionPreview;
+  pendingVoiceActionPreview = null;
+  const action = approveVoiceAction(preview, args[0]);
+  if (!action) {
+    return { ok: false, error: { code: 'ACTION_APPROVAL_INVALID', message: 'Preview устарел или не был подтверждён.' } };
+  }
+  const now = Date.now();
+  if (now - voiceActionLastExecutedAt < VOICE_ACTION_RATE_LIMIT_MS) {
+    return { ok: false, error: { code: 'ACTION_RATE_LIMITED', message: 'Подождите секунду перед следующим действием.' } };
+  }
+  voiceActionLastExecutedAt = now;
+
+  try {
+    await shell.openExternal(action.target);
+    return { ok: true, receipt: createVoiceActionReceipt(preview) };
+  } catch {
+    return { ok: false, error: { code: 'BROWSER_OPEN_FAILED', message: 'Браузер не смог открыть подтверждённый адрес.' } };
   }
 });
 
@@ -430,7 +491,7 @@ async function runPiperSynthesis(text) {
             finish({ ok: false, error: { code: 'TTS_INVALID_AUDIO', message: 'Локальный голос вернул некорректное аудио.' } });
             return;
           }
-          finish({ ok: true, audio: new Uint8Array(wav), engine: 'piper-dmitri-medium' });
+          finish({ ok: true, audio: new Uint8Array(wav), engine: 'piper-denis-medium' });
         } catch {
           finish({ ok: false, error: { code: 'TTS_INVALID_AUDIO', message: 'Не удалось прочитать локальное аудио.' } });
         }
