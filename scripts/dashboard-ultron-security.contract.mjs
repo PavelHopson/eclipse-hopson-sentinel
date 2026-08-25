@@ -129,9 +129,10 @@ test('Ultron live microphone remains explicit, local, bounded and cancellable', 
   assert.doesNotMatch(conversation, /setInterval|wake.?word/i)
 })
 
-test('Ultron fast TTS uses fixed Piper runtime with bounded trusted IPC and SAPI fallback', async () => {
-  const [main, preload, voice] = await Promise.all([
+test('Ultron fast TTS uses fixed Piper runtime with bounded ephemeral WAV transport and SAPI fallback', async () => {
+  const [main, transport, preload, voice] = await Promise.all([
     readText('dashboard/electron/main.cjs'),
+    readText('dashboard/electron/tts-wav-transport.cjs'),
     readText('dashboard/electron/preload.cjs'),
     readText('dashboard/src/lib/voice.ts'),
   ])
@@ -140,11 +141,21 @@ test('Ultron fast TTS uses fixed Piper runtime with bounded trusted IPC and SAPI
   assert.match(main, /PIPER_TTS_OUTPUT_LIMIT_BYTES = 12 \* 1024 \* 1024/)
   assert.match(main, /PIPER_TTS_TIMEOUT_MS = 8_000/)
   assert.match(main, /piperTtsModelRelative = path\.join\('\.\.', '\.\.', 'voices'/)
+  assert.match(main, /'dmitri', 'medium', 'ru_RU-dmitri-medium\.onnx'/)
   assert.match(main, /'--espeak_data', path\.join\('\.', 'espeak-ng-data'\)/)
-  assert.match(main, /'--output_file', '-'/)
+  assert.match(main, /'--output_file', temporaryOutput\.filePath/)
+  assert.match(main, /stdio: \['pipe', 'ignore', 'pipe'\]/)
+  assert.match(main, /readBoundedPcmWav\(temporaryOutput\.filePath, PIPER_TTS_OUTPUT_LIMIT_BYTES\)/)
+  assert.match(main, /finally[\s\S]*removeEphemeralTtsFile\(temporaryOutput\.filePath\)/)
+  assert.match(main, /pruneStaleTtsFiles\(piperTtsTempDirectory\)/)
+  assert.doesNotMatch(main, /'--output_file', '-'/)
   assert.match(main, /shell: false/)
   assert.match(main, /isTrustedOperatorSender\(event\)/)
-  assert.match(main, /wav\.subarray\(0, 4\)\.toString\('ascii'\) === 'RIFF'/)
+  assert.match(transport, /randomUUID\(\)/)
+  assert.match(transport, /wav\.readUInt32LE\(4\) \+ 8 === wav\.length/)
+  assert.match(transport, /wav\.readUInt32LE\(40\) \+ 44 === wav\.length/)
+  assert.match(transport, /file\.size > byteLimit/)
+  assert.match(transport, /TTS_FILE_PATTERN/)
   assert.doesNotMatch(main, /exec(?:File|Sync)?\s*\(/)
   assert.match(preload, /synthesize\(text\)[\s\S]*ipcRenderer\.invoke\(VOICE_TTS_SYNTHESIZE_CHANNEL, text\)/)
   assert.match(preload, /stopSpeech\(\)/)
@@ -152,6 +163,9 @@ test('Ultron fast TTS uses fixed Piper runtime with bounded trusted IPC and SAPI
   assert.match(voice, /header\.startsWith\('RIFF'\)/)
   assert.match(voice, /new SpeechSynthesisUtterance/)
   assert.match(voice, /stopSpeech/)
+  assert.match(voice, /decodeAudioData\(audioBytes\.slice\(0\)\)/)
+  assert.match(voice, /createBufferSource\(\)/)
+  assert.doesNotMatch(voice, /new Audio\(|preservesPitch|createObjectURL/)
 })
 
 test('Ultron command center exposes explicit safety, voice and accessible motion controls', async () => {

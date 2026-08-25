@@ -142,15 +142,15 @@ export function SettingsPanel({ open, onClose, onModelChange }: SettingsPanelPro
               <p className="mt-1 text-[10px] text-text-3">Одна фраза или явный живой режим</p>
             </div>
             <div className="px-4 py-3 bg-card border border-border rounded-xl">
-              <p className="flex items-center gap-2 text-xs font-medium text-text-1"><Volume2 size={14} /> Piper Denis</p>
-              <p className="mt-1 text-[10px] text-text-3">Быстрый русский нейроголос · offline</p>
+              <p className="flex items-center gap-2 text-xs font-medium text-text-1"><Volume2 size={14} /> Piper Dmitri</p>
+              <p className="mt-1 text-[10px] text-text-3">Чёткий русский нейроголос · нативное воспроизведение · offline</p>
             </div>
           </div>
           <section className="space-y-3 px-4 py-4 bg-card border border-border rounded-xl" aria-labelledby="voice-profile-title">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p id="voice-profile-title" className="text-xs font-medium text-text-1">Голос Альтрона</p>
-                <p className="mt-1 text-[10px] text-text-3">Piper — основной. Windows Voice — резервный fallback</p>
+                <p className="mt-1 text-[10px] text-text-3">Piper Dmitri — основной. Ниже настраивается только резервный Windows Voice</p>
               </div>
               <button
                 type="button"
@@ -180,7 +180,7 @@ export function SettingsPanel({ open, onClose, onModelChange }: SettingsPanelPro
 
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-[10px] font-medium text-text-2" htmlFor="ultron-voice-rate">
-                <Gauge size={13} aria-hidden="true" /> Скорость речи
+                <Gauge size={13} aria-hidden="true" /> Скорость резервного голоса
               </label>
               <output className="text-[10px] font-medium text-accent" htmlFor="ultron-voice-rate">{voicePreferences.rate.toFixed(2)}×</output>
             </div>

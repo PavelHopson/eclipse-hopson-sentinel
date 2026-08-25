@@ -130,7 +130,7 @@ export function UsageGuide({
               <span className="usage-guide-step-number">01</span>
               <div>
                 <p className="usage-guide-step-title"><Settings2 size={15} /> Проверьте локальный контур</p>
-                <p>Основной голос — быстрый локальный Piper Denis. В настройках можно изменить темп, прослушать результат и выбрать резервный Windows-голос.</p>
+                <p>Основной голос — локальный Piper Dmitri без дополнительного цифрового ускорения. В настройках можно выбрать и настроить резервный Windows-голос.</p>
                 <button type="button" className="usage-guide-action" onClick={onOpenSettings}>
                   Открыть настройки <ArrowRight size={13} />
                 </button>

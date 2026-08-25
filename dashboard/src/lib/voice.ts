@@ -53,7 +53,7 @@ export interface LiveVoiceTranscript {
 }
 
 type FastSpeechResult =
-  | { ok: true; audio: Uint8Array; engine: 'piper-denis-medium' }
+  | { ok: true; audio: Uint8Array; engine: 'piper-dmitri-medium' }
   | { ok: false; error?: { code: string; message: string } };
 
 type UltronVoiceWindow = Window & {
@@ -198,9 +198,11 @@ let speechSequence = 0;
 let activeSpeech: { id: number; resolve: () => void; timeoutId: number } | null = null;
 let activeAudioSpeech: {
   id: number;
-  audio: HTMLAudioElement;
-  objectUrl: string;
+  source: AudioBufferSourceNode;
+  gain: GainNode;
+  resolve: (played: boolean) => void;
 } | null = null;
+let neuralAudioContext: AudioContext | null = null;
 
 const MAX_LOCAL_AUDIO_BYTES = 12 * 1024 * 1024;
 
@@ -290,30 +292,43 @@ function finishActiveSpeech(id: number) {
   resolve();
 }
 
-function clearActiveAudioSpeech(id: number) {
+function finishActiveAudioSpeech(id: number, played: boolean) {
   if (!activeAudioSpeech || activeAudioSpeech.id !== id) return;
-  const objectUrl = activeAudioSpeech.objectUrl;
+  const active = activeAudioSpeech;
   activeAudioSpeech = null;
-  if (objectUrl) URL.revokeObjectURL(objectUrl);
+  active.source.onended = null;
+  active.source.disconnect();
+  active.gain.disconnect();
+  active.resolve(played);
 }
 
-async function playAudioBlob(audioBlob: Blob, id: number): Promise<boolean> {
-  if (audioBlob.size <= 0 || audioBlob.size > MAX_LOCAL_AUDIO_BYTES || speechSequence !== id) return false;
-  const objectUrl = URL.createObjectURL(audioBlob);
-  const audio = new Audio(objectUrl);
-  const preferences = loadVoicePreferences();
-  audio.playbackRate = clamp(preferences.rate, 0.95, 1.12);
-  audio.preservesPitch = true;
-  activeAudioSpeech = { id, audio, objectUrl };
+async function playAudioBuffer(audioBytes: ArrayBuffer, id: number): Promise<boolean> {
+  if (audioBytes.byteLength <= 44 || audioBytes.byteLength > MAX_LOCAL_AUDIO_BYTES || speechSequence !== id) return false;
+
+  if (!neuralAudioContext || neuralAudioContext.state === 'closed') {
+    neuralAudioContext = new AudioContext({ latencyHint: 'playback' });
+  }
+
+  const context = neuralAudioContext;
+  const decoded = await context.decodeAudioData(audioBytes.slice(0));
+  if (speechSequence !== id || decoded.duration <= 0) return false;
+  if (context.state === 'suspended') await context.resume();
+
+  const source = context.createBufferSource();
+  const gain = context.createGain();
+  gain.gain.value = 0.96;
+  source.buffer = decoded;
+  source.connect(gain);
+  gain.connect(context.destination);
 
   return new Promise<boolean>((resolve) => {
-    const finish = (played: boolean) => {
-      clearActiveAudioSpeech(id);
-      resolve(played);
-    };
-    audio.onended = () => finish(true);
-    audio.onerror = () => finish(false);
-    void audio.play().catch(() => finish(false));
+    activeAudioSpeech = { id, source, gain, resolve };
+    source.onended = () => finishActiveAudioSpeech(id, true);
+    try {
+      source.start();
+    } catch {
+      finishActiveAudioSpeech(id, false);
+    }
   });
 }
 
@@ -328,7 +343,7 @@ async function playFastLocalSpeech(text: string, id: number): Promise<boolean> {
     const header = String.fromCharCode(...bytes.slice(0, 12));
     if (!header.startsWith('RIFF') || header.slice(8, 12) !== 'WAVE') return false;
     const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-    return playAudioBlob(new Blob([buffer], { type: 'audio/wav' }), id);
+    return playAudioBuffer(buffer, id);
   } catch {
     return false;
   }
@@ -392,8 +407,9 @@ export function stopSpeaking() {
   speechSequence += 1;
   void liveBridge()?.stopSpeech?.();
   if (activeAudioSpeech) {
-    activeAudioSpeech.audio.pause();
-    clearActiveAudioSpeech(activeAudioSpeech.id);
+    const activeId = activeAudioSpeech.id;
+    try { activeAudioSpeech.source.stop(); } catch { /* already stopped */ }
+    finishActiveAudioSpeech(activeId, false);
   }
   if (isTTSSupported()) speechSynthesis.cancel();
   if (activeSpeech) finishActiveSpeech(activeSpeech.id);

@@ -366,3 +366,28 @@ This document records blocked checks, failed attempts, and known limitations dur
 - Added bounded Piper IPC: fixed relative model/espeak paths, UTF-8 stdin, memory-only WAV stdout, 400-character
   input, 12 MiB output, 8-second timeout, one process, rate limit, RIFF/WAVE validation and cancellable fallback.
   Windows SAPI remains a deterministic fallback when the E-drive runtime is absent.
+
+# 2026-08-25 — live Whisper redraw parser hotfix
+
+- Reproduced the failure against the installed `whisper-stream` and FIFINE microphone. CUDA, DirectSound and
+  recognition were healthy, but sliding-window mode emitted ANSI/CR redraws and newline commits rather than
+  VAD `### Transcription START/END` blocks, so the initial live parser never forwarded a transcript.
+- Added bounded parsing for the real sliding-window protocol: ANSI removal, carriage-return hypothesis
+  replacement, newline commit boundaries, diagnostic-line filtering and existing duplicate/echo guards.
+- Added a regression fixture matching the captured output shape and kept explicit VAD block support for
+  compatibility. No audio or diagnostic transcript file was written during reproduction.
+
+# 2026-08-25 — Piper Windows PCM corruption hotfix
+
+- Reproduced the reported broadband noise from the supplied desktop recording and isolated it before
+  Electron playback. The stdout WAV contained 74,612 bytes while its RIFF/data headers declared 74,116:
+  Windows text-mode conversion inserted exactly 496 carriage-return bytes before line-feed-valued PCM bytes.
+- Confirmed the same fixed Piper runtime and Dmitri voice produce an exact, clean RIFF file when given a
+  real output path: zero excess bytes, RMS -19.50 dB instead of -9.19 dB, max sample delta 14,399 instead
+  of 65,026, and a materially lower zero-crossing rate.
+- Replaced binary stdout with a cryptographically unique file below the E-drive runtime `temp\tts` boundary.
+  Electron enforces fixed executable/model/arguments, 400-character input, 12 MiB output, exact RIFF/data
+  lengths and trusted IPC; the WAV is deleted in `finally`, with scoped cleanup of crash residue older than
+  ten minutes on next start so a concurrent fresh synthesis cannot be removed.
+- Added regression coverage for exact RIFF acceptance, CRLF-corruption rejection, size bounds, immediate
+  deletion and prefix-scoped startup cleanup. No renderer-controlled path or new dependency was introduced.

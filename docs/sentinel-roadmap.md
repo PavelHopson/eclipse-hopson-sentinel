@@ -10,7 +10,8 @@
 - [x] preserve one-shot capture and add an explicit cancellable live session; keep wake word, startup capture and standing authorization absent
 - [x] keep one persistent Whisper process during live mode, pause transcript delivery during TTS and suppress immediate echo/duplicates
 - [x] start speaking after the first complete generated sentence instead of waiting for the full model response
-- [x] replace the robotic SAPI default with bounded Piper Denis IPC; retain Windows TTS only as fallback
+- [x] replace the robotic SAPI default with bounded Piper Dmitri IPC; retain Windows TTS only as fallback
+- [x] eliminate Windows Piper stdout corruption with validated ephemeral E-drive WAV transport and startup cleanup
 - [x] install and benchmark Qwen3-TTS 0.6B on E:, then exclude it from real-time default after measured 13.21-second warm latency
 - [x] verify desktop normal-motion and mobile reduced-motion layouts with zero overflow and browser errors
 - [x] evaluate OrcaRouter and AEON Qwen3.8 27B variants against hardware, provenance and safety boundaries
@@ -28,7 +29,7 @@
 - [x] fix FIFINE USB microphone capture by pinning the trusted Whisper child to SDL DirectSound
 - [x] split Ultron Core voice UX into an obvious spoken question path and explicit operator dictation
 - [x] add a local TTS voice inventory, Russian voice selection, bounded speed control and testable preview
-- [x] evaluate local TTS candidates against the system Pavel baseline and select Piper Denis for real-time latency; keep Qwen3-TTS as Studio/Lab evidence
+- [x] evaluate local TTS candidates against the system Pavel baseline and select Piper Dmitri for real-time latency; keep Qwen3-TTS as Studio/Lab evidence
 - [ ] evaluate compact always-on-top mode without enabling wake word or background listening
 
 ## Retired persistent contact experiment — 2026-08-25

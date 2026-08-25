@@ -6,6 +6,12 @@ const { existsSync } = require('fs');
 const { ipcMain } = require('electron');
 const { pathToFileURL } = require('url');
 const { UltronLiveVoiceManager } = require('./ultron-live-voice.cjs');
+const {
+  prepareEphemeralTtsFile,
+  pruneStaleTtsFiles,
+  readBoundedPcmWav,
+  removeEphemeralTtsFile,
+} = require('./tts-wav-transport.cjs');
 
 // The desktop product was renamed to Eclipse Ultron, but the existing local
 // Chromium profile remains the stable data boundary for sessions and settings.
@@ -68,7 +74,8 @@ const labOllamaExecutable = path.join(eclipseAiRuntimeRoot, 'ollama', 'ollama.ex
 const labOllamaModels = path.join(eclipseAiRuntimeRoot, 'models', 'ollama');
 const piperTtsDirectory = path.join(eclipseAiRuntimeRoot, 'tts', 'piper', 'runtime', 'piper');
 const piperTtsExecutable = path.join(piperTtsDirectory, 'piper.exe');
-const piperTtsModelRelative = path.join('..', '..', 'voices', 'ru', 'ru_RU', 'denis', 'medium', 'ru_RU-denis-medium.onnx');
+const piperTtsModelRelative = path.join('..', '..', 'voices', 'ru', 'ru_RU', 'dmitri', 'medium', 'ru_RU-dmitri-medium.onnx');
+const piperTtsTempDirectory = path.join(eclipseAiRuntimeRoot, 'temp', 'tts');
 
 function sendVoiceEvent(channel, payload) {
   if (!win || win.isDestroyed() || win.webContents.isDestroyed()) return;
@@ -354,72 +361,89 @@ function normalizeTtsText(input) {
   return input.replace(/\s+/g, ' ').trim();
 }
 
-function runPiperSynthesis(text) {
-  return new Promise((resolve) => {
-    let outputBytes = 0;
-    let stderrBytes = 0;
-    let settled = false;
-    const output = [];
-    const child = spawn(piperTtsExecutable, [
-      '--model', piperTtsModelRelative,
-      '--espeak_data', path.join('.', 'espeak-ng-data'),
-      '--output_file', '-',
-      '--length_scale', '0.94',
-      '--sentence_silence', '0.12',
-      '--quiet',
-    ], {
-      cwd: piperTtsDirectory,
-      windowsHide: true,
-      shell: false,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    piperTtsProcess = child;
+async function runPiperSynthesis(text) {
+  let temporaryOutput;
+  try {
+    temporaryOutput = await prepareEphemeralTtsFile(eclipseAiRuntimeRoot);
+  } catch {
+    return { ok: false, error: { code: 'TTS_UNAVAILABLE', message: 'Не удалось подготовить локальный голос на диске E:.' } };
+  }
 
-    const finish = (result) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeoutId);
-      if (piperTtsProcess === child) piperTtsProcess = null;
-      resolve(result);
-    };
-    const timeoutId = setTimeout(() => {
-      child.kill();
-      finish({ ok: false, error: { code: 'TTS_TIMEOUT', message: 'Быстрый локальный голос не успел ответить.' } });
-    }, PIPER_TTS_TIMEOUT_MS);
+  try {
+    return await new Promise((resolve) => {
+      let stderrBytes = 0;
+      let settled = false;
+      let terminalError = null;
+      let killFallbackId = null;
+      const child = spawn(piperTtsExecutable, [
+        '--model', piperTtsModelRelative,
+        '--espeak_data', path.join('.', 'espeak-ng-data'),
+        '--output_file', temporaryOutput.filePath,
+        '--length_scale', '0.94',
+        '--sentence_silence', '0.12',
+        '--quiet',
+      ], {
+        cwd: piperTtsDirectory,
+        windowsHide: true,
+        shell: false,
+        stdio: ['pipe', 'ignore', 'pipe'],
+      });
+      piperTtsProcess = child;
 
-    child.stdout.on('data', (chunk) => {
-      outputBytes += chunk.length;
-      if (outputBytes > PIPER_TTS_OUTPUT_LIMIT_BYTES) {
+      const finish = (result) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        if (killFallbackId) clearTimeout(killFallbackId);
+        if (piperTtsProcess === child) piperTtsProcess = null;
+        resolve(result);
+      };
+      const timeoutId = setTimeout(() => {
+        terminalError = { ok: false, error: { code: 'TTS_TIMEOUT', message: 'Быстрый локальный голос не успел ответить.' } };
         child.kill();
-        finish({ ok: false, error: { code: 'TTS_OUTPUT_LIMIT', message: 'Локальный голос превысил лимит аудио.' } });
-        return;
-      }
-      output.push(chunk);
-    });
-    child.stderr.on('data', (chunk) => {
-      stderrBytes += chunk.length;
-      if (stderrBytes > 4 * 1024) child.kill();
-    });
-    child.once('error', () => {
-      finish({ ok: false, error: { code: 'TTS_UNAVAILABLE', message: 'Быстрый локальный голос недоступен.' } });
-    });
-    child.once('close', (code) => {
-      if (settled) return;
-      const wav = Buffer.concat(output);
-      const validWav = code === 0
-        && wav.length > 44
-        && wav.subarray(0, 4).toString('ascii') === 'RIFF'
-        && wav.subarray(8, 12).toString('ascii') === 'WAVE';
-      if (!validWav) {
-        finish({ ok: false, error: { code: 'TTS_INVALID_AUDIO', message: 'Локальный голос вернул некорректное аудио.' } });
-        return;
-      }
-      finish({ ok: true, audio: new Uint8Array(wav), engine: 'piper-denis-medium' });
-    });
+        killFallbackId = setTimeout(() => finish(terminalError), 1_000);
+      }, PIPER_TTS_TIMEOUT_MS);
 
-    child.stdin.on('error', () => {});
-    child.stdin.end(`${text}\n`, 'utf8');
-  });
+      child.stderr.on('data', (chunk) => {
+        stderrBytes += chunk.length;
+        if (stderrBytes > 4 * 1024 && !terminalError) {
+          terminalError = { ok: false, error: { code: 'TTS_OUTPUT_LIMIT', message: 'Локальный голос превысил лимит диагностики.' } };
+          child.kill();
+        }
+      });
+      child.once('error', () => {
+        finish({ ok: false, error: { code: 'TTS_UNAVAILABLE', message: 'Быстрый локальный голос недоступен.' } });
+      });
+      child.once('close', async (code) => {
+        if (settled) return;
+        if (terminalError) {
+          finish(terminalError);
+          return;
+        }
+        if (code !== 0) {
+          finish({ ok: false, error: { code: 'TTS_INVALID_AUDIO', message: 'Локальный голос не сформировал аудио.' } });
+          return;
+        }
+        try {
+          const wav = await readBoundedPcmWav(temporaryOutput.filePath, PIPER_TTS_OUTPUT_LIMIT_BYTES);
+          if (!wav) {
+            finish({ ok: false, error: { code: 'TTS_INVALID_AUDIO', message: 'Локальный голос вернул некорректное аудио.' } });
+            return;
+          }
+          finish({ ok: true, audio: new Uint8Array(wav), engine: 'piper-dmitri-medium' });
+        } catch {
+          finish({ ok: false, error: { code: 'TTS_INVALID_AUDIO', message: 'Не удалось прочитать локальное аудио.' } });
+        }
+      });
+
+      child.stdin.on('error', () => {});
+      child.stdin.end(`${text}\n`, 'utf8');
+    });
+  } catch {
+    return { ok: false, error: { code: 'TTS_UNAVAILABLE', message: 'Быстрый локальный голос недоступен.' } };
+  } finally {
+    await removeEphemeralTtsFile(temporaryOutput.filePath);
+  }
 }
 
 ipcMain.handle(VOICE_TTS_SYNTHESIZE_CHANNEL, async (event, ...args) => {
@@ -544,6 +568,7 @@ function createTray() {
 }
 
 app.whenReady().then(() => {
+  void pruneStaleTtsFiles(piperTtsTempDirectory).catch(() => {});
   createWindow();
   createTray();
   void warmPrimaryVoiceModel();

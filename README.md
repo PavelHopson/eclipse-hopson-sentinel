@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml)
 ![Desktop](https://img.shields.io/badge/Desktop-Windows-111318?style=flat-square&logo=windows11&logoColor=F3F5F7)
-![Release](https://img.shields.io/badge/Ultron-1.2.4-8E1024?style=flat-square)
+![Release](https://img.shields.io/badge/Ultron-1.2.7-8E1024?style=flat-square)
 ![Runtime](https://img.shields.io/badge/Sentinel-0.1.7-15181D?style=flat-square)
 ![Local first](https://img.shields.io/badge/data-local--first-45D89A?style=flat-square)
 ![Policy](https://img.shields.io/badge/execution-human%20approved-F2C94C?style=flat-square)
@@ -146,7 +146,8 @@ explicit live start
           └─> whisper.cpp + large-v3-turbo-q5_0
                 └─> transcript in memory
                       └─> fixed Qwen 3 8B streaming answer
-                            └─> first complete sentence → Piper Denis WAV in memory
+                            └─> first complete sentence → Piper Dmitri
+                                  └─> ephemeral E-drive WAV → validate → delete → memory playback
 
 Operator: explicit dictation → editable command → plan → diff → approval → receipt
 ```
@@ -155,11 +156,12 @@ Operator: explicit dictation → editable command → plan → diff → approval
 - USB-микрофоны открываются через локальный SDL DirectSound backend с согласованием `16 kHz / mono`;
 - фиксированный timeout и rate limit;
 - bounded JSON output;
-- аудио и транскрипт не сохраняются;
+- microphone audio и транскрипт не сохраняются; TTS использует уникальный временный WAV на
+  диске E:, проверяет его размер/RIFF и удаляет сразу после чтения;
 - визуальные состояния `listening / thinking / speaking / success / error` синхронизированы с turn;
 - production TTS ограничен 400 символами, 12 MiB WAV и 8 секундами process time; голос можно остановить вручную;
-- основной voice — CC0 Piper `ru_RU-denis-medium`; проверенный Windows voice остаётся fallback;
-- измеренный Piper path генерирует 5.39 сек аудио за 0.67 сек, тогда как Qwen3-TTS 0.6B warm test занял 13.21 сек для 2.96 сек аудио и оставлен только в Studio/Lab;
+- основной voice — CC0 Piper `ru_RU-dmitri-medium` без renderer pitch/time processing; проверенный Windows voice остаётся fallback;
+- измеренный Piper path генерирует 4.74 сек аудио за 0.59 сек, тогда как Qwen3-TTS 0.6B warm test занял 13.21 сек для 2.96 сек аудио и оставлен только в Studio/Lab;
 - модель прогревается при старте, получает восемь последних сообщений, отвечает до 120 токенов и начинает говорить по первой законченной фразе;
 - wake word, startup capture и standing microphone authorization отсутствуют.
 
