@@ -36,6 +36,27 @@ test('live manager parses completed blocks and suppresses immediate duplicates',
   assert.equal(transcripts[0].payload.text, 'Привет, Альтрон!')
 })
 
+test('live manager commits the final whisper-stream redraw instead of partial hypotheses', () => {
+  const events = []
+  const manager = new UltronLiveVoiceManager({
+    runtimeRoot: 'E:\\missing-runtime-for-contract-test',
+    sendEvent: (channel, payload) => events.push({ channel, payload }),
+  })
+  manager.process = { killed: false }
+  manager.ignoreUntil = 0
+
+  manager.stdoutBuffer = '[Start speaking]\n\x1b[2K\r Привет, Альтрон'
+  manager.parseAvailableTranscripts()
+  assert.equal(events.length, 0)
+
+  manager.stdoutBuffer += '\x1b[2K\r Привет, Альтрон, ты меня слышишь?\n'
+  manager.parseAvailableTranscripts()
+
+  const transcripts = events.filter((event) => event.channel === 'sentinel:voice:live-transcript')
+  assert.equal(transcripts.length, 1)
+  assert.equal(transcripts[0].payload.text, 'Привет, Альтрон, ты меня слышишь?')
+})
+
 test('live manager fails closed when fixed runtime files are unavailable', () => {
   const manager = new UltronLiveVoiceManager({
     runtimeRoot: 'E:\\missing-runtime-for-contract-test',

@@ -10,6 +10,7 @@ const DUPLICATE_WINDOW_MS = 8_000;
 
 function normalizeTranscript(raw) {
   return String(raw || '')
+    .replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, '')
     .replace(/^\s*\[[^\]]+\]\s*/gm, '')
     .replace(/<\|[^|]+\|>/g, '')
     .replace(/\s+/g, ' ')
@@ -22,6 +23,11 @@ function transcriptKey(text) {
     .toLocaleLowerCase('ru')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
+}
+
+function isTranscriptCandidate(text) {
+  if (!text) return false;
+  return !/^(?:\[?start speaking\]?|ggml_|load_backend:|init:|whisper_|sdl_main:|main:)/i.test(text);
 }
 
 class UltronLiveVoiceManager {
@@ -58,26 +64,47 @@ class UltronLiveVoiceManager {
     });
   }
 
+  commitTranscript(raw) {
+    if (this.paused || Date.now() < this.ignoreUntil) return;
+    const text = normalizeTranscript(raw);
+    if (!isTranscriptCandidate(text)) return;
+    const key = transcriptKey(text);
+    if (!key) return;
+    const now = Date.now();
+    if (key === this.lastTranscriptKey && now - this.lastTranscriptAt < DUPLICATE_WINDOW_MS) return;
+
+    this.lastTranscriptKey = key;
+    this.lastTranscriptAt = now;
+    this.emitTranscript(text);
+  }
+
   parseAvailableTranscripts() {
+    // VAD mode emits explicit START/END blocks. Keep supporting that format,
+    // even though the production sliding-window mode below does not use it.
     const pattern = /### Transcription \d+ START[^\r\n]*\r?\n([\s\S]*?)\r?\n### Transcription \d+ END/g;
     let consumedThrough = 0;
     let match;
     while ((match = pattern.exec(this.stdoutBuffer)) !== null) {
       consumedThrough = pattern.lastIndex;
-      if (this.paused || Date.now() < this.ignoreUntil) continue;
-
-      const text = normalizeTranscript(match[1]);
-      const key = transcriptKey(text);
-      if (!key) continue;
-      const now = Date.now();
-      if (key === this.lastTranscriptKey && now - this.lastTranscriptAt < DUPLICATE_WINDOW_MS) continue;
-
-      this.lastTranscriptKey = key;
-      this.lastTranscriptAt = now;
-      this.emitTranscript(text);
+      this.commitTranscript(match[1]);
     }
 
     if (consumedThrough > 0) this.stdoutBuffer = this.stdoutBuffer.slice(consumedThrough);
+
+    // whisper-stream sliding mode redraws the current hypothesis with
+    // `ESC[2K\r` and commits the latest hypothesis with `\n` every n_new_line
+    // iterations. Only emit the final redraw of each completed line; emitting
+    // carriage-return frames would answer partial phrases multiple times.
+    const completedLines = this.stdoutBuffer.split('\n');
+    this.stdoutBuffer = completedLines.pop() || '';
+    for (const line of completedLines) {
+      const redraws = line
+        .split('\r')
+        .map((candidate) => normalizeTranscript(candidate))
+        .filter(isTranscriptCandidate);
+      if (redraws.length > 0) this.commitTranscript(redraws.at(-1));
+    }
+
     if (Buffer.byteLength(this.stdoutBuffer, 'utf8') > MAX_STDOUT_BUFFER_BYTES) {
       this.stdoutBuffer = this.stdoutBuffer.slice(-MAX_STDOUT_BUFFER_BYTES / 2);
     }
