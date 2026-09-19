@@ -50,3 +50,22 @@ sentinel
 - перезапустите терминал
 - проверьте `npm prefix -g`
 - убедитесь, что путь к глобальным npm-бинарникам есть в `PATH`
+
+## 7. Опциональный Lab-профиль Qwen3.8 Cyber
+
+Этот профиль предназначен для изолированного текстового чата Eclipse Ultron. Он не становится
+моделью живого голоса и не получает tools или права Sentinel Operator.
+
+1. Запустите Eclipse Ultron или отдельный Lab Ollama на `127.0.0.1:11435`. Для отдельного
+   процесса задайте `OLLAMA_MODELS` на `E:\ADMIN_HOPSON_PC\Программы\Eclipse AI Runtime\models\ollama`;
+   встроенный Electron-процесс задаёт этот каталог сам.
+2. Проверьте, что Ollama отвечает на `http://127.0.0.1:11435/api/tags`.
+3. Из корня репозитория выполните:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-qwen38-cyber.ps1
+```
+
+Скрипт скачает non-MTP GGUF примерно на 15 GiB, проверит SHA-256 и создаст модель
+`qwen3.8-cyber-iq4xs:27b` через Lab endpoint в его настроенном model store. Подробности и ограничения описаны в
+[реестре моделей](ultron-model-registry.md).

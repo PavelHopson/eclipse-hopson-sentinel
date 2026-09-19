@@ -25,6 +25,7 @@ E:\ADMIN_HOPSON_PC\Программы\Eclipse AI Runtime
 | Ollama | `0.32.15`, portable Windows amd64 | локальный model server | `ollama/ollama` |
 | HuiHui Qwen3.8 | `27b`, Q4_K_M | изолированный Lab-чат | `huihui_ai/qwen3.8-abliterated:27b` |
 | OrcaRouter Qwen3.8 | `27b`, Q4_K_M | установлен в изолированный Lab, benchmark ожидается | `chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF` |
+| Qwen3.8 Cyber | `27b`, IQ4_XS imatrix | ручной non-MTP импорт в изолированный Lab; benchmark pending | `cyjin-yl/Qwen3.8-27B-Uncensored-Cyber-agentic-imatrix-GGUF` |
 
 Проверенные SHA-256:
 
@@ -128,6 +129,12 @@ HuiHui Qwen3.8 abliterated не является доверенным planner и
 передаются shell, filesystem, network tools, secrets, MCP, install, deploy или operator
 execute. Результаты требуют ручной проверки. Снятие model-level отказов не ослабляет
 детерминированный Policy Gate Eclipse Ultron.
+
+Qwen3.8 Cyber подключается тем же безопасным Lab-контуром через
+`scripts/install-qwen38-cyber.ps1`. Скрипт использует non-MTP GGUF, проверяет опубликованный
+SHA-256 и импортирует его под alias `qwen3.8-cyber-iq4xs:27b`. Vision projector в HF-репозитории
+не входит, поэтому текущая интеграция поддерживает только текст. Модель не выбирается для live
+voice и не получает tools, shell, filesystem, network, secrets, MCP, install, deploy или execute.
 
 ## Hardware contract этой рабочей станции
 

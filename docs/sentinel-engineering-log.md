@@ -2,6 +2,16 @@
 
 This document records blocked checks, failed attempts, and known limitations during the build-out of `Eclipse Hopson Sentinel`.
 
+## 2026-09-18
+
+### Qwen3.8 Cyber IQ4_XS Lab integration
+
+- Added the `qwen3.8-cyber-iq4xs:27b` model entry to the isolated Ultron Lab inventory. The live voice profile remains pinned to `qwen3:8b`.
+- Added an explicit PowerShell installer that downloads the non-MTP GGUF from Hugging Face, verifies SHA-256 `d11d28b9b253fb7fc9de277a46af5bbd790c000d6bfdfe5648fd7b62ec2560b7`, and imports it into the loopback Lab Ollama store.
+- Configured the import defaults at `num_ctx=8192` and `num_predict=4096`; installation and smoke benchmarking remain pending. The advertised 262K context remains an unpromoted architectural claim until local hardware measurements are recorded.
+- Kept the model text-only: the matching vision projector is a separate artifact and the current dashboard has no image input contract.
+- Kept the model outside Sentinel Core tools, secrets and Operator authority because the publisher describes it as de-refusal/abliterated and cyber/offensive-security oriented.
+
 ## 2026-08-24
 
 ### Embedded desktop usage guide

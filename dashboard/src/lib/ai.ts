@@ -30,10 +30,24 @@ export const MODELS = [
     endpoint: 'lab',
     risk: 'experimental',
   },
+  {
+    id: 'qwen3.8-cyber-iq4xs:27b',
+    name: 'Qwen3.8 Cyber IQ4_XS · Lab',
+    desc: 'Agentic coding GGUF · текстовый эксперимент',
+    endpoint: 'lab',
+    risk: 'experimental',
+  },
 ] as const;
 
 export type ModelDefinition = (typeof MODELS)[number];
 export const VOICE_MODEL_ID = 'qwen3:8b';
+export const LAB_MODELS = MODELS.filter((model) => model.endpoint === 'lab');
+export const LAB_DEFAULT_MODEL_ID = 'qwen3.8-cyber-iq4xs:27b';
+
+export function getLabModelId(model?: string): string {
+  return LAB_MODELS.find((entry) => entry.id === model)?.id || LAB_DEFAULT_MODEL_ID;
+}
+
 const VOICE_WARMUP_TIMEOUT_MS = 120_000;
 let voiceWarmupInFlight: Promise<void> | null = null;
 
@@ -213,7 +227,7 @@ export async function checkProviderStatus(model?: string): Promise<{
     }
     const data: unknown = await resp.json();
     const models = providerModelNames(data);
-    const hasModel = models.some((n: string) => n.startsWith(m.split(':')[0]));
+    const hasModel = models.some((n: string) => n === m);
     return {
       provider: selected.endpoint === 'lab' ? 'Ollama Lab (локально)' : 'Ollama (локально)',
       model: m,
