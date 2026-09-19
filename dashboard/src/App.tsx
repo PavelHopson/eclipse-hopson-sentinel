@@ -4,14 +4,15 @@ import { SettingsPanel } from './components/SettingsPanel';
 import { BrandLockup } from './components/BrandMark';
 import { UsageGuide } from './components/UsageGuide';
 import { UltronAvatar } from './components/UltronAvatar';
-import { type ChatSession, type Message, createSession, loadSessions, saveSessions, VOICE_MODEL_ID } from './lib/ai';
+import { type ChatSession, type Message, createSession, getLabModelId, getModelDefinition, getSelectedModel, loadSessions, saveSessions, VOICE_MODEL_ID } from './lib/ai';
 import { type ContactTurn, type UltronPresenceState } from './lib/ultronPresence';
 
 const VoiceConversation = lazy(() => import('./components/UltronVoiceConversation').then((module) => ({ default: module.UltronVoiceConversation })));
 const VoiceCommandRoom = lazy(() => import('./components/VoiceCommandRoomV2').then((module) => ({ default: module.VoiceCommandRoom })));
+const LabChat = lazy(() => import('./components/Chat').then((module) => ({ default: module.Chat })));
 
 type ElectronWindowStyle = CSSProperties & { WebkitAppRegion: 'drag' | 'no-drag' };
-type Surface = 'conversation' | 'operator';
+type Surface = 'conversation' | 'operator' | 'lab';
 
 const DRAG_STYLE: ElectronWindowStyle = { WebkitAppRegion: 'drag' };
 const NO_DRAG_STYLE: ElectronWindowStyle = { WebkitAppRegion: 'no-drag' };
@@ -27,12 +28,13 @@ function loadInitialSessions(): ChatSession[] {
   return stored.length > 0 ? stored : [createSession(VOICE_MODEL_ID)];
 }
 
-function SurfaceLoading({ presence, motionEnabled }: { presence: UltronPresenceState; motionEnabled: boolean }) {
+function SurfaceLoading({ presence, motionEnabled, surface }: { presence: UltronPresenceState; motionEnabled: boolean; surface: Surface }) {
   const loadingPresence = presence === 'idle' ? 'thinking' : presence;
+  const isLab = surface === 'lab';
   return (
     <div className="surface-loading" role="status" aria-live="polite">
       <UltronAvatar presence={loadingPresence} size="chat" motionEnabled={motionEnabled} />
-      <span><strong>Альтрон выходит на связь</strong><small>Локальный голосовой контур запускается</small></span>
+      <span><strong>{isLab ? 'Lab выходит на связь' : 'Альтрон выходит на связь'}</strong><small>{isLab ? 'Изолированный текстовый контур запускается' : 'Локальный голосовой контур запускается'}</small></span>
     </div>
   );
 }
@@ -42,6 +44,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [usageGuideOpen, setUsageGuideOpen] = useState(() => localStorage.getItem(USAGE_GUIDE_STORAGE_KEY) !== '1');
   const [surface, setSurface] = useState<Surface>('conversation');
+  const [selectedModel, setSelectedModel] = useState(() => getLabModelId(getSelectedModel()));
   const [contactTurn, setContactTurn] = useState<ContactTurn | null>(null);
   const [presence, setPresence] = useState<UltronPresenceState>('idle');
   const [motionPreference, setMotionPreference] = useState(loadMotionPreference);
@@ -67,12 +70,11 @@ export default function App() {
   }, [presence]);
 
   const handleNew = () => {
-    const session = createSession(VOICE_MODEL_ID);
+    const session = createSession(surface === 'lab' ? selectedModel : VOICE_MODEL_ID);
     setSessions((current) => [session, ...current]);
     setActiveId(session.id);
     setContactTurn(null);
     setPresence('idle');
-    setSurface('conversation');
   };
 
   const handleMessagesChange = (messages: Message[]) => {
@@ -81,11 +83,39 @@ export default function App() {
       const firstQuestion = messages.find((message) => message.role === 'user')?.content.trim();
       return {
         ...session,
-        model: VOICE_MODEL_ID,
+        model: surface === 'lab' ? selectedModel : VOICE_MODEL_ID,
         messages,
         title: firstQuestion ? firstQuestion.slice(0, 48) : 'Новый разговор',
       };
     }));
+  };
+
+  const openSurface = (nextSurface: Surface) => {
+    const desiredModel = nextSurface === 'lab' ? getLabModelId(selectedModel) : VOICE_MODEL_ID;
+    const existing = sessions.find((session) => nextSurface === 'lab'
+      ? getModelDefinition(session.model).endpoint === 'lab' && session.model === desiredModel
+      : session.model === desiredModel);
+
+    if (existing) {
+      setActiveId(existing.id);
+    } else {
+      const session = createSession(desiredModel);
+      setSessions((current) => [session, ...current]);
+      setActiveId(session.id);
+    }
+    setContactTurn(null);
+    setPresence('idle');
+    setSurface(nextSurface);
+  };
+
+  const handleModelChange = (nextModel: string) => {
+    const labModel = getLabModelId(nextModel);
+    setSelectedModel(labModel);
+    if (surface !== 'lab' || activeSession.model === labModel) return;
+    const session = createSession(labModel);
+    setSessions((current) => [session, ...current]);
+    setActiveId(session.id);
+    setPresence('idle');
   };
 
   const closeUsageGuide = () => {
@@ -100,7 +130,7 @@ export default function App() {
 
   const openSurfaceFromGuide = (nextSurface: Surface) => {
     closeUsageGuide();
-    setSurface(nextSurface);
+    openSurface(nextSurface);
   };
 
   const queueConversationTurn = (text: string) => {
@@ -124,8 +154,9 @@ export default function App() {
             <BrandLockup />
           </div>
           <nav className="surface-switcher" aria-label="Режим Альтрона" style={NO_DRAG_STYLE}>
-            <button type="button" aria-pressed={surface === 'conversation'} onClick={() => setSurface('conversation')}>Альтрон</button>
-            <button type="button" aria-pressed={surface === 'operator'} onClick={() => setSurface('operator')}>Оператор</button>
+            <button type="button" aria-pressed={surface === 'conversation'} onClick={() => openSurface('conversation')}>Альтрон</button>
+            <button type="button" aria-pressed={surface === 'lab'} onClick={() => openSurface('lab')}>Lab</button>
+            <button type="button" aria-pressed={surface === 'operator'} onClick={() => openSurface('operator')}>Оператор</button>
           </nav>
           <div className="ultron-voice-header__tools" style={NO_DRAG_STYLE}>
             <div className="ultron-header-presence" data-state={presence}>
@@ -145,7 +176,7 @@ export default function App() {
         </header>
 
         <div className="sentinel-workspace flex-1 overflow-hidden">
-          <Suspense fallback={<SurfaceLoading presence={presence} motionEnabled={motionEnabled} />}>
+          <Suspense fallback={<SurfaceLoading presence={presence} motionEnabled={motionEnabled} surface={surface} />}>
             {surface === 'conversation' ? (
               <VoiceConversation
                 messages={activeSession.messages}
@@ -155,6 +186,17 @@ export default function App() {
                 presence={presence}
                 onPresenceChange={setPresence}
                 motionEnabled={motionEnabled}
+              />
+            ) : surface === 'lab' ? (
+              <LabChat
+                messages={activeSession.messages}
+                onMessagesChange={handleMessagesChange}
+                showGuide={false}
+                autoSpeak={false}
+                onPresenceChange={setPresence}
+                motionEnabled={motionEnabled}
+                model={selectedModel}
+                labMode
               />
             ) : (
               <VoiceCommandRoom
@@ -169,7 +211,11 @@ export default function App() {
         </div>
       </main>
 
-      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onModelChange={handleModelChange}
+      />
       <UsageGuide
         open={usageGuideOpen}
         onClose={closeUsageGuide}

@@ -1,6 +1,6 @@
 # Eclipse Ultron model registry
 
-Updated: 2026-08-25
+Updated: 2026-09-18
 
 ## Production voice profile
 
@@ -16,6 +16,17 @@ The voice surface pins this model. A stored Lab selection cannot silently replac
 |---|---|---|---|
 | `huihui_ai/qwen3.8-abliterated:27b` Q4_K_M | Installed | Ollama Lab on `127.0.0.1:11435`; no tools, files, shell, network, secrets, or Operator execute | Retain for comparisons. Measured cold start on this PC was about 233 seconds, so it is excluded from live voice. |
 | `hf.co/chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF:Q4_K_M` | Installed, benchmark pending | Same Lab boundary; never a voice default | Keep as a local Q4 experiment and benchmark against HuiHui before any promotion. |
+| `qwen3.8-cyber-iq4xs:27b` | Import script ready, benchmark pending | Non-MTP GGUF from `cyjin-yl`, imported into the same Lab endpoint; no tools, files, shell, network, secrets, or Operator execute | Use the explicit installer, verify the pinned SHA-256, then benchmark before any promotion. |
+
+### Qwen3.8 Cyber IQ4_XS
+
+- Source: <https://huggingface.co/cyjin-yl/Qwen3.8-27B-Uncensored-Cyber-agentic-imatrix-GGUF>
+- Import artifact: `Qwen3.8-27B-Uncensored-Cyber-IQ4_XS-imatrix-fromq8.gguf` (about 14.96 GiB).
+- Pinned SHA-256: `d11d28b9b253fb7fc9de277a46af5bbd790c000d6bfdfe5648fd7b62ec2560b7`.
+- The repository also publishes a `plus-mtp` artifact. It is intended for a runtime that supports the grafted MTP tensors; the Lab installer deliberately uses the conventional non-MTP file.
+- The model card reports a 262,144-token architectural/production configuration, but that result was measured with FastLLM on a V100. The Ultron pilot starts at `num_ctx=8192` and `num_predict=4096`; raise those only after measuring VRAM, RAM, cold start and sustained tokens/sec on the target machine.
+- The vision projector is a separate artifact and is not included in the imported GGUF. The current Ultron chat is text-only, so this integration does not claim image understanding.
+- The publisher describes the upstream model as de-refusal/abliterated and cyber/offensive-security oriented. Treat its output as untrusted text; it receives no tools or credentials and cannot authorize actions.
 
 ## Evidence review: OrcaRouter and AEON
 

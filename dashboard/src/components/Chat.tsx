@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Code2, FolderSearch, Send, ShieldCheck, Square, Mic, MicOff } from 'lucide-react';
-import { sendMessage, type Message, getSelectedModel, MODELS } from '../lib/ai';
+import { sendMessage, type Message, getModelDefinition } from '../lib/ai';
 import { isLocalSTTSupported, listenOnceLocal, speak, stopSpeaking } from '../lib/voice';
 import { MessageBubble } from './MessageBubble';
 import { VoiceWave } from './VoiceWave';
@@ -23,6 +23,8 @@ interface ChatProps {
   onExternalTurnApplied?: () => void;
   onPresenceChange?: (state: UltronPresenceState) => void;
   motionEnabled: boolean;
+  model?: string;
+  labMode?: boolean;
 }
 
 export function Chat({
@@ -34,6 +36,8 @@ export function Chat({
   onExternalTurnApplied,
   onPresenceChange,
   motionEnabled,
+  model,
+  labMode = false,
 }: ChatProps) {
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -46,7 +50,7 @@ export function Chat({
   const appliedTurnRef = useRef<number | null>(null);
   const turnSequenceRef = useRef(0);
 
-  const currentModel = MODELS.find(m => m.id === getSelectedModel());
+  const currentModel = getModelDefinition(model);
   const localVoiceAvailable = isLocalSTTSupported();
 
   useEffect(() => {
@@ -76,7 +80,7 @@ export function Chat({
       await sendMessage(newMessages, (chunk) => {
         assistantMsg.content += chunk;
         onMessagesChange([...newMessages, { ...assistantMsg }]);
-      }, controller.signal);
+      }, controller.signal, model);
 
       if ((autoSpeak || options.forceSpeak) && assistantMsg.content) {
         setSpeaking(true);
@@ -99,7 +103,7 @@ export function Chat({
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [autoSpeak, input, messages, onMessagesChange, onPresenceChange, streaming]);
+  }, [autoSpeak, input, messages, model, onMessagesChange, onPresenceChange, streaming]);
 
   useEffect(() => {
     if (!externalTurn || appliedTurnRef.current === externalTurn.id) return;
@@ -158,20 +162,25 @@ export function Chat({
           {messages.length === 0 && (
             <div className="chat-empty">
               <div className="chat-empty__mark"><UltronAvatar presence="idle" size="chat" motionEnabled={motionEnabled} /></div>
-              <p className="chat-empty__eyebrow">Eclipse Forge · Ultron</p>
-              <h1>Чем займёмся?</h1>
+              <p className="chat-empty__eyebrow">{labMode ? 'Eclipse Forge · Lab' : 'Eclipse Forge · Ultron'}</p>
+              <h1>{labMode ? 'Исследовательский чат' : 'Чем займёмся?'}</h1>
               <p className="chat-empty__lead">
-                Локальный AI-помощник для проектов, кода и безопасных операторских задач. Выберите быстрый старт или сформулируйте свой запрос.
+                {labMode
+                  ? 'Изолированный локальный текстовый контур без инструментов, shell, доступа к файлам и сети. Ответы модели требуют самостоятельной проверки.'
+                  : 'Локальный AI-помощник для проектов, кода и безопасных операторских задач. Выберите быстрый старт или сформулируйте свой запрос.'}
               </p>
               <div className="quick-prompts" aria-label="Быстрый старт">
-                {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+                {(labMode ? [
+                  { icon: Code2, label: 'Разобрать фрагмент кода', prompt: 'Разбери следующий фрагмент кода, укажи предположения и возможные ошибки: ' },
+                  { icon: ShieldCheck, label: 'Проверить идею', prompt: 'Проверь эту техническую идею на противоречия и риски: ' },
+                ] : QUICK_PROMPTS).map(({ icon: Icon, label, prompt }) => (
                   <button key={label} type="button" onClick={() => setInput(prompt)}>
                     <Icon size={16} aria-hidden="true" />
                     <span>{label}</span>
                   </button>
                 ))}
               </div>
-              {showGuide && (
+              {showGuide && !labMode && (
                 <div className="mt-4 border-l-2 border-accent/40 pl-3 text-[11px] leading-relaxed text-text-3">
                   Enter отправляет сообщение. Голосовой ввод включается отдельной кнопкой и не запускается автоматически.
                 </div>
@@ -184,7 +193,7 @@ export function Chat({
           ))}
 
           {/* Voice wave indicator */}
-          {(listening || speaking) && (
+          {!labMode && (listening || speaking) && (
             <div className="flex justify-center py-2" role="status" aria-live="polite">
               <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-card border border-border">
                 <VoiceWave active={true} mode={listening ? 'listening' : 'speaking'} />
@@ -200,8 +209,8 @@ export function Chat({
       {/* Input */}
       <div className="chat-composer-shell border-t border-border p-3 sm:p-4">
         <div className="chat-composer flex gap-2">
-          {/* Voice button */}
-          <Tooltip text={localVoiceAvailable ? 'Голос заполнит поле — проверьте текст перед отправкой' : 'Голос доступен в Eclipse Ultron Desktop'} show={showGuide}>
+          {/* Voice button stays out of the isolated Lab surface. */}
+          {!labMode && <Tooltip text={localVoiceAvailable ? 'Голос заполнит поле — проверьте текст перед отправкой' : 'Голос доступен в Eclipse Ultron Desktop'} show={showGuide}>
             <button onClick={captureVoice} type="button" aria-label={listening ? 'Идёт распознавание речи' : 'Заполнить сообщение голосом'} disabled={!localVoiceAvailable || listening || streaming}
               className={`w-11 h-11 flex items-center justify-center rounded-xl border shrink-0 transition-all ${
                 listening
@@ -210,12 +219,12 @@ export function Chat({
               } disabled:opacity-30`}>
               {listening ? <MicOff size={16} /> : <Mic size={16} />}
             </button>
-          </Tooltip>
+          </Tooltip>}
 
           {/* Text input */}
           <input type="text" value={input}
             ref={inputRef}
-            aria-label="Сообщение для Альтрона"
+            aria-label={labMode ? 'Сообщение для исследовательского чата' : 'Сообщение для Альтрона'}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder={`Сообщение для ${currentModel?.name || 'Альтрона'}…`}
@@ -235,7 +244,7 @@ export function Chat({
             </button>
           )}
         </div>
-        {voiceError && <p className="mt-2 text-[11px] text-red-400" role="alert">{voiceError}</p>}
+        {voiceError && !labMode && <p className="mt-2 text-[11px] text-red-400" role="alert">{voiceError}</p>}
       </div>
     </div>
   );

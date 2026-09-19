@@ -1,119 +1,75 @@
-# Sentinel + Ollama: Локальные AI-модели
+# Sentinel и Ollama: локальные модели
 
-## Рекомендуемая модель
+В репозитории есть два разных контура:
 
-### Huihui-Qwen 3.5 35B (abliterated) — основная
-```bash
-ollama run huihui-ai/Huihui-Qwen3.5-35B-A3B-abliterated
+- **Sentinel Core** — coding-agent, который может получить tools и полномочия из текущей сессии;
+- **Eclipse Ultron Lab** — изолированный текстовый чат на loopback, без tools, shell, filesystem, network, secrets, install, deploy и Operator execute.
+
+Модели с пометками *uncensored*, *abliterated* или *cyber/offensive-security* считаются недоверенными генераторами текста. Новую Qwen3.8 Cyber подключаем только к Lab. Не указывайте её как обычный OPENAI_MODEL в Sentinel Core, пока не появится отдельный проверенный capability profile и набор ограничений для tools.
+
+## Qwen3.8 Cyber IQ4_XS · Lab
+
+Источник — [cyjin-yl/Qwen3.8-27B-Uncensored-Cyber-agentic-imatrix-GGUF](https://huggingface.co/cyjin-yl/Qwen3.8-27B-Uncensored-Cyber-agentic-imatrix-GGUF).
+
+Для обычного GGUF/Ollama-импорта используется non-MTP-файл:
+
+```
+Qwen3.8-27B-Uncensored-Cyber-IQ4_XS-imatrix-fromq8.gguf
+Размер: около 14.96 GiB
+SHA-256: d11d28b9b253fb7fc9de277a46af5bbd790c000d6bfdfe5648fd7b62ec2560b7
 ```
 
-| Параметр | Значение |
-|----------|----------|
-| Размер | 35B параметров (MoE, 3B активных) |
-| RAM | ~8-12 GB (MoE — лёгкая для своего размера) |
-| GPU | опционально, работает на CPU |
-| Цензура | **нет** — abliterated, без отказов |
-| Приватность | 100% локально, офлайн |
-| Базовая модель | Qwen 3.5 |
-| Источник | [HuggingFace](https://huggingface.co/huihui-ai/Huihui-Qwen3.5-35B-A3B-abliterated) |
+Файл plus-mtp предназначен для runtime с поддержкой grafted MTP-тензоров и в этот импорт не входит. Vision projector также является отдельным артефактом; текущий Ultron Chat принимает только текст.
 
-**Почему именно эта:**
-- MoE-архитектура — только 3B параметров активны одновременно, поэтому 35B модель работает как 7B по скорости
-- Abliterated — удалены все ограничения, модель не отказывает в задачах
-- Qwen 3.5 база — одна из лучших open-source моделей для кодинга и русского языка
-- Полностью приватно — данные не покидают вашу машину
+### Импорт в изолированный Lab
 
-### Для быстрых задач
-```bash
-ollama run qwen2.5-coder:7b
-```
-- Лёгкая модель для автодополнения и быстрых правок
-- RAM: ~5GB
-- Идеально как `SMALL_MODEL` в SmartRouter
+Убедитесь, что portable Lab Ollama запущен на 127.0.0.1:11435, затем из корня репозитория выполните:
 
-### Для анализа кода
-```bash
-ollama run deepseek-coder-v2:16b
-```
-- Сильная модель для code review и архитектурных решений
-- RAM: ~12GB
-
-## Облачная альтернатива: Qwen 3.6 (бесплатно)
-
-Если нужна мощная модель без локальной установки:
-
-```bash
-# Через OpenRouter (бесплатный API)
-OPENAI_BASE_URL=https://openrouter.ai/api/v1
-OPENAI_API_KEY=sk-or-v1-ваш-ключ
-OPENAI_MODEL=qwen/qwen3.6-plus-preview:free
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-qwen38-cyber.ps1
 ```
 
-| Параметр | Значение |
-|----------|----------|
-| Контекст | **1 000 000 токенов** |
-| Стоимость | бесплатно (free tier) |
-| Рассуждение | улучшенное (chain-of-thought) |
-| Кодинг | на уровне GPT-4o |
-| Ключ | [openrouter.ai/keys](https://openrouter.ai/workspaces/default/keys) |
+Скрипт:
 
-## Настройка Sentinel
+1. скачивает фиксированный non-MTP-файл с Hugging Face;
+2. проверяет SHA-256 до импорта;
+3. создаёт Ollama Modelfile с num_ctx 8192 и num_predict 4096;
+4. создаёт alias qwen3.8-cyber-iq4xs:27b через Lab endpoint (каталог store принадлежит уже запущенному серверу);
+5. не запускается автоматически из Electron и не кладёт модельные веса в Git или installer.
 
-### Вариант 1: Локально (Ollama)
-```bash
-# 1. Установите Ollama
-# https://ollama.com/download
+Если модель не импортируется, проверьте версию Ollama и выполните ollama show qwen3.8-cyber-iq4xs:27b. IQ4_XS не следует считать совместимой с любой старой сборкой только по расширению .gguf.
 
-# 2. Скачайте модель
-ollama run huihui-ai/Huihui-Qwen3.5-35B-A3B-abliterated
+### Проверка
 
-# 3. В .env:
-CLAUDE_CODE_USE_OPENAI=1
-OPENAI_BASE_URL=http://localhost:11434/v1
-OPENAI_API_KEY=ollama
-OPENAI_MODEL=huihui-ai/Huihui-Qwen3.5-35B-A3B-abliterated
+```powershell
+$env:OLLAMA_HOST = "127.0.0.1:11435"
+curl.exe http://127.0.0.1:11435/api/tags
+
+curl.exe http://127.0.0.1:11435/v1/chat/completions `
+  -H "Content-Type: application/json" `
+  -H "Authorization: Bearer ollama" `
+  -d '{"model":"qwen3.8-cyber-iq4xs:27b","messages":[{"role":"user","content":"Ответь OK."}],"stream":false,"max_tokens":16}'
 ```
 
-### Вариант 2: Облако (OpenRouter + Qwen 3.6)
-```bash
-# 1. Получите ключ: https://openrouter.ai/workspaces/default/keys
+Начинайте с num_ctx=8192. Заявленные 262K — архитектурный/production-результат из карточки модели для FastLLM на V100, а не безопасный default для RTX 4060 Ti. Перед повышением контекста зафиксируйте cold start, warm latency, tokens/sec, RAM/VRAM и отсутствие OOM.
 
-# 2. В .env:
-CLAUDE_CODE_USE_OPENAI=1
-OPENAI_BASE_URL=https://openrouter.ai/api/v1
-OPENAI_API_KEY=sk-or-v1-ваш-ключ
-OPENAI_MODEL=qwen/qwen3.6-plus-preview:free
+## Sentinel Core: обычный локальный профиль
+
+Для Core используйте модель, которую вы отдельно признали доверенной для текущего набора tools, например:
+
+```powershell
+$env:CLAUDE_CODE_USE_OPENAI = "1"
+$env:OPENAI_BASE_URL = "http://127.0.0.1:11434/v1"
+$env:OPENAI_API_KEY = "ollama"
+$env:OPENAI_MODEL = "qwen2.5-coder:7b"
+
+sentinel
 ```
 
-### Вариант 3: SmartRouter (авто-балансировка)
-```bash
-# В .env:
-ROUTER_MODE=smart
-ROUTER_STRATEGY=balanced
-OPENROUTER_API_KEY=sk-or-v1-ваш-ключ
-# SmartRouter автоматически выберет лучший провайдер
-# Ollama (локальный, бесплатный) → OpenRouter (облако, бесплатный) → OpenAI (платный)
-```
+Обычный OpenAI-compatible shim пересылает schemas tools в локальный endpoint. Поэтому перевод недоверенной Qwen3.8 Cyber в Core — это отдельная задача с явным capability profile, fail-closed ограничением tools и аудитом; эта интеграция этого не включает.
 
-## Преимущества локальных моделей
+## Откат
 
-- **Приватность** — код не покидает вашу машину
-- **Без rate limits** — генерируйте сколько нужно
-- **Без цензуры** — модель не отказывает в задачах
-- **Без интернета** — работает полностью офлайн
-- **Бесплатно** — никаких API-ключей и подписок
+Модель можно удалить из Lab store через Ollama после остановки активного запроса. Голосовой профиль не меняется: live voice по-прежнему закреплён за qwen3:8b на 127.0.0.1:11434.
 
-## R&D: Colibri и disk-streamed MoE
-
-[Colibri](https://github.com/JustVugg/colibri) показывает другой класс локального runtime: GLM-5.2 744B MoE запускается через pure C engine, dense-часть держится в RAM, а expert-блоки стримятся с диска.
-
-Для Sentinel это **не замена Ollama сейчас**, а reference для будущего `sentinel doctor model`:
-
-- заранее считать RAM / disk / VRAM budget
-- предупреждать, если модель физически запускается, но будет очень медленной
-- показывать safe next action вместо “магической” кнопки запуска
-- отдавать machine-readable JSON для desktop shell и bridge-клиентов
-
-Reality check: по данным проекта Colibri, int4 модель занимает сотни GB на диске, а cold decode упирается в скорость чтения. Поэтому не скачиваем и не включаем в обычный setup без отдельного hardware/time плана.
-
-Подробнее: [sentinel-local-model-runtime-rd.md](sentinel-local-model-runtime-rd.md).
+Подробные ограничения и статус сравнения находятся в [реестре моделей](ultron-model-registry.md).

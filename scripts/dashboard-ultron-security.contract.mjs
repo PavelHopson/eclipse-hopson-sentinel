@@ -74,13 +74,32 @@ test('Ultron Lab routes the abliterated model to a separate local endpoint witho
   assert.doesNotMatch(ai, /tools\s*:/)
   assert.match(settings, /Qwen 3 8B · голосовой профиль/)
   assert.match(settings, /Живой режим включается только вручную/)
-  assert.doesNotMatch(settings, /HuiHui|Lab-профиль/)
   assert.match(main, /OLLAMA_HOST: '127\.0\.0\.1:11435'/)
   assert.match(main, /OLLAMA_MODELS: labOllamaModels/)
   assert.match(main, /OLLAMA_LOAD_TIMEOUT: '15m'/)
   assert.match(main, /spawn\(labOllamaExecutable, \['serve'\]/)
   assert.match(html, /connect-src[^;]*http:\/\/127\.0\.0\.1:11435/)
+  assert.match(settings, /Модель диалога/)
+  assert.match(settings, /LAB_MODELS\.map/)
   assert.doesNotMatch(`${ai}\n${main}`, /0\.0\.0\.0:11435/)
+})
+
+test('Qwen3.8 Cyber Lab import is explicit, verified and bounded', async () => {
+  const [ai, installer] = await Promise.all([
+    readText('dashboard/src/lib/ai.ts'),
+    readText('scripts/install-qwen38-cyber.ps1'),
+  ])
+
+  assert.match(ai, /qwen3\.8-cyber-iq4xs:27b/)
+  assert.match(ai, /qwen3\.8-cyber-iq4xs:27b[\s\S]*endpoint: 'lab'/)
+  assert.match(ai, /Agentic coding GGUF · текстовый эксперимент/)
+  assert.match(ai, /LAB_DEFAULT_MODEL_ID = 'qwen3\.8-cyber-iq4xs:27b'/)
+  assert.match(installer, /127\.0\.0\.1:11435/)
+  assert.match(installer, /d11d28b9b253fb7fc9de277a46af5bbd790c000d6bfdfe5648fd7b62ec2560b7/)
+  assert.match(installer, /Get-FileHash -Algorithm SHA256/)
+  assert.match(installer, /PARAMETER num_ctx 8192/)
+  assert.match(installer, /PARAMETER num_predict 4096/)
+  assert.doesNotMatch(installer, /plus-mtp/i)
 })
 
 test('Ultron live microphone remains explicit, local, bounded and cancellable', async () => {
@@ -153,7 +172,14 @@ test('Ultron command center exposes explicit safety, voice and accessible motion
   assert.match(room, /onVoiceQuestion\(result\.text\)/)
   assert.match(app, /onVoiceQuestion=\{queueConversationTurn\}/)
   assert.match(app, /VOICE_MODEL_ID/)
-  assert.doesNotMatch(app, /components\/Chat|components\/Sidebar|UltronContactDock/)
+  assert.match(app, /components\/Chat/)
+  assert.match(app, /type Surface = 'conversation' \| 'operator' \| 'lab'/)
+  assert.match(app, /surface === 'lab'/)
+  assert.match(app, /labMode/)
+  assert.match(app, /model=\{selectedModel\}/)
+  assert.match(app, /getLabModelId\(getSelectedModel\(\)\)/)
+  assert.match(app, /getModelDefinition\(session\.model\)\.endpoint === 'lab'/)
+  assert.doesNotMatch(app, /components\/Sidebar|UltronContactDock/)
   assert.match(conversation, /listenOnceLocal/)
   assert.match(conversation, /sendMessage/)
   assert.match(conversation, /VOICE_MODEL_ID/)

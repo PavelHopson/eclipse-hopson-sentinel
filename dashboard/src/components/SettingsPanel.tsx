@@ -8,15 +8,18 @@ import {
   stopSpeaking,
   type VoicePreferences,
 } from '../lib/voice';
+import { getLabModelId, getSelectedModel, LAB_MODELS, setSelectedModel as persistSelectedModel } from '../lib/ai';
 
 interface SettingsPanelProps {
   open: boolean;
   onClose: () => void;
+  onModelChange?: (modelId: string) => void;
 }
 
-export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ open, onClose, onModelChange }: SettingsPanelProps) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voicePreferences, setVoicePreferences] = useState<VoicePreferences>(() => loadVoicePreferences());
+  const [selectedModel, setSelectedModel] = useState(() => getLabModelId(getSelectedModel()));
   const [previewing, setPreviewing] = useState(false);
 
   const closePanel = () => {
@@ -53,6 +56,14 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
     const saved = saveVoicePreferences(next);
     setVoicePreferences(saved);
   };
+
+  const updateModel = (modelId: string) => {
+    persistSelectedModel(modelId);
+    setSelectedModel(modelId);
+    onModelChange?.(modelId);
+  };
+
+  const selectedModelDefinition = LAB_MODELS.find((model) => model.id === selectedModel) || LAB_MODELS[0]!;
 
   const previewVoice = async () => {
     if (previewing) {
@@ -104,6 +115,27 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
               <p className="text-[10px] text-text-3">Закреплён для быстрой живой беседы без долгого старта 27B</p>
             </div>
           </div>
+          <section className="space-y-2 px-4 py-4 bg-card border border-border rounded-xl" aria-labelledby="chat-model-title">
+            <div>
+              <p id="chat-model-title" className="text-xs font-medium text-text-1">Модель диалога</p>
+              <p className="mt-1 text-[10px] text-text-3">Выбор действует только для локального текстового чата. Живой голос остаётся на Qwen 3 8B.</p>
+            </div>
+            <select
+              id="ultron-chat-model"
+              aria-label="Модель локального диалога"
+              value={selectedModel}
+              onChange={(event) => updateModel(event.target.value)}
+              className="w-full rounded-lg border border-border bg-panel px-3 py-2.5 text-xs text-text-1 outline-none focus:border-accent"
+            >
+              {LAB_MODELS.map((model) => (
+                <option key={model.id} value={model.id}>{model.name}</option>
+              ))}
+            </select>
+            <p className="text-[10px] leading-relaxed text-text-3">{selectedModelDefinition.desc}</p>
+            {selectedModelDefinition.risk === 'experimental' && (
+              <p className="text-[10px] leading-relaxed text-amber-300">Экспериментальный Lab-профиль: проверьте модель и не передавайте ей секреты или команды.</p>
+            )}
+          </section>
           <div className="grid grid-cols-2 gap-3">
             <div className="px-4 py-3 bg-card border border-border rounded-xl">
               <p className="flex items-center gap-2 text-xs font-medium text-text-1"><Mic size={14} /> Whisper offline</p>

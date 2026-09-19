@@ -94,3 +94,22 @@ test('gpt-5.4 family keeps large max output overrides within provider limits', (
   expect(getMaxOutputTokensForModel('gpt-5.4-mini')).toBe(128_000)
   expect(getMaxOutputTokensForModel('gpt-5.4-nano')).toBe(128_000)
 })
+
+test('Qwen3.8 Cyber Lab keeps the first hardware pilot bounded', () => {
+  process.env.CLAUDE_CODE_USE_OPENAI = '1'
+  delete process.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS
+
+  expect(getContextWindowForModel('qwen3.8-cyber-iq4xs:27b')).toBe(8_192)
+  expect(getModelMaxOutputTokens('qwen3.8-cyber-iq4xs:27b')).toEqual({
+    default: 4_096,
+    upperLimit: 4_096,
+  })
+  expect(getMaxOutputTokensForModel('qwen3.8-cyber-iq4xs:27b')).toBe(4_096)
+})
+
+test('Qwen3.8 Cyber Lab clamps oversized output overrides', () => {
+  process.env.CLAUDE_CODE_USE_OPENAI = '1'
+  process.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS = '32000'
+
+  expect(getMaxOutputTokensForModel('qwen3.8-cyber-iq4xs:27b')).toBe(4_096)
+})

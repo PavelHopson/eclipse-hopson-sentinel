@@ -71,10 +71,13 @@ test('Ultron shell exposes branded, accessible and responsive primary paths', as
   const css = `${baseCss}\n${brandCss}\n${ultronCss}`
 
   assert.match(app, /BrandLockup/)
-  assert.match(app, /type Surface = 'conversation' \| 'operator'/)
+  assert.match(app, /type Surface = 'conversation' \| 'operator' \| 'lab'/)
   assert.match(app, />Альтрон<\/button>/)
+  assert.match(app, />Lab<\/button>/)
   assert.match(app, />Оператор<\/button>/)
-  assert.doesNotMatch(app, /components\/Chat|components\/Sidebar|UltronContactDock/)
+  assert.match(app, /components\/Chat/)
+  assert.match(app, /surface === 'lab'/)
+  assert.doesNotMatch(app, /components\/Sidebar|UltronContactDock/)
   assert.match(conversation, /Включить живой разговор/)
   assert.match(conversation, /Последний голосовой обмен/)
   assert.doesNotMatch(conversation, /<input|<textarea/)

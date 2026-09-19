@@ -63,6 +63,9 @@ const OPENAI_CONTEXT_WINDOWS: Record<string, number> = {
   'phi4:14b':                  16_384,
   'gemma2:27b':                 8_192,
   'codellama:13b':              16_384,
+  // cyjin-yl Qwen3.8 Cyber IQ4_XS: architectural 262K is not a safe
+  // default on the Lab workstation; the imported Modelfile starts at 8K.
+  'qwen3.8-cyber-iq4xs:27b':   8_192,
 }
 
 /**
@@ -120,6 +123,7 @@ const OPENAI_MAX_OUTPUT_TOKENS: Record<string, number> = {
   'phi4:14b':                   4_096,
   'gemma2:27b':                 4_096,
   'codellama:13b':              4_096,
+  'qwen3.8-cyber-iq4xs:27b':   4_096,
 }
 
 function lookupByModel<T>(table: Record<string, T>, model: string): T | undefined {
