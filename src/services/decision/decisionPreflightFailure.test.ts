@@ -19,6 +19,26 @@ test('classifies runtime and HTTP failures without exposing raw messages', () =>
   assert.equal(classifyDecisionPreflightFailure({ status: 503 }), 'http-5xx')
   assert.equal(classifyDecisionPreflightFailure({ status: 422 }), 'http-error')
   assert.equal(
+    classifyDecisionPreflightFailure({ response: { status: 403 } }),
+    'http-403',
+  )
+  assert.equal(
+    classifyDecisionPreflightFailure({ cause: { statusCode: 429 } }),
+    'http-429',
+  )
+  assert.equal(
+    classifyDecisionPreflightFailure({ name: 'AuthenticationError' }),
+    'http-401',
+  )
+  assert.equal(
+    classifyDecisionPreflightFailure({ name: 'PermissionDeniedError' }),
+    'http-403',
+  )
+  assert.equal(
+    classifyDecisionPreflightFailure({ name: 'APIConnectionError' }),
+    'network',
+  )
+  assert.equal(
     classifyDecisionPreflightFailure({ code: 'ECONNRESET' }),
     'network',
   )

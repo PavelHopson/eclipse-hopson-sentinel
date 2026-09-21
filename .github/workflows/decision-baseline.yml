@@ -4,24 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       model:
-        description: GitHub Models model ID or Sentinel alias
+        description: OpenAI API model ID
         required: true
-        default: github:copilot
+        default: gpt-5.6-luna
         type: string
 
 permissions:
   contents: read
-  models: read
 
 jobs:
   baseline:
-    name: GitHub Models baseline
+    name: OpenAI API baseline
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     env:
-      CLAUDE_CODE_USE_GITHUB: '1'
-      GITHUB_TOKEN: ${{ github.token }}
+      CLAUDE_CODE_USE_OPENAI: '1'
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ inputs.model }}
 
     steps:
@@ -44,6 +43,15 @@ jobs:
             echo "Decision baseline must run from the current main revision." >&2
             echo "Use Actions → Decision Baseline Evidence → Run workflow on branch main; do not use Re-run jobs on an older run." >&2
             exit 1
+          fi
+
+      - name: Verify OpenAI API credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "OPENAI_API_KEY repository secret is required for Decision Baseline Evidence." >&2
+            exit 2
           fi
 
       - name: Setup Bun
