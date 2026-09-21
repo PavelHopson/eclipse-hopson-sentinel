@@ -49,7 +49,7 @@ jobs:
             exit 1
           fi
 
-          bun run decision:shadow:validate -- --report "$report"
+          bun run decision:shadow:validate -- --report "$report" --require-live-engine
           echo "REPORT_PATH=$report" >> "$GITHUB_ENV"
 
       - name: Upload baseline evidence

@@ -44,7 +44,8 @@ The workflow is **manual only**. It is not triggered by push, pull request, sche
 3. runs `decision:shadow:baseline`;
 4. locates the timestamped JSON evidence file;
 5. validates the file against `sentinel.decision-shadow-report.v1`;
-6. uploads only the validated evidence JSON as an Actions artifact.
+6. requires at least one schema-valid live decision before treating the run as baseline evidence;
+7. uploads only the validated evidence JSON as an Actions artifact.
 
 The workflow does not modify repository contents, open PRs, update model defaults, or enable canary
 traffic.
@@ -54,3 +55,17 @@ traffic.
 Running the workflow invokes GitHub Models inference for the fixed 18-case seed corpus. Because
 model access can be subject to account-specific quotas or billing, the workflow requires an
 explicit human **Run workflow** action and is never automatic.
+
+
+## Invalid diagnostic runs
+
+A workflow can produce a schema-valid JSON file even when the decision engine itself failed before
+inference. Such a file is diagnostic evidence, not a model baseline.
+
+The workflow therefore uses `--require-live-engine`. If the report contains zero valid decisions,
+the job fails before artifact upload.
+
+The first diagnostic run on 2026-09-21 exposed a raw-script compatibility bug: `sideQuery` and
+the attribution header referenced build-time `MACRO.VERSION` directly. In a raw Bun script that
+symbol can be absent, causing every case to fail locally before any provider request. The runtime
+now resolves the version through a raw-script-safe fallback instead.

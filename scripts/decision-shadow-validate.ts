@@ -10,6 +10,7 @@ function readArg(name: string): string | null {
 
 async function main(): Promise<void> {
   const reportPath = readArg('--report')
+  const requireLiveEngine = process.argv.includes('--require-live-engine')
   if (!reportPath) {
     process.stderr.write(
       'Usage: bun run decision:shadow:validate -- --report <file>\n',
@@ -30,6 +31,15 @@ async function main(): Promise<void> {
   }
 
   const { report } = validation
+
+  if (requireLiveEngine && report.metrics.valid === 0) {
+    process.stderr.write(
+      'Decision shadow report has zero valid decisions; live engine was not established.\n',
+    )
+    process.exitCode = 3
+    return
+  }
+
   process.stdout.write(
     `${JSON.stringify(
       {

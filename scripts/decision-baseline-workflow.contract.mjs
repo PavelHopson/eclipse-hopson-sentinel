@@ -58,6 +58,7 @@ test('decision baseline workflow validates evidence before artifact upload', asy
 
   assert.ok(validateIndex >= 0)
   assert.ok(uploadIndex > validateIndex)
+  assert.match(text, /decision:shadow:validate -- --report \"\$report\" --require-live-engine/)
   assert.match(text, /if-no-files-found: error/)
   assert.match(text, /retention-days: 30/)
 })
