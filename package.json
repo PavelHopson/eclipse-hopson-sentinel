@@ -66,7 +66,8 @@
     "prepack": "npm run build",
     "decision:shadow:baseline": "bun run scripts/decision-shadow-baseline.ts",
     "decision:shadow:compare": "bun run scripts/decision-shadow-compare.ts",
-    "decision:shadow:validate": "bun run scripts/decision-shadow-validate.ts"
+    "decision:shadow:validate": "bun run scripts/decision-shadow-validate.ts",
+    "recovery:journal:inspect": "bun run scripts/recovery-journal-inspect.ts"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "0.3.0",
