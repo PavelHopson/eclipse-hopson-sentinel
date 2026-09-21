@@ -38,7 +38,9 @@ closed rather than being truncated.
 
 ## Output hygiene
 
-The report prints:
+The report is printed to stdout and also persisted as a new timestamped evidence file under `reports/decision-shadow/`. The directory is gitignored and prior runs are preserved.
+
+The report contains:
 
 - case ID;
 - expected / actual decision;
@@ -58,4 +60,4 @@ This command is diagnostic only. It does not change routing, select a new defaul
 tools, or enable canary traffic.
 
 The next candidate engine (including a future Jev adapter) must be evaluated against the same corpus
-and compared to this baseline before any canary discussion.
+and compared to this baseline before any canary discussion. Use `bun run decision:shadow:compare -- --baseline <file> --candidate <file>`; even a passing comparison only makes the candidate eligible for human canary review and never authorizes canary traffic.
