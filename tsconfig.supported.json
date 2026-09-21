@@ -10,7 +10,11 @@
     "src/operations/adsSpendAnomaly.ts",
     "src/operations/adsSpendAnomaly.test.ts",
     "src/utils/providerRecommendation.ts",
-    "src/utils/providerRecommendation.test.ts"
+    "src/utils/providerRecommendation.test.ts",
+    "src/services/decision/decisionLayer.ts",
+    "src/services/decision/decisionLayer.test.ts",
+    "src/services/recovery/recoveryPolicy.ts",
+    "src/services/recovery/recoveryPolicy.test.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
