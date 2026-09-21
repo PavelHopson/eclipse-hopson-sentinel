@@ -26,7 +26,11 @@
     "src/services/recovery/supervisedRecoverySession.ts",
     "src/services/recovery/supervisedRecoverySession.test.ts",
     "src/services/recovery/recoverySimulation.ts",
-    "src/services/recovery/recoverySimulation.test.ts"
+    "src/services/recovery/recoverySimulation.test.ts",
+    "src/services/decision/shadowReport.ts",
+    "src/services/decision/shadowReport.test.ts",
+    "src/services/decision/decisionPromotionGate.ts",
+    "src/services/decision/decisionPromotionGate.test.ts"
   ],
   "exclude": [
     "node_modules",
