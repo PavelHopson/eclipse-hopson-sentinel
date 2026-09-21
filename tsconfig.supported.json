@@ -32,7 +32,9 @@
     "src/services/decision/decisionPromotionGate.ts",
     "src/services/decision/decisionPromotionGate.test.ts",
     "src/services/recovery/recoveryRunJournal.ts",
-    "src/services/recovery/recoveryRunJournal.test.ts"
+    "src/services/recovery/recoveryRunJournal.test.ts",
+    "src/utils/runtimeVersion.ts",
+    "src/utils/runtimeVersion.test.ts"
   ],
   "exclude": [
     "node_modules",
