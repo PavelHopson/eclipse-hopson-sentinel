@@ -11,6 +11,7 @@ import {
   type AutoCompactTrackingState,
 } from './services/compact/autoCompact.js'
 import { buildPostCompactMessages } from './services/compact/compact.js'
+import { createRuntimeRecoveryObserver } from './services/recovery/runtimeRecoveryObserver.js'
 /* eslint-disable @typescript-eslint/no-require-imports */
 const reactiveCompact = feature('REACTIVE_COMPACT')
   ? (require('./services/compact/reactiveCompact.js') as typeof import('./services/compact/reactiveCompact.js'))
@@ -38,6 +39,7 @@ import type {
   TombstoneMessage,
 } from './types/message.js'
 import { logError } from './utils/log.js'
+import { isEnvTruthy } from './utils/envUtils.js'
 import {
   PROMPT_TOO_LONG_ERROR_MESSAGE,
   isPromptTooLongMessage,
@@ -97,7 +99,10 @@ import { StreamingToolExecutor } from './services/tools/StreamingToolExecutor.js
 import { queryCheckpoint } from './utils/queryProfiler.js'
 import { runTools } from './services/tools/toolOrchestration.js'
 import { applyToolResultBudget } from './utils/toolResultStorage.js'
-import { recordContentReplacement } from './utils/sessionStorage.js'
+import {
+  getTranscriptPath,
+  recordContentReplacement,
+} from './utils/sessionStorage.js'
 import { handleStopHooks } from './query/stopHooks.js'
 import { buildQueryConfig } from './query/config.js'
 import { productionDeps, type QueryDeps } from './query/deps.js'
@@ -107,6 +112,7 @@ import {
   getCurrentTurnTokenBudget,
   getTurnOutputTokens,
   incrementBudgetContinuationCount,
+  isSessionPersistenceDisabled,
 } from './bootstrap/state.js'
 import { createBudgetTracker, checkTokenBudget } from './query/tokenBudget.js'
 import { count } from './utils/array.js'
@@ -293,6 +299,18 @@ async function* queryLoop(
   // Snapshot immutable env/statsig/session state once at entry. See QueryConfig
   // for what's included and why feature() gates are intentionally excluded.
   const config = buildQueryConfig()
+
+  // Eclipse Sentinel recovery observer: explicit opt-in, top-level only.
+  // It records bounded evidence beside the transcript but never controls
+  // continuation, retry, permissions, rollback or tool execution.
+  const recoveryObserver =
+    !params.toolUseContext.agentId &&
+    !isSessionPersistenceDisabled() &&
+    isEnvTruthy(process.env.SENTINEL_RECOVERY_OBSERVER)
+      ? createRuntimeRecoveryObserver({
+          transcriptPath: getTranscriptPath(),
+        })
+      : null
 
   // Fired once per user turn — the prompt is invariant across loop iterations,
   // so per-iteration firing would ask sideQuery the same question N times.
@@ -1413,6 +1431,17 @@ async function* queryLoop(
       }
     }
     queryCheckpoint('query_tool_execution_end')
+
+    const recoverySnapshot = recoveryObserver?.observe(toolResults)
+    if (
+      recoverySnapshot &&
+      (!recoverySnapshot.journalRecorded ||
+        recoverySnapshot.decision.action !== 'continue')
+    ) {
+      logForDebugging(
+        `[sentinel-recovery-observer] action=${recoverySnapshot.decision.action} reason=${recoverySnapshot.decision.reasonCode} journalRecorded=${recoverySnapshot.journalRecorded}`,
+      )
+    }
 
     // Generate tool use summary after tool batch completes — passed to next recursive call
     let nextPendingToolUseSummary:
