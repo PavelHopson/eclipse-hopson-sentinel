@@ -44,7 +44,9 @@
     "src/services/recovery/recoveryJournalDiagnostics.ts",
     "src/services/recovery/recoveryJournalDiagnostics.test.ts",
     "src/services/recovery/recoveryShadowHarness.ts",
-    "src/services/recovery/recoveryShadowHarness.test.ts"
+    "src/services/recovery/recoveryShadowHarness.test.ts",
+    "src/services/decision/decisionPreflightFailure.ts",
+    "src/services/decision/decisionPreflightFailure.test.ts"
   ],
   "exclude": [
     "node_modules",
