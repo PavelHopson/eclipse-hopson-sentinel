@@ -138,3 +138,30 @@ test('entry builder rejects invalid journal metadata', () => {
     /valid timestamp/,
   )
 })
+
+
+test('journal failure cannot mask a human-stop recovery decision', () => {
+  const session = new SupervisedRecoverySession(
+    undefined,
+    undefined,
+    {
+      journal: {
+        append() {
+          throw new Error('journal unavailable')
+        },
+      },
+      now: () => '2026-09-21T12:00:00.000Z',
+    },
+  )
+
+  const stopped = session.record({
+    type: 'unexpected-external-side-effect',
+  })
+
+  assert.equal(stopped.journalRecorded, false)
+  assert.equal(stopped.decision.action, 'stop-for-human')
+  assert.equal(stopped.decision.requiresHumanApproval, true)
+  assert.equal(stopped.mayContinueWithoutHuman, false)
+  assert.equal(stopped.externalActionAuthorized, false)
+  assert.equal(stopped.automatedRollbackAuthorized, false)
+})
