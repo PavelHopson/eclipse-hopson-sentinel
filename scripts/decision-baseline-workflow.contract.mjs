@@ -21,10 +21,11 @@ test('decision baseline workflow remains manual-only', async () => {
   assert.doesNotMatch(text, /^\s*workflow_run:/m)
 })
 
-test('decision baseline workflow keeps least-privilege model permissions', async () => {
+test('decision baseline workflow keeps least-privilege repository permissions', async () => {
   const text = await workflowText()
 
-  assert.match(text, /permissions:\s*\n\s+contents: read\s*\n\s+models: read/)
+  assert.match(text, /permissions:\s*\n\s+contents: read/)
+  assert.doesNotMatch(text, /models:\s*read/)
   assert.doesNotMatch(text, /contents:\s*write/)
   assert.doesNotMatch(text, /actions:\s*write/)
   assert.doesNotMatch(text, /pull-requests:\s*write/)
@@ -32,11 +33,38 @@ test('decision baseline workflow keeps least-privilege model permissions', async
   assert.doesNotMatch(text, /id-token:\s*write/)
 })
 
-test('decision baseline workflow uses built-in token and pinned actions only', async () => {
+test('decision baseline workflow uses only OPENAI_API_KEY for inference auth', async () => {
+  const text = await workflowText()
+  const secrets = [...text.matchAll(/secrets\.([A-Za-z0-9_]+)/g)].map(
+    match => match[1],
+  )
+
+  assert.deepEqual([...new Set(secrets)], ['OPENAI_API_KEY'])
+  assert.match(
+    text,
+    /OPENAI_API_KEY:\s*\$\{\{ secrets\.OPENAI_API_KEY \}\}/,
+  )
+  assert.match(text, /CLAUDE_CODE_USE_OPENAI:\s*'1'/)
+  assert.doesNotMatch(text, /CLAUDE_CODE_USE_GITHUB/)
+  assert.doesNotMatch(text, /models\.github\.ai/)
+})
+
+test('decision baseline workflow fails before inference when the OpenAI secret is missing', async () => {
+  const text = await workflowText()
+  const credentialIndex = text.indexOf('Verify OpenAI API credential')
+  const preflightIndex = text.indexOf('Preflight live decision engine')
+
+  assert.ok(credentialIndex >= 0)
+  assert.ok(preflightIndex > credentialIndex)
+  assert.match(
+    text,
+    /OPENAI_API_KEY repository secret is required for Decision Baseline Evidence/,
+  )
+})
+
+test('decision baseline workflow pins third-party actions', async () => {
   const text = await workflowText()
 
-  assert.match(text, /GITHUB_TOKEN:\s*\$\{\{ github\.token \}\}/)
-  assert.doesNotMatch(text, /secrets\.[A-Za-z0-9_]+/)
   assert.match(
     text,
     /actions\/checkout@d23441a48e516b6c34aea4fa41551a30e30af803/,
@@ -58,11 +86,13 @@ test('decision baseline workflow validates evidence before artifact upload', asy
 
   assert.ok(validateIndex >= 0)
   assert.ok(uploadIndex > validateIndex)
-  assert.match(text, /decision:shadow:validate -- --report \"\$report\" --require-live-engine/)
+  assert.match(
+    text,
+    /decision:shadow:validate -- --report "\$report" --require-live-engine/,
+  )
   assert.match(text, /if-no-files-found: error/)
   assert.match(text, /retention-days: 30/)
 })
-
 
 test('decision baseline workflow rejects stale revisions and stamps artifact provenance', async () => {
   const text = await workflowText()
@@ -79,7 +109,6 @@ test('decision baseline workflow rejects stale revisions and stamps artifact pro
   assert.match(text, /do not use Re-run jobs on an older run/)
 })
 
-
 test('decision baseline workflow preflights one live decision before the full corpus', async () => {
   const text = await workflowText()
   const preflightIndex = text.indexOf('decision:shadow:preflight')
@@ -91,4 +120,11 @@ test('decision baseline workflow preflights one live decision before the full co
     text,
     /bun run decision:shadow:preflight -- --model "\$OPENAI_MODEL"/,
   )
+})
+
+test('decision baseline defaults to the low-cost GPT-5.6 Luna model', async () => {
+  const text = await workflowText()
+
+  assert.match(text, /default: gpt-5\.6-luna/)
+  assert.match(text, /OPENAI_MODEL:\s*\$\{\{ inputs\.model \}\}/)
 })
