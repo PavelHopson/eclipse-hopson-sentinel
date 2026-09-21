@@ -42,7 +42,9 @@
     "src/services/recovery/sessionRecoveryJournal.ts",
     "src/services/recovery/sessionRecoveryJournal.test.ts",
     "src/services/recovery/recoveryJournalDiagnostics.ts",
-    "src/services/recovery/recoveryJournalDiagnostics.test.ts"
+    "src/services/recovery/recoveryJournalDiagnostics.test.ts",
+    "src/services/recovery/recoveryShadowHarness.ts",
+    "src/services/recovery/recoveryShadowHarness.test.ts"
   ],
   "exclude": [
     "node_modules",
