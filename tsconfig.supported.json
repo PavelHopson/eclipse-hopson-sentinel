@@ -13,6 +13,12 @@
     "src/utils/providerRecommendation.test.ts",
     "src/services/decision/decisionLayer.ts",
     "src/services/decision/decisionLayer.test.ts",
+    "src/services/decision/structuredOutputDecisionEngine.ts",
+    "src/services/decision/structuredOutputDecisionEngine.test.ts",
+    "src/services/decision/shadowEvaluation.ts",
+    "src/services/decision/shadowEvaluation.test.ts",
+    "src/services/decision/sentinelIncidentSeedCorpus.ts",
+    "src/services/decision/sentinelIncidentSeedCorpus.test.ts",
     "src/services/recovery/recoveryPolicy.ts",
     "src/services/recovery/recoveryPolicy.test.ts"
   ],
