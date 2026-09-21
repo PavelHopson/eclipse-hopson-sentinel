@@ -12,13 +12,13 @@ import {
 type Route = 'ignore' | 'review' | 'escalate'
 
 test('uses exactly one forced decision tool and treats context as untrusted data', async () => {
-  let captured: SideQueryDecisionCallOptions | null = null
+  const captured: { value?: SideQueryDecisionCallOptions } = {}
 
   const engine = createSideQueryStructuredDecisionEngine<Route>({
     model: 'fixture-model',
     engineName: 'sidequery:fixture',
     sideQuery: async options => {
-      captured = options
+      captured.value = options
       return {
         content: [
           {
@@ -46,13 +46,15 @@ test('uses exactly one forced decision tool and treats context as untrusted data
   assert.equal(run.accepted, true)
   assert.equal(run.envelope?.decision, 'review')
   assert.equal(run.executionAuthorized, false)
-  assert.ok(captured)
-  assert.equal(captured.tools.length, 1)
-  assert.equal(captured.tool_choice.name, SIDE_QUERY_DECISION_TOOL_NAME)
-  assert.equal(captured.thinking, false)
-  assert.equal(captured.temperature, 0)
-  assert.match(captured.system, /untrusted data/i)
-  assert.match(captured.messages[0].content, /Untrusted context JSON/)
+
+  const options = captured.value
+  assert.ok(options)
+  assert.equal(options.tools.length, 1)
+  assert.equal(options.tool_choice.name, SIDE_QUERY_DECISION_TOOL_NAME)
+  assert.equal(options.thinking, false)
+  assert.equal(options.temperature, 0)
+  assert.match(options.system, /untrusted data/i)
+  assert.match(options.messages[0].content, /Untrusted context JSON/)
 })
 
 test('model cannot spoof trusted engine or model metadata', async () => {
