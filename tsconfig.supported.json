@@ -34,7 +34,11 @@
     "src/services/recovery/recoveryRunJournal.ts",
     "src/services/recovery/recoveryRunJournal.test.ts",
     "src/utils/runtimeVersion.ts",
-    "src/utils/runtimeVersion.test.ts"
+    "src/utils/runtimeVersion.test.ts",
+    "src/services/recovery/recoveryToolBatchObserver.ts",
+    "src/services/recovery/recoveryToolBatchObserver.test.ts",
+    "src/services/recovery/runtimeRecoveryObserver.ts",
+    "src/services/recovery/runtimeRecoveryObserver.test.ts"
   ],
   "exclude": [
     "node_modules",
