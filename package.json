@@ -63,7 +63,8 @@
     "hardening:check": "bun run smoke && bun run doctor:runtime",
     "hardening:strict": "bun run typecheck && bun run hardening:check",
     "spec:verify": "node ./scripts/spec-gate-verify.mjs",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "decision:shadow:baseline": "bun run scripts/decision-shadow-baseline.ts"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "0.3.0",
