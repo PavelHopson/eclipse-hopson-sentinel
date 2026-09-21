@@ -68,7 +68,8 @@
     "decision:shadow:compare": "bun run scripts/decision-shadow-compare.ts",
     "decision:shadow:validate": "bun run scripts/decision-shadow-validate.ts",
     "recovery:journal:inspect": "bun run scripts/recovery-journal-inspect.ts",
-    "recovery:shadow:simulate": "bun run scripts/recovery-shadow-simulate.ts"
+    "recovery:shadow:simulate": "bun run scripts/recovery-shadow-simulate.ts",
+    "decision:shadow:preflight": "bun run scripts/decision-shadow-preflight.ts"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "0.3.0",
