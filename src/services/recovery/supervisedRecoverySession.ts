@@ -5,6 +5,12 @@ import {
   type RecoveryPolicy,
   type RecoveryState,
 } from './recoveryPolicy.ts'
+import {
+  createRecoveryJournalEntry,
+  type RecoveryJournalClock,
+  type RecoveryJournalEventType,
+  type RecoveryJournalSink,
+} from './recoveryRunJournal.ts'
 
 export type RecoverySignal =
   | { type: 'progress' }
@@ -23,6 +29,12 @@ export type SupervisedRecoverySnapshot = {
   checkpointPersistenceRequired: boolean
   automatedRollbackAuthorized: false
   externalActionAuthorized: false
+  journalRecorded: boolean
+}
+
+export type SupervisedRecoverySessionOptions = {
+  journal?: RecoveryJournalSink
+  now?: RecoveryJournalClock
 }
 
 const INITIAL_STATE: RecoveryState = {
@@ -41,10 +53,12 @@ function cloneState(state: RecoveryState): RecoveryState {
 
 export class SupervisedRecoverySession {
   private state: RecoveryState
+  private journalSequence = 0
 
   constructor(
     private readonly policy: RecoveryPolicy = DEFAULT_RECOVERY_POLICY,
     initialState: RecoveryState = INITIAL_STATE,
+    private readonly options: SupervisedRecoverySessionOptions = {},
   ) {
     this.state = cloneState(initialState)
   }
@@ -120,7 +134,7 @@ export class SupervisedRecoverySession {
     }
 
     const decision = decideRecovery(this.state, this.policy)
-    return this.buildSnapshot(decision)
+    return this.recordJournal(signal.type, this.buildSnapshot(decision))
   }
 
   clearReplanFlags(): SupervisedRecoverySnapshot {
@@ -130,7 +144,38 @@ export class SupervisedRecoverySession {
       consecutiveFailures: 0,
       noProgressSteps: 0,
     }
-    return this.snapshot()
+    const decision = decideRecovery(this.state, this.policy)
+    return this.recordJournal(
+      'supervisor-reset',
+      this.buildSnapshot(decision),
+    )
+  }
+
+  private recordJournal(
+    event: RecoveryJournalEventType,
+    snapshot: SupervisedRecoverySnapshot,
+  ): SupervisedRecoverySnapshot {
+    const journal = this.options.journal
+    if (!journal) {
+      return snapshot
+    }
+
+    this.journalSequence += 1
+
+    try {
+      journal.append(
+        createRecoveryJournalEntry({
+          sequence: this.journalSequence,
+          event,
+          snapshot,
+          recordedAt:
+            this.options.now?.() ?? new Date().toISOString(),
+        }),
+      )
+      return { ...snapshot, journalRecorded: true }
+    } catch {
+      return { ...snapshot, journalRecorded: false }
+    }
   }
 
   private buildSnapshot(
@@ -144,6 +189,7 @@ export class SupervisedRecoverySession {
       checkpointPersistenceRequired: decision.action === 'checkpoint',
       automatedRollbackAuthorized: false,
       externalActionAuthorized: false,
+      journalRecorded: false,
     }
   }
 }

@@ -30,7 +30,9 @@
     "src/services/decision/shadowReport.ts",
     "src/services/decision/shadowReport.test.ts",
     "src/services/decision/decisionPromotionGate.ts",
-    "src/services/decision/decisionPromotionGate.test.ts"
+    "src/services/decision/decisionPromotionGate.test.ts",
+    "src/services/recovery/recoveryRunJournal.ts",
+    "src/services/recovery/recoveryRunJournal.test.ts"
   ],
   "exclude": [
     "node_modules",
