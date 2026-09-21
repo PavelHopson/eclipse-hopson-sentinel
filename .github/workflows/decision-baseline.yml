@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Preflight live decision engine
+        run: bun run decision:shadow:preflight -- --model "$OPENAI_MODEL"
+
       - name: Run decision baseline
         run: bun run decision:shadow:baseline -- --model "$OPENAI_MODEL"
 
