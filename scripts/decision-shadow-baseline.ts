@@ -1,3 +1,5 @@
+import { mkdir, rename, writeFile } from 'node:fs/promises'
+
 import type { SideQueryOptions } from '../src/utils/sideQuery.ts'
 import { sideQuery } from '../src/utils/sideQuery.ts'
 import {
@@ -8,15 +10,43 @@ import { getAPIProvider } from '../src/utils/model/providers.ts'
 import { getSmallFastModel } from '../src/utils/model/model.ts'
 import { createSideQueryStructuredDecisionEngine } from '../src/services/decision/sideQueryDecisionEngine.ts'
 import { evaluateDecisionEngineInShadow } from '../src/services/decision/shadowEvaluation.ts'
+import { buildDecisionShadowReport } from '../src/services/decision/shadowReport.ts'
 import {
   sentinelIncidentSeedCorpus,
   type SentinelIncidentDecision,
 } from '../src/services/decision/sentinelIncidentSeedCorpus.ts'
 
+const EVIDENCE_DIR = 'reports/decision-shadow'
+
 function readArg(name: string): string | null {
   const index = process.argv.indexOf(name)
   if (index === -1) return null
   return process.argv[index + 1] ?? null
+}
+
+function safeTimestamp(value: string): string {
+  return value.replace(/[^0-9A-Za-z]/g, '')
+}
+
+async function persistEvidence(
+  report: ReturnType<typeof buildDecisionShadowReport>,
+): Promise<string> {
+  await mkdir(EVIDENCE_DIR, { recursive: true })
+
+  const filename =
+    `baseline-${safeTimestamp(report.generatedAt)}.json`
+  const finalPath = `${EVIDENCE_DIR}/${filename}`
+  const tempPath =
+    `${finalPath}.tmp-${process.pid}-${Date.now()}`
+  const json = `${JSON.stringify(report, null, 2)}\n`
+
+  await writeFile(tempPath, json, {
+    encoding: 'utf8',
+    mode: 0o600,
+    flag: 'wx',
+  })
+  await rename(tempPath, finalPath)
+  return finalPath
 }
 
 async function main(): Promise<void> {
@@ -36,48 +66,28 @@ async function main(): Promise<void> {
       sideQuery(options as unknown as SideQueryOptions),
   })
 
-  const report = await evaluateDecisionEngineInShadow(
+  const engineReport = await evaluateDecisionEngineInShadow(
     engineName,
     engine,
     sentinelIncidentSeedCorpus,
   )
 
-  const safeReport = {
-    schemaVersion: 'sentinel.decision-shadow-report.v1',
-    generatedAt: new Date().toISOString(),
+  const report = buildDecisionShadowReport({
     provider,
     model,
     corpus: 'sentinelIncidentSeedCorpus',
-    caseCount: sentinelIncidentSeedCorpus.length,
-    metrics: {
-      accuracy: report.evaluation.accuracy,
-      valid: report.evaluation.valid,
-      correct: report.evaluation.correct,
-      invalidRate: report.invalidRate,
-      meanConfidenceOnCorrect: report.evaluation.meanConfidenceOnCorrect,
-      meanConfidenceOnIncorrect:
-        report.evaluation.meanConfidenceOnIncorrect,
-      meanLatencyMs: report.meanLatencyMs,
-      p50LatencyMs: report.p50LatencyMs,
-      p95LatencyMs: report.p95LatencyMs,
-    },
-    cases: report.cases.map(item => ({
-      id: item.id,
-      expected: item.expected,
-      actual: item.actual,
-      confidence: item.confidence,
-      accepted: item.accepted,
-      elapsedMs: item.elapsedMs,
-      errors: item.errors,
-    })),
-  }
+    engineReport,
+  })
 
-  process.stdout.write(`${JSON.stringify(safeReport, null, 2)}\n`)
+  const evidencePath = await persistEvidence(report)
+
+  process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+  process.stderr.write(`Decision shadow evidence saved: ${evidencePath}\n`)
 }
 
 main().catch(() => {
   process.stderr.write(
-    'Decision shadow baseline failed. Check provider profile, credentials, and model availability.\n',
+    'Decision shadow baseline failed. Check provider profile, credentials, model availability, and reports directory permissions.\n',
   )
   process.exitCode = 1
 })
