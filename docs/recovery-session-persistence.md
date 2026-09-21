@@ -22,7 +22,7 @@ and model context.
 
 ## Writer
 
-`SessionRecoveryJournalSink` implements the existing synchronous `RecoveryJournalSink`.
+`SessionRecoveryJournalSink` implements the existing synchronous `RecoveryJournalSink`. The adapter deliberately requires an explicit `transcriptPath` or `filePath`; it does not import the legacy session-storage graph. Runtime glue owns resolving the current transcript path.
 
 The write path:
 
