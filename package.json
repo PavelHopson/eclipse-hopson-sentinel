@@ -65,7 +65,8 @@
     "spec:verify": "node ./scripts/spec-gate-verify.mjs",
     "prepack": "npm run build",
     "decision:shadow:baseline": "bun run scripts/decision-shadow-baseline.ts",
-    "decision:shadow:compare": "bun run scripts/decision-shadow-compare.ts"
+    "decision:shadow:compare": "bun run scripts/decision-shadow-compare.ts",
+    "decision:shadow:validate": "bun run scripts/decision-shadow-validate.ts"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "0.3.0",
