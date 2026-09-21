@@ -28,6 +28,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      - name: Verify current main revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
+          checked_out="$(git rev-parse HEAD)"
+          current_main="$(git rev-parse origin/main)"
+          short_sha="$(git rev-parse --short=12 HEAD)"
+          echo "checked_out_sha=$checked_out"
+          echo "origin_main_sha=$current_main"
+          echo "SHORT_SHA=$short_sha" >> "$GITHUB_ENV"
+
+          if [ "$checked_out" != "$current_main" ]; then
+            echo "Decision baseline must run from the current main revision." >&2
+            echo "Use Actions → Decision Baseline Evidence → Run workflow on branch main; do not use Re-run jobs on an older run." >&2
+            exit 1
+          fi
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
@@ -55,7 +73,7 @@ jobs:
       - name: Upload baseline evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: decision-baseline-${{ github.run_id }}
+          name: decision-baseline-${{ github.run_id }}-${{ env.SHORT_SHA }}
           path: ${{ env.REPORT_PATH }}
           if-no-files-found: error
           retention-days: 30

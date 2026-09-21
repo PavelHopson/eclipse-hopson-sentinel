@@ -62,3 +62,19 @@ test('decision baseline workflow validates evidence before artifact upload', asy
   assert.match(text, /if-no-files-found: error/)
   assert.match(text, /retention-days: 30/)
 })
+
+
+test('decision baseline workflow rejects stale revisions and stamps artifact provenance', async () => {
+  const text = await workflowText()
+
+  assert.match(text, /git fetch --no-tags --depth=1 origin main/)
+  assert.match(text, /checked_out="\$\(git rev-parse HEAD\)"/)
+  assert.match(text, /current_main="\$\(git rev-parse origin\/main\)"/)
+  assert.match(text, /if \[ "\$checked_out" != "\$current_main" \]/)
+  assert.match(text, /SHORT_SHA=\$short_sha/)
+  assert.match(
+    text,
+    /name: decision-baseline-\$\{\{ github\.run_id \}\}-\$\{\{ env\.SHORT_SHA \}\}/,
+  )
+  assert.match(text, /do not use Re-run jobs on an older run/)
+})

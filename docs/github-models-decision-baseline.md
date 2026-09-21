@@ -33,7 +33,7 @@ No PAT or repository secret is required.
 3. Choose **Run workflow**.
 4. Keep the default `github:copilot` alias for the first baseline, or explicitly select another
    GitHub Models model ID.
-5. After the run completes, download the `decision-baseline-<run id>` artifact.
+5. After the run completes, download the `decision-baseline-<run id>-<short sha>` artifact.
 
 The workflow is **manual only**. It is not triggered by push, pull request, schedule, or merge.
 
@@ -69,3 +69,18 @@ The first diagnostic run on 2026-09-21 exposed a raw-script compatibility bug: `
 the attribution header referenced build-time `MACRO.VERSION` directly. In a raw Bun script that
 symbol can be absent, causing every case to fail locally before any provider request. The runtime
 now resolves the version through a raw-script-safe fallback instead.
+
+
+## Fresh-run provenance
+
+A Decision Baseline Evidence run is accepted only when its checked-out commit exactly matches the
+current `origin/main`.
+
+The workflow fetches `origin/main`, prints both SHAs, and fails before inference when they differ.
+The artifact name includes the short source SHA.
+
+Do not use **Re-run jobs** on an older Decision Baseline Evidence run. GitHub re-runs the historical
+workflow against that run's original `head_sha`, which can execute obsolete runner code even after
+fixes have merged.
+
+To obtain a fresh baseline, open the workflow page and choose **Run workflow** on branch `main`.
