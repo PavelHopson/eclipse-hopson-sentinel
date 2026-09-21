@@ -58,6 +58,19 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value)
 }
 
+function isIntegerInRange(
+  value: unknown,
+  min: number,
+  max: number,
+): value is number {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= min &&
+    value <= max
+  )
+}
+
 function isRate(value: unknown): value is number {
   return isFiniteNumber(value) && value >= 0 && value <= 1
 }
@@ -89,20 +102,16 @@ function validateMetrics(
   } = value
 
   if (!isRate(accuracy)) errors.push('metrics.accuracy must be 0..1')
-  if (!Number.isInteger(valid) || (valid as number) < 0 || (valid as number) > caseCount) {
+  if (!isIntegerInRange(valid, 0, caseCount)) {
     errors.push('metrics.valid must be an integer within caseCount')
   }
-  if (
-    !Number.isInteger(correct) ||
-    (correct as number) < 0 ||
-    (correct as number) > caseCount
-  ) {
+  if (!isIntegerInRange(correct, 0, caseCount)) {
     errors.push('metrics.correct must be an integer within caseCount')
   }
   if (
-    Number.isInteger(valid) &&
-    Number.isInteger(correct) &&
-    (correct as number) > (valid as number)
+    isIntegerInRange(valid, 0, caseCount) &&
+    isIntegerInRange(correct, 0, caseCount) &&
+    correct > valid
   ) {
     errors.push('metrics.correct must not exceed metrics.valid')
   }
@@ -308,18 +317,13 @@ export function validateDecisionShadowReport(
   }
 
   const caseCount = value.caseCount
-  if (
-    !Number.isInteger(caseCount) ||
-    (caseCount as number) < 0 ||
-    (caseCount as number) > MAX_CASES
-  ) {
+  if (!isIntegerInRange(caseCount, 0, MAX_CASES)) {
     errors.push(`caseCount must be an integer from 0 to ${MAX_CASES}`)
   }
 
-  const normalizedCaseCount =
-    Number.isInteger(caseCount) && (caseCount as number) >= 0
-      ? (caseCount as number)
-      : 0
+  const normalizedCaseCount = isIntegerInRange(caseCount, 0, MAX_CASES)
+    ? caseCount
+    : 0
 
   const metrics = validateMetrics(value.metrics, normalizedCaseCount, errors)
   const cases = validateCases(value.cases, normalizedCaseCount, errors)
