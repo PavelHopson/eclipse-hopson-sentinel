@@ -78,3 +78,17 @@ test('decision baseline workflow rejects stale revisions and stamps artifact pro
   )
   assert.match(text, /do not use Re-run jobs on an older run/)
 })
+
+
+test('decision baseline workflow preflights one live decision before the full corpus', async () => {
+  const text = await workflowText()
+  const preflightIndex = text.indexOf('decision:shadow:preflight')
+  const baselineIndex = text.indexOf('decision:shadow:baseline')
+
+  assert.ok(preflightIndex >= 0)
+  assert.ok(baselineIndex > preflightIndex)
+  assert.match(
+    text,
+    /bun run decision:shadow:preflight -- --model "\$OPENAI_MODEL"/,
+  )
+})

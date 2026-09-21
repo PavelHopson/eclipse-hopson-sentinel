@@ -41,11 +41,12 @@ The workflow is **manual only**. It is not triggered by push, pull request, sche
 
 1. checks out the exact requested commit;
 2. installs the frozen lockfile with Bun;
-3. runs `decision:shadow:baseline`;
-4. locates the timestamped JSON evidence file;
-5. validates the file against `sentinel.decision-shadow-report.v1`;
-6. requires at least one schema-valid live decision before treating the run as baseline evidence;
-7. uploads only the validated evidence JSON as an Actions artifact.
+3. runs a one-case `decision:shadow:preflight` against the same provider path;
+4. only after preflight succeeds, runs `decision:shadow:baseline`;
+5. locates the timestamped JSON evidence file;
+6. validates the file against `sentinel.decision-shadow-report.v1`;
+7. requires at least one schema-valid live decision before treating the run as baseline evidence;
+8. uploads only the validated evidence JSON as an Actions artifact.
 
 The workflow does not modify repository contents, open PRs, update model defaults, or enable canary
 traffic.
@@ -84,3 +85,14 @@ workflow against that run's original `head_sha`, which can execute obsolete runn
 fixes have merged.
 
 To obtain a fresh baseline, open the workflow page and choose **Run workflow** on branch `main`.
+
+
+## Safe preflight diagnostics
+
+Before running all 18 seed cases, the workflow now evaluates one representative case through the
+same structured-output engine. If it fails, only a bounded failure category is printed, such as
+`reference-error`, `type-error`, `http-401`, `http-403`, `http-404`, `http-429`,
+`http-5xx`, `network`, `tool-response-missing`, or `unknown`.
+
+Raw exception messages, response bodies, tokens, prompts and case context are never printed by the
+preflight classifier.
