@@ -15,10 +15,22 @@ export type DecisionPreflightFailureCategory =
 function readStatus(error: unknown): number | null {
   if (typeof error !== 'object' || error === null) return null
 
+  const record = error as Record<string, unknown>
   for (const key of ['status', 'statusCode'] as const) {
-    const value = (error as Record<string, unknown>)[key]
+    const value = record[key]
     if (typeof value === 'number' && Number.isInteger(value)) {
       return value
+    }
+  }
+
+  for (const key of ['response', 'cause'] as const) {
+    const nested = record[key]
+    if (typeof nested !== 'object' || nested === null) continue
+    for (const statusKey of ['status', 'statusCode'] as const) {
+      const value = (nested as Record<string, unknown>)[statusKey]
+      if (typeof value === 'number' && Number.isInteger(value)) {
+        return value
+      }
     }
   }
 
@@ -40,6 +52,17 @@ export function classifyDecisionPreflightFailure(
   if (typeof error === 'object' && error !== null) {
     const name = (error as Record<string, unknown>).name
     if (name === 'AbortError') return 'abort'
+    if (name === 'AuthenticationError') return 'http-401'
+    if (name === 'PermissionDeniedError') return 'http-403'
+    if (name === 'NotFoundError') return 'http-404'
+    if (name === 'RateLimitError') return 'http-429'
+    if (name === 'InternalServerError') return 'http-5xx'
+    if (
+      name === 'APIConnectionError' ||
+      name === 'APIConnectionTimeoutError'
+    ) {
+      return 'network'
+    }
   }
 
   const status = readStatus(error)
