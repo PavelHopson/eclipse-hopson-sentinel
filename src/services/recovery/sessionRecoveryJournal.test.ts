@@ -48,6 +48,30 @@ test('derives a recovery sidecar path without touching transcript JSONL', () => 
     getSessionRecoveryJournalPath('/tmp/session-123'),
     '/tmp/session-123.recovery.jsonl',
   )
+  assert.throws(() => getSessionRecoveryJournalPath(''), /non-empty/)
+})
+
+test('sink resolves transcriptPath explicitly and rejects ambiguous configuration', t => {
+  const dir = tempDir()
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+
+  const transcriptPath = join(dir, 'session.jsonl')
+  const expected = join(dir, 'session.recovery.jsonl')
+  const sink = new SessionRecoveryJournalSink({ transcriptPath })
+
+  assert.equal(sink.path(), expected)
+  assert.throws(
+    () =>
+      new SessionRecoveryJournalSink({
+        transcriptPath,
+        filePath: expected,
+      }),
+    /either filePath or transcriptPath/,
+  )
+  assert.throws(
+    () => new SessionRecoveryJournalSink(),
+    /filePath or transcriptPath is required/,
+  )
 })
 
 test('persists and reloads validated append-only recovery entries', t => {
