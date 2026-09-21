@@ -12,7 +12,6 @@ import {
 } from 'node:fs'
 import { dirname } from 'node:path'
 
-import { getTranscriptPath } from '../../utils/sessionStorage.ts'
 import {
   type RecoveryJournalEntry,
   type RecoveryJournalSink,
@@ -38,11 +37,13 @@ export type SessionRecoveryJournalReadResult = {
 
 export type SessionRecoveryJournalSinkOptions = {
   filePath?: string
+  transcriptPath?: string
   maxEntryBytes?: number
 }
 
 export type ReadSessionRecoveryJournalOptions = {
   filePath?: string
+  transcriptPath?: string
   maxFileBytes?: number
   maxEntries?: number
 }
@@ -54,9 +55,28 @@ function recoveryPathFromTranscriptPath(transcriptPath: string): string {
 }
 
 export function getSessionRecoveryJournalPath(
-  transcriptPath = getTranscriptPath(),
+  transcriptPath: string,
 ): string {
+  if (!transcriptPath.trim()) {
+    throw new Error('transcriptPath must be a non-empty string')
+  }
   return recoveryPathFromTranscriptPath(transcriptPath)
+}
+
+function resolveJournalPath(options: {
+  filePath?: string
+  transcriptPath?: string
+}): string {
+  if (options.filePath && options.transcriptPath) {
+    throw new Error('provide either filePath or transcriptPath, not both')
+  }
+  if (options.filePath?.trim()) {
+    return options.filePath
+  }
+  if (options.transcriptPath?.trim()) {
+    return getSessionRecoveryJournalPath(options.transcriptPath)
+  }
+  throw new Error('filePath or transcriptPath is required')
 }
 
 function ensurePositiveInteger(name: string, value: number): void {
@@ -113,8 +133,7 @@ export class SessionRecoveryJournalSink implements RecoveryJournalSink {
   private readonly maxEntryBytes: number
 
   constructor(options: SessionRecoveryJournalSinkOptions = {}) {
-    this.filePath =
-      options.filePath ?? getSessionRecoveryJournalPath()
+    this.filePath = resolveJournalPath(options)
     this.maxEntryBytes =
       options.maxEntryBytes ?? MAX_PERSISTED_RECOVERY_ENTRY_BYTES
     ensurePositiveInteger('maxEntryBytes', this.maxEntryBytes)
@@ -150,8 +169,7 @@ export class SessionRecoveryJournalSink implements RecoveryJournalSink {
 export function readSessionRecoveryJournal(
   options: ReadSessionRecoveryJournalOptions = {},
 ): SessionRecoveryJournalReadResult {
-  const filePath =
-    options.filePath ?? getSessionRecoveryJournalPath()
+  const filePath = resolveJournalPath(options)
   const maxFileBytes =
     options.maxFileBytes ?? MAX_PERSISTED_RECOVERY_JOURNAL_BYTES
   const maxEntries =
