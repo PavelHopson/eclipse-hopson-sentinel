@@ -11,12 +11,10 @@ The Decision Layer now separates three different concepts:
 `decision:shadow:baseline` writes the latest safe report to:
 
 ```
-reports/decision-shadow/baseline-latest.json
+reports/decision-shadow/baseline-<timestamp>.json
 ```
 
-The `reports/` directory is already gitignored.
-
-Writes are atomic: a temporary file is written in the same directory and then renamed.
+The `reports/` directory is already gitignored. Every run creates a new timestamped file, so prior evidence is preserved. Writes are atomic: a unique temporary file is written in the same directory and then renamed to a new final path.
 
 The report contains no raw decision contexts or credentials. It contains only:
 
@@ -36,7 +34,7 @@ Compare two validated reports:
 
 ```bash
 bun run decision:shadow:compare -- \
-  --baseline reports/decision-shadow/baseline-latest.json \
+  --baseline reports/decision-shadow/baseline-<timestamp>.json \
   --candidate reports/decision-shadow/candidate-latest.json
 ```
 
