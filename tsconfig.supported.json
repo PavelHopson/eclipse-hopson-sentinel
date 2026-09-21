@@ -19,6 +19,8 @@
     "src/services/decision/shadowEvaluation.test.ts",
     "src/services/decision/sentinelIncidentSeedCorpus.ts",
     "src/services/decision/sentinelIncidentSeedCorpus.test.ts",
+    "src/services/decision/sideQueryDecisionEngine.ts",
+    "src/services/decision/sideQueryDecisionEngine.test.ts",
     "src/services/recovery/recoveryPolicy.ts",
     "src/services/recovery/recoveryPolicy.test.ts",
     "src/services/recovery/supervisedRecoverySession.ts",
@@ -26,5 +28,8 @@
     "src/services/recovery/recoverySimulation.ts",
     "src/services/recovery/recoverySimulation.test.ts"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
