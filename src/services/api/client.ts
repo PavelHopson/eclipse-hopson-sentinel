@@ -132,6 +132,22 @@ export async function getAnthropicClient({
     defaultHeaders['x-anthropic-additional-protection'] = 'true'
   }
 
+  // OpenAI-compatible providers have their own auth/token handling.
+  // Route to the shim before Anthropic OAuth refresh or API-key helper work so
+  // raw scripts and CI do not depend on unrelated Anthropic auth state.
+  if (
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENAI) ||
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_GITHUB) ||
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_GEMINI)
+  ) {
+    const { createOpenAIShimClient } = await import('./openaiShim.js')
+    return createOpenAIShimClient({
+      defaultHeaders,
+      maxRetries,
+      timeout: parseInt(process.env.API_TIMEOUT_MS || String(600 * 1000), 10),
+    }) as unknown as Anthropic
+  }
+
   logForDebugging('[API:auth] OAuth token check starting')
   await checkAndRefreshOAuthTokenIfNeeded()
   logForDebugging('[API:auth] OAuth token check complete')
@@ -153,18 +169,6 @@ export async function getAnthropicClient({
     ...(resolvedFetch && {
       fetch: resolvedFetch,
     }),
-  }
-  if (
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENAI) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_GITHUB) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_GEMINI)
-  ) {
-    const { createOpenAIShimClient } = await import('./openaiShim.js')
-    return createOpenAIShimClient({
-      defaultHeaders,
-      maxRetries,
-      timeout: parseInt(process.env.API_TIMEOUT_MS || String(600 * 1000), 10),
-    }) as unknown as Anthropic
   }
   if (isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK)) {
     const { AnthropicBedrock } = await import('@anthropic-ai/bedrock-sdk')
