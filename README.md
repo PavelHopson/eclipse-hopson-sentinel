@@ -4,6 +4,10 @@
 
 # Eclipse Ultron
 
+<!-- project-links:start -->
+[Документация](docs/repository-guide.md) · [Код](https://github.com/PavelHopson/eclipse-hopson-sentinel/tree/main) · [История изменений](https://github.com/PavelHopson/eclipse-hopson-sentinel/commits/main/)
+<!-- project-links:end -->
+
 ### Локальный AI command center: голос → план → approval → действие → receipt
 
 [![CI](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml)
