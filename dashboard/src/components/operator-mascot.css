@@ -1,0 +1,32 @@
+.operator-mascot { margin: 12px 0; padding: 12px 0; border-block: 1px solid var(--ultron-line, #30242a); color: var(--ultron-silver, #f3f5f7); }
+.operator-mascot__body { display: flex; align-items: center; gap: 12px; }
+.operator-mascot__slot { flex: 0 0 96px; width: 96px; height: 96px; display: grid; place-items: center; color: var(--ultron-signal-soft, #ff7b89); }
+.operator-mascot__slot > span { font-size: 11px; color: var(--ultron-silver-2, #c7cdd6); }
+.operator-mascot__figure { display: grid; place-items: center; width: 96px; height: 96px; }
+.operator-mascot__figure img { display: block; object-fit: contain; }
+.operator-mascot__copy { min-width: 0; }
+.operator-mascot__copy small { display: block; font-size: 10px; line-height: 1.5; color: var(--ultron-silver-2, #c7cdd6); }
+.operator-mascot__copy strong { display: block; margin: 5px 0; font-size: 13px; line-height: 1.4; }
+.operator-mascot__copy p { margin: 0; font-size: 11px; line-height: 1.6; color: var(--ultron-silver-2, #c7cdd6); }
+.operator-mascot__controls { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.operator-mascot__controls button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--ultron-silver-2, #c7cdd6); font: inherit; font-size: 11px; cursor: pointer; }
+.operator-mascot__controls button:hover { background: var(--ultron-raised, #15181d); }
+.operator-mascot__controls button:focus-visible { outline: 2px solid var(--ultron-silver, #f3f5f7); outline-offset: 2px; }
+@keyframes mascot-attention { from { opacity: .7; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .operator-mascot[data-motion="on"] .operator-mascot__figure { animation: mascot-attention 180ms ease-out 1; }
+}
+.operator-mascot[data-motion="off"] .operator-mascot__figure { animation: none; }
+.mascot-gallery { max-width: 720px; padding: 40px 24px; margin: auto; }
+.mascot-gallery h1 { margin: 12px 0; font-size: 28px; letter-spacing: -.03em; }
+.mascot-gallery > p { color: var(--ultron-silver-2); line-height: 1.65; font-size: 14px; }
+.mascot-gallery__states { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 24px; }
+.mascot-gallery__states button { min-height: 44px; border: 1px solid var(--ultron-line); background: var(--ultron-panel); color: var(--ultron-silver); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+.mascot-gallery__states button[aria-pressed="true"] { border-color: var(--ultron-signal-soft); }
+.mascot-gallery button:focus-visible, .mascot-gallery a:focus-visible { outline: 2px solid var(--ultron-silver); outline-offset: 3px; }
+.mascot-gallery a { display: inline-block; padding-block: 12px; color: var(--ultron-signal-soft); }
+.mascot-gallery .operator-mascot { margin-block: 24px; }
+@media (max-width: 420px) {
+  .operator-mascot__slot, .operator-mascot__figure { flex-basis: 72px; width: 72px; height: 72px; }
+  .operator-mascot__figure img { width: 72px; height: 72px; }
+}

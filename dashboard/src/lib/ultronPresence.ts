@@ -13,10 +13,10 @@ export interface ContactTurn {
 }
 
 export const ULTRON_PRESENCE_COPY: Record<UltronPresenceState, { label: string; detail: string }> = {
-  idle: { label: 'На связи', detail: 'Готов к следующей реплике' },
+  idle: { label: 'Ожидаю команду', detail: 'Микрофон выключен' },
   listening: { label: 'Слушаю', detail: 'Локальное распознавание речи' },
   thinking: { label: 'Думаю', detail: 'Формирую ответ' },
   speaking: { label: 'Говорю', detail: 'Озвучиваю ответ' },
   success: { label: 'Готово', detail: 'Реплика завершена' },
-  error: { label: 'Нужна помощь', detail: 'Повторите попытку' },
+  error: { label: 'Нужна проверка', detail: 'Не удалось завершить запрос' },
 };

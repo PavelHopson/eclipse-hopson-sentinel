@@ -32,7 +32,17 @@ jobs:
           node --test
           scripts/dashboard-branding.contract.mjs
           scripts/dashboard-ultron-security.contract.mjs
-          scripts/dashboard-usage-guide.contract.mjs\n          scripts/decision-baseline-workflow.contract.mjs
+          scripts/dashboard-usage-guide.contract.mjs
+          scripts/dashboard-live-voice.test.mjs
+          scripts/dashboard-live-voice-regression.test.mjs
+          scripts/dashboard-voice-session.test.mjs
+          scripts/dashboard-ollama-host.test.mjs
+          scripts/dashboard-primary-voice-runtime.test.mjs
+          scripts/dashboard-voice-turn.test.mjs
+          scripts/voice-dictation-eval.test.mjs
+          scripts/voice-local-smoke.test.mjs
+          scripts/voice-recorded-eval.test.mjs
+          scripts/decision-baseline-workflow.contract.mjs
 
       - name: Typecheck supported Eclipse contracts
         run: bun run typecheck:supported
@@ -70,3 +80,14 @@ jobs:
       - name: Verify Windows Doctor contract
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sentinel-windows-doctor.ps1 -SelfTest
+
+      - name: Build GUI-only Ollama host (no model downloads)
+        run: node dashboard/scripts/build-ollama-console-host.mjs
+
+      - name: Verify Windows native lifecycle and voice readiness
+        run: >-
+          node --test
+          scripts/ollama-lifecycle-native.test.mjs
+          scripts/dashboard-ollama-host.test.mjs
+          scripts/dashboard-primary-voice-runtime.test.mjs
+          scripts/dashboard-owned-process.test.mjs

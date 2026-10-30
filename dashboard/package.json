@@ -1,7 +1,7 @@
 {
   "name": "eclipse-sentinel",
   "private": true,
-  "version": "1.2.8",
+  "version": "1.2.20",
   "description": "Eclipse Ultron — local-first AI command center powered by Sentinel runtime",
   "author": "Eclipse Forge <hello@eclipseforge.dev>",
   "main": "electron/main.cjs",
@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "assets:brand": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-installer-brand-assets.ps1",
     "electron:dev": "vite & sleep 2 && electron .",
-    "electron:build": "npm run assets:brand && npm run build && electron-builder --config.electronDist=node_modules/electron/dist",
+    "electron:build": "npm run assets:brand && node scripts/build-ollama-console-host.mjs && npm run build && electron-builder --config.electronDist=node_modules/electron/dist",
     "lint": "eslint ."
   },
   "build": {
@@ -27,6 +27,28 @@
       "electron/**/*"
     ],
     "extraResources": [
+      {
+        "from": "build/UltronOllamaHost.exe",
+        "to": "runtime-host/UltronOllamaHost.exe"
+      },
+      {
+        "from": "../scripts/voice-runtime",
+        "to": "voice-runtime",
+        "filter": [
+          "runtime.mjs",
+          "piper-runtime.mjs",
+          "supervisor.mjs",
+          "session.mjs",
+          "dsp.mjs",
+          "worker.py",
+          "guard.py",
+          "model-lock.json"
+        ]
+      },
+      {
+        "from": "../reports/voice-reference-2026-08-28/06-angry.mp3",
+        "to": "voice-runtime/ultron-approved.mp3"
+      },
       {
         "from": "../office",
         "to": "office",
@@ -94,7 +116,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "electron": "^41.10.3",
+    "electron": "^45.1.0",
     "electron-builder": "^26.15.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",

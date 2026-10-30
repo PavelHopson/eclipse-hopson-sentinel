@@ -1,9 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { type Message } from '../lib/ai';
-import { Copy, Check, Volume2 } from 'lucide-react';
+import { Copy, Check, Square, Volume2 } from 'lucide-react';
 import { useState } from 'react';
-import { speak } from '../lib/voice';
+import { speak, stopSpeaking } from '../lib/voice';
 
 interface MessageBubbleProps {
   message: Message;
@@ -11,6 +11,15 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [speechError, setSpeechError] = useState('');
+  const readAloud = async () => {
+    if (speaking) { stopSpeaking(); setSpeaking(false); return; }
+    setSpeechError(''); setSpeaking(true);
+    try { await speak(message.content); }
+    catch (error) { setSpeechError(error instanceof Error ? error.message : 'Не удалось озвучить ответ.'); }
+    finally { setSpeaking(false); }
+  };
   const isUser = message.role === 'user';
 
   const handleCopy = (code: string) => {
@@ -79,11 +88,12 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             className="flex items-center gap-1 px-2 py-1 rounded text-[10px] text-text-3 hover:text-text-2 hover:bg-card transition-colors">
             {copied ? <Check size={10} /> : <Copy size={10} />} Копировать
           </button>
-          <button onClick={() => speak(message.content)}
+          <button onClick={() => void readAloud()} aria-pressed={speaking}
             className="flex items-center gap-1 px-2 py-1 rounded text-[10px] text-text-3 hover:text-text-2 hover:bg-card transition-colors">
-            <Volume2 size={10} /> Озвучить
+            {speaking ? <Square size={10} /> : <Volume2 size={10} />} {speaking ? 'Остановить озвучку' : 'Озвучить'}
           </button>
         </div>
+        {speechError && <p role="alert" className="mt-2 text-xs text-accent">{speechError}</p>}
       </div>
     </div>
   );

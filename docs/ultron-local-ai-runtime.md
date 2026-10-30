@@ -23,7 +23,7 @@ E:\ADMIN_HOPSON_PC\Программы\Eclipse AI Runtime
 | Qwen3-TTS | `0.6B CustomVoice`, CUDA | установленный Studio/Lab benchmark, не real-time default | `Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice` |
 | Python | `3.12.14`, portable via uv `0.12.5` | изолированный Qwen3-TTS runtime | `astral-sh/uv` |
 | Ollama | `0.32.15`, portable Windows amd64 | локальный model server | `ollama/ollama` |
-| HuiHui Qwen3.8 | `27b`, Q4_K_M | изолированный Lab-чат | `huihui_ai/qwen3.8-abliterated:27b` |
+| Qwen 3 | `8b`, Q4_K_M | закреплённый быстрый голосовой ответ | `qwen3:8b` |
 | OrcaRouter Qwen3.8 | `27b`, Q4_K_M | установлен в изолированный Lab, benchmark ожидается | `chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF` |
 | Qwen3.8 Cyber | `27b`, IQ4_XS imatrix | ручной non-MTP импорт в изолированный Lab; benchmark pending | `cyjin-yl/Qwen3.8-27B-Uncensored-Cyber-agentic-imatrix-GGUF` |
 
@@ -58,13 +58,11 @@ MIT release и дополнительно проверен Microsoft Defender; t
 Eclipse AI Runtime\
 ├── downloads\             # проверенные portable archives
 ├── models\
-│   ├── ollama\            # 27B model store, около 16.52 GiB
+│   ├── ollama\            # canonical 8B + 27B model store
 │   ├── qwen3-tts\         # установленный Studio/Lab TTS benchmark
 │   └── whisper\           # STT model, около 548 MiB
 ├── ollama\                # portable Ollama runtime
 ├── python\                # portable CPython; системный PATH не изменяется
-├── temp\
-│   └── tts\               # ephemeral Piper WAV; удаляется сразу после чтения
 ├── tools\uv\              # portable Python/package manager
 ├── tts\
 │   ├── piper\             # основной быстрый TTS + CC0 Russian voices
@@ -73,11 +71,11 @@ Eclipse AI Runtime\
 ```
 
 Microphone audio и транскрипт обрабатываются в памяти: Ultron не включает `--save-audio` и не
-пишет распознанный текст в runtime logs. Архивный Windows Piper повреждает бинарный stdout из-за
-CRLF text-mode conversion, поэтому production TTS использует уникальный WAV только в
-`temp\tts`. Electron проверяет точный RIFF/data size и лимит 12 MiB, читает файл в память и
-удаляет его в `finally`; после crash scoped-остатки старше 10 минут с префиксом `ultron-tts-`
-удаляются при следующем запуске. Renderer не управляет executable, model path, output path или arguments.
+пишет распознанный текст в runtime logs. В 1.2.13 production TTS запрашивает у закреплённого Piper
+raw PCM, ограничивает его 1.2 MiB, формирует канонический mono PCM16 WAV только в памяти и передаёт
+его фиксированному Ultron DSP sandbox. Renderer не управляет executable, model/config path, output
+path или arguments. Старый temporary-WAV transport сохранён только как regression evidence и не
+участвует в текущем голосовом ответе.
 
 ## Как пользоваться голосом
 
@@ -118,16 +116,18 @@ Portable Lab server запускается только на loopback. Он ис
 
 | Контур | Тест | Wall time | Audio | Решение |
 | --- | --- | ---: | ---: | --- |
-| Piper Denis medium | русская реплика | 0.67 сек | 5.39 сек | production default · Brutal |
+| Piper Denis + Ultron DSP | короткая production-реплика 1.2.13 | 1.426 сек | bounded MP3 | production default |
+| Piper Denis medium | прежний базовый benchmark | 0.67 сек | 5.39 сек | historical baseline |
 | Qwen3-TTS 0.6B | warm короткая реплика | 13.21 сек | 2.96 сек | Studio/Lab only |
 | Qwen3-TTS 0.6B | первая реплика | около 62 сек | 9.04 сек | исключён из real-time path |
 
 Qwen3-TTS технически работает на RTX 4060 Ti через CUDA, но текущий Windows SDPA runtime не
 соответствует требованию живого диалога. Модель и venv остаются на `E:` для дальнейшего
 профилирования; приложение их не запускает автоматически и не разрешает loopback-порт в CSP.
-Piper загружает фиксированный CC0 voice model на каждую реплику. Electron читает строго
-ограниченный WAV, удаляет временный файл и только затем возвращает аудио через IPC; при отсутствии
-runtime или невалидном RIFF используется системный Windows TTS fallback.
+Piper загружает фиксированный CC0 voice model на каждую реплику. Electron проверяет SHA-256 и
+размер executable/model/config, ограничивает child environment и принимает только bounded PCM.
+Системный Windows TTS и браузерный speech synthesis не используются как скрытый fallback: ошибка
+остаётся видимой, а текст ответа сохраняется на экране.
 
 HuiHui Qwen3.8 abliterated не является доверенным planner или policy engine. Ей не
 передаются shell, filesystem, network tools, secrets, MCP, install, deploy или operator
@@ -179,7 +179,7 @@ benchmark. Для живой голосовой беседы основной `q
 Удаление только Lab-модели выполняется portable Ollama с теми же `OLLAMA_HOST` и
 `OLLAMA_MODELS`, после чего UI возвращается на `Qwen 3 8B`.
 
-Rollback TTS выполняется без удаления runtime: отсутствие Piper автоматически возвращает Windows
-TTS fallback. Полный rollback требует закрыть Eclipse Ultron, остановить только process, который
+Rollback TTS выполняется установкой предыдущего проверенного desktop build; отсутствие Piper
+fail-closed показывает ошибку и не подменяет голос. Полный rollback требует закрыть Eclipse Ultron, остановить только process, который
 слушает `127.0.0.1:11435`, и удалить точный каталог `Eclipse AI Runtime`. Каталоги Eclipse Ultron,
 репозитории, primary Ollama и данные пользователя при этом не затрагиваются.

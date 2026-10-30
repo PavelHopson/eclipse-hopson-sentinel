@@ -1,221 +1,85 @@
-import { useEffect, useState } from 'react';
-import { Cpu, Gauge, Mic, Play, Server, ShieldCheck, Volume2, X } from 'lucide-react';
-import {
-  getAvailableVoices,
-  loadVoicePreferences,
-  saveVoicePreferences,
-  speak,
-  stopSpeaking,
-  type VoicePreferences,
-} from '../lib/voice';
-import { getLabModelId, getSelectedModel, LAB_MODELS, setSelectedModel as persistSelectedModel } from '../lib/ai';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Cpu, Mic, Play, Server, ShieldCheck, Square, Volume2, X } from 'lucide-react';
+import { isTTSSupported, previewUltronVoice, stopSpeaking } from '../lib/voice';
 
-interface SettingsPanelProps {
-  open: boolean;
-  onClose: () => void;
-  onModelChange?: (modelId: string) => void;
-}
+interface SettingsPanelProps { open: boolean; onClose: () => void; onModelChange?: (modelId: string) => void; voiceBusy?: boolean; }
 
-export function SettingsPanel({ open, onClose, onModelChange }: SettingsPanelProps) {
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [voicePreferences, setVoicePreferences] = useState<VoicePreferences>(() => loadVoicePreferences());
-  const [selectedModel, setSelectedModel] = useState(() => getLabModelId(getSelectedModel()));
+export function SettingsPanel({ open, onClose, voiceBusy = false }: SettingsPanelProps) {
   const [previewing, setPreviewing] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previewId = useRef(0);
+  const ownsPreview = useRef(false);
+  const invalidatePreview = useCallback(() => {
+    previewId.current++;
+    if (ownsPreview.current) { ownsPreview.current = false; stopSpeaking(); }
+  }, []);
 
   const closePanel = () => {
-    stopSpeaking();
-    setPreviewing(false);
-    onClose();
+    invalidatePreview(); setPreviewing(false); onClose();
   };
-
   useEffect(() => {
     if (!open) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        stopSpeaking();
-        setPreviewing(false);
-        onClose();
-      }
+    const previous = document.activeElement as HTMLElement | null;
+    dialogRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { invalidatePreview(); setPreviewing(false); onClose(); }
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), [tabindex="0"]') || []);
+      const first = controls[0], last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-    let active = true;
-    void getAvailableVoices().then((available) => {
-      if (!active) return;
-      const russian = available.filter((voice) => voice.lang.toLocaleLowerCase().startsWith('ru'));
-      setVoices((russian.length ? russian : available).sort((a, b) => a.name.localeCompare(b.name, 'ru')));
-    });
-    return () => { active = false; };
-  }, [open]);
-
-  const updateVoicePreferences = (next: VoicePreferences) => {
-    const saved = saveVoicePreferences(next);
-    setVoicePreferences(saved);
-  };
-
-  const updateModel = (modelId: string) => {
-    persistSelectedModel(modelId);
-    setSelectedModel(modelId);
-    onModelChange?.(modelId);
-  };
-
-  const selectedModelDefinition = LAB_MODELS.find((model) => model.id === selectedModel) || LAB_MODELS[0]!;
+    window.addEventListener('keydown', handleKey);
+    return () => { window.removeEventListener('keydown', handleKey); invalidatePreview(); previous?.focus(); };
+  }, [open, onClose, invalidatePreview]);
 
   const previewVoice = async () => {
-    if (previewing) {
-      stopSpeaking();
-      setPreviewing(false);
-      return;
-    }
-    setPreviewing(true);
-    try {
-      await speak('Я на связи. Голосовой контур Альтрона готов к работе.');
-    } finally {
-      setPreviewing(false);
-    }
+    if (previewing) { invalidatePreview(); setPreviewing(false); return; }
+    if (voiceBusy) return;
+    const id = ++previewId.current;
+    ownsPreview.current = true;
+    setVoiceError(''); setPreviewing(true);
+    try { await previewUltronVoice(); }
+    catch { if (previewId.current === id) setVoiceError('Не удалось воспроизвести голос. Попробуйте ещё раз.'); }
+    finally { if (previewId.current === id) { ownsPreview.current = false; setPreviewing(false); } }
   };
-
   if (!open) return null;
-
   return (
-    <div className="settings-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={closePanel}>
-      <div
-        aria-labelledby="settings-title"
-        aria-modal="true"
-        className="settings-dialog bg-panel border border-border rounded-2xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-      >
+    <div className="settings-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={closePanel}>
+      <div ref={dialogRef} aria-labelledby="settings-title" aria-modal="true" role="dialog"
+        className="settings-dialog bg-panel border border-border rounded-2xl w-full max-w-lg mx-4 max-h-[90dvh] overflow-y-auto"
+        onClick={event => event.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="settings-title">
-            <h2 id="settings-title" className="text-sm font-medium text-text-1">Настройки Eclipse Ultron</h2>
-            <p>Локальный голосовой контур</p>
-          </div>
-          <button type="button" aria-label="Закрыть настройки" onClick={closePanel} className="w-8 h-8 flex items-center justify-center rounded-lg text-text-3 hover:bg-card hover:text-text-1 transition-colors">
-            <X size={16} />
-          </button>
+          <div className="settings-title"><h2 id="settings-title" className="text-sm font-medium text-text-1">Настройки Eclipse Ultron</h2><p>Голос и приватность</p></div>
+          <button type="button" aria-label="Закрыть настройки" onClick={closePanel} className="w-10 h-10 flex items-center justify-center rounded-lg text-text-2 hover:bg-card focus-visible:outline-2 focus-visible:outline-accent"><X size={18} /></button>
         </div>
-
-        <div className="p-5 space-y-3">
-          <div className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl">
-            <Server size={16} className="text-live" />
-            <div>
-              <p className="text-xs font-medium text-text-1">Ollama · основной локальный контур</p>
-              <p className="text-[10px] text-text-3">127.0.0.1:11434 · данные не покидают устройство</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl">
-            <Cpu size={16} className="text-accent" />
-            <div>
-              <p className="text-xs font-medium text-text-1">Qwen 3 8B · голосовой профиль</p>
-              <p className="text-[10px] text-text-3">Закреплён для быстрой живой беседы без долгого старта 27B</p>
-            </div>
-          </div>
-          <section className="space-y-2 px-4 py-4 bg-card border border-border rounded-xl" aria-labelledby="chat-model-title">
-            <div>
-              <p id="chat-model-title" className="text-xs font-medium text-text-1">Модель диалога</p>
-              <p className="mt-1 text-[10px] text-text-3">Выбор действует только для локального текстового чата. Живой голос остаётся на Qwen 3 8B.</p>
-            </div>
-            <select
-              id="ultron-chat-model"
-              aria-label="Модель локального диалога"
-              value={selectedModel}
-              onChange={(event) => updateModel(event.target.value)}
-              className="w-full rounded-lg border border-border bg-panel px-3 py-2.5 text-xs text-text-1 outline-none focus:border-accent"
-            >
-              {LAB_MODELS.map((model) => (
-                <option key={model.id} value={model.id}>{model.name}</option>
-              ))}
-            </select>
-            <p className="text-[10px] leading-relaxed text-text-3">{selectedModelDefinition.desc}</p>
-            {selectedModelDefinition.risk === 'experimental' && (
-              <p className="text-[10px] leading-relaxed text-amber-300">Экспериментальный Lab-профиль: проверьте модель и не передавайте ей секреты или команды.</p>
-            )}
+        <div className="p-5 space-y-4">
+          <section className="space-y-3" aria-labelledby="voice-profile-title">
+            <h3 id="voice-profile-title" className="flex items-center gap-2 text-sm font-medium text-text-1"><Volume2 size={17} /> Голос Альтрона</h3>
+            <p className="text-xs leading-relaxed text-text-2">Выбранный низкий голос с грубой металлической обработкой. Один профиль, без автоматической замены другим голосом.</p>
+            <button type="button" onClick={() => void previewVoice()} disabled={!isTTSSupported() || (voiceBusy && !previewing)} aria-pressed={previewing}
+              className="inline-flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-xs font-medium text-text-1 hover:bg-accent/20 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-accent">
+              {previewing ? <Square size={15} aria-hidden="true" /> : <Play size={15} aria-hidden="true" />}
+              {previewing ? 'Остановить' : 'Послушать голос'}
+            </button>
+            {!isTTSSupported() && <p className="text-xs text-text-2">Прослушивание доступно в установленном приложении.</p>}
+            {voiceBusy && !previewing && <p className="text-xs text-text-2">Остановите текущий разговор, чтобы прослушать образец.</p>}
+            {voiceError && <p role="alert" className="text-xs text-accent">{voiceError}</p>}
+            <p className="text-xs leading-relaxed text-text-2">Кнопка воспроизводит настоящий текущий голос. Текст появляется раньше, локальная озвучка обычно готовится за несколько секунд и её всегда можно остановить.</p>
           </section>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="px-4 py-3 bg-card border border-border rounded-xl">
-              <p className="flex items-center gap-2 text-xs font-medium text-text-1"><Mic size={14} /> Whisper offline</p>
-              <p className="mt-1 text-[10px] text-text-3">Одна фраза или явный живой режим</p>
-            </div>
-            <div className="px-4 py-3 bg-card border border-border rounded-xl">
-              <p className="flex items-center gap-2 text-xs font-medium text-text-1"><Volume2 size={14} /> Piper Denis · Brutal</p>
-              <p className="mt-1 text-[10px] text-text-3">Чёткий русский нейроголос · нативное воспроизведение · offline</p>
-            </div>
+          <div className="space-y-3 border-t border-border pt-4">
+            <p className="flex items-center gap-2 text-xs text-text-2"><Cpu size={16} /> Qwen 3 8B формирует ответы</p>
+            <p className="flex items-center gap-2 text-xs text-text-2"><Mic size={16} /> Whisper распознаёт русскую речь локально</p>
+            <p className="flex items-center gap-2 text-xs text-text-2"><Server size={16} /> Pinned Piper + Ultron DSP озвучивают без облака</p>
           </div>
-          <section className="space-y-3 px-4 py-4 bg-card border border-border rounded-xl" aria-labelledby="voice-profile-title">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p id="voice-profile-title" className="text-xs font-medium text-text-1">Голос Альтрона</p>
-                <p className="mt-1 text-[10px] text-text-3">Низкий Piper Denis — основной. Ниже настраивается только резервный Windows Voice</p>
-              </div>
-              <button
-                type="button"
-                onClick={previewVoice}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-accent/25 bg-accent/10 px-3 py-2 text-[10px] font-medium text-accent hover:bg-accent/15 disabled:opacity-50"
-              >
-                <Play size={12} aria-hidden="true" /> {previewing ? 'Остановить' : 'Прослушать'}
-              </button>
-            </div>
-
-            <label className="block text-[10px] font-medium text-text-2" htmlFor="ultron-voice-select">
-              Резервный Windows-голос
-            </label>
-            <select
-              id="ultron-voice-select"
-              value={voicePreferences.voiceName}
-              onChange={(event) => updateVoicePreferences({ ...voicePreferences, voiceName: event.target.value })}
-              className="w-full rounded-lg border border-border bg-panel px-3 py-2.5 text-xs text-text-1 outline-none focus:border-accent"
-            >
-              {!voices.some((voice) => voice.name === voicePreferences.voiceName) && (
-                <option value={voicePreferences.voiceName}>{voicePreferences.voiceName}</option>
-              )}
-              {voices.map((voice) => (
-                <option key={`${voice.name}-${voice.lang}`} value={voice.name}>{voice.name} · {voice.lang}</option>
-              ))}
-            </select>
-
-            <div className="flex items-center justify-between gap-3">
-              <label className="flex items-center gap-2 text-[10px] font-medium text-text-2" htmlFor="ultron-voice-rate">
-                <Gauge size={13} aria-hidden="true" /> Скорость резервного голоса
-              </label>
-              <output className="text-[10px] font-medium text-accent" htmlFor="ultron-voice-rate">{voicePreferences.rate.toFixed(2)}×</output>
-            </div>
-            <input
-              id="ultron-voice-rate"
-              type="range"
-              min="0.95"
-              max="1.12"
-              step="0.01"
-              value={voicePreferences.rate}
-              onChange={(event) => updateVoicePreferences({ ...voicePreferences, rate: Number(event.target.value) })}
-              className="w-full accent-red-500"
-            />
+          <section className="border-t border-border pt-4" aria-labelledby="voice-privacy-title">
+            <h3 id="voice-privacy-title" className="flex items-center gap-2 text-xs font-medium text-text-1"><ShieldCheck size={16} /> Приватность</h3>
+            <p className="mt-2 text-xs leading-relaxed text-text-2">Микрофон включается только по вашей команде. Голосовой процесс изолирован средствами Windows: без сетевых разрешений, ключей и инструментов управления компьютером. Аудиозаписи разговора не сохраняются.</p>
           </section>
-          <div className="px-4 py-3 bg-accent/5 border border-accent/20 rounded-xl" role="status">
-            <p className="flex items-center gap-2 text-xs font-medium text-accent">
-              <ShieldCheck size={14} /> Приватность по умолчанию
-            </p>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-text-3">
-              Живой режим включается только вручную и заметен на экране и в tray. Аудио не сохраняется; остановка доступна одним нажатием.
-            </p>
-          </div>
-          <div className="px-4 py-3 bg-card border border-border rounded-xl">
-            <p className="text-[11px] text-text-3 leading-relaxed">
-              Локальный runtime и модели:<br/>
-              <code className="text-accent text-[10px]">E:\ADMIN_HOPSON_PC\Программы\Eclipse AI Runtime</code>
-            </p>
-          </div>
         </div>
-
-        <div className="px-5 py-4 border-t border-border flex items-center justify-end">
-          <button type="button" onClick={closePanel}
-            className="px-5 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent text-xs font-medium hover:bg-accent/15 transition-colors">
-            Готово
-          </button>
+        <div className="px-5 py-4 border-t border-border flex justify-end">
+          <button type="button" onClick={closePanel} className="px-5 py-3 rounded-lg bg-card border border-border text-text-1 text-xs font-medium hover:bg-accent/10 focus-visible:outline-2 focus-visible:outline-accent">Готово</button>
         </div>
       </div>
     </div>

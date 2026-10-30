@@ -130,7 +130,7 @@ export function UsageGuide({
               <span className="usage-guide-step-number">01</span>
               <div>
                 <p className="usage-guide-step-title"><Settings2 size={15} /> Проверьте локальный контур</p>
-                <p>Основной голос — низкий локальный Piper Denis без цифрового pitch-shift. В настройках можно выбрать и настроить резервный Windows-голос.</p>
+                <p>Основной голос — закреплённый локальный Piper Denis с профилем Ultron DSP. Кнопка «Послушать голос» воспроизводит настоящий production-контур, без облака и скрытой замены.</p>
                 <button type="button" className="usage-guide-action" onClick={onOpenSettings}>
                   Открыть настройки <ArrowRight size={13} />
                 </button>

@@ -60,7 +60,7 @@ function defaultRunner({ operation, target, producerId, input, timeoutMs }) {
   if (process.platform !== 'win32') return Promise.reject(new OfficeCredentialError('UNSUPPORTED_PLATFORM'))
   return new Promise((resolve, reject) => {
     const child = spawn(POWERSHELL_PATH, [
-      '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+      '-NoLogo', '-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass',
       '-File', HELPER_PATH,
       '-Operation', operation,
       '-Target', target,

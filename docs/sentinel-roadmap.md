@@ -1,5 +1,180 @@
 # Eclipse Hopson Sentinel Roadmap
 
+## Decision / Recovery / Shadow-Canary — read-only сверка 2026-10-09
+
+Отдельный поток: Backlog 30–32 / Agent OS 103–105. Этот статус не подтверждает голосовой runtime или Codex Gateway; их реализация здесь не менялась. Исторические записи ниже сохранены.
+
+- Локальный `main`: `1268cf9d9a1dc1c0cd35f5dcb14d76fceb8a5a05`, ahead 3 / behind 18 относительно `origin/main`; есть чужие незавершённые изменения. GitHub main и имеющийся origin/main: `ffb846615dfcd1fa887aacc4ea748c981a87e604`. Merged-файлы этого потока отсутствуют в текущем checkout; изучены через существующие Git objects, без pull/checkout/reset.
+- PR [#19](https://github.com/PavelHopson/eclipse-hopson-sentinel/pull/19), [#20](https://github.com/PavelHopson/eclipse-hopson-sentinel/pull/20), [#21](https://github.com/PavelHopson/eclipse-hopson-sentinel/pull/21), [#22](https://github.com/PavelHopson/eclipse-hopson-sentinel/pull/22) merged. Merge SHAs соответственно: `47868b04c648c3b3ca5563f3e4162ec0617b6893`, `6422f3c5507e86b2a94253bc948fdca96d47ce99`, `2a6ab0f6dcf48d0cd2c1c54ce718c84ea70efd84`, `ffb846615dfcd1fa887aacc4ea748c981a87e604`.
+- На точном ffb8466 [CI 35614844369](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/runs/35614844369) и PR Checks 35614844363 успешны. Проверены статусы jobs и исходники synthetic/contracts. Локально merged-тесты в этой сверке не перезапускались; зелёный CI не является live-provider или production доказательством.
+
+| Существующий пункт | Реализовано и проверено по merged-коду/CI | Runtime и следующий блокер |
+|---|---|---|
+| Backlog 30 / Agent OS 103 — Decision Layer | Контракты, structured-output adapter, synthetic corpus 18 случаев, evidence persistence/provenance; PR #22 переводит manual baseline на OpenAI | После #22 успешного live baseline нет. Нужен отдельно разрешённый запуск preflight и корпуса на точном согласованном main; наличие ключа не проверялось. Execution authority не предоставлена. |
+| Backlog 31 / Agent OS 104 — Recovery Controller | Supervised state machine; append-only sidecar; bounded reader; opt-in observer tool batches; read-only operator diagnostics | Код observer не доказывает, что он включён в runtime. Автоматические retry/rollback/control-flow не разрешены. Нужен отдельный согласованный runtime-сценарий; реальные session payloads не читались. |
+| Backlog 32 / Agent OS 105 — Shadow/Canary | Synthetic observer → session → sidecar → reader → summary: healthy / checkpoint / replan; comparison gate блокирует regressions и всегда оставляет canaryAuthorized=false | Нет достоверного baseline/candidate сравнения и разрешения на canary. Следующий безопасный шаг — согласовать checkout с сохранением dirty work и повторить offline harness; live/canary требует отдельного допуска. |
+
+Последний [baseline run 35613001871](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/runs/35613001871), SHA `2a6ab0f6dcf48d0cd2c1c54ce718c84ea70efd84`, завершился **failure на preflight**: corpus/validation/upload skipped, артефактов нет. После #22 нового запуска не найдено.
+
+Единственный сохранённый артефакт `decision-baseline-35598298973`, ID **10640520390**, относится к [старому run 35598298973](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/runs/35598298973) и SHA `3e2674dc6e9d6a875b5e06a6b5eb6b10da8ddca2`. ZIP SHA-256 `21819138239777e1078c52ddc6e3d9ffd872b209cc97f7a1e8f682c31de27939` проверен; внутри `baseline-20260921T130537369Z.json`, schema `sentinel.decision-shadow-report.v1`, engine `sidequery:github`, model `github:copilot`: **18 случаев, 0 valid, 0 correct, 0 accepted, invalidRate=1**. Все bounded errors: `decision engine failed`. Успешный статус старого workflow подтверждает лишь выпуск отчёта, не работоспособность inference и не пригодный baseline. Его почти нулевые latency не являются измерением скорости модели.
+
+В этой сверке не запускались live workflow/provider, observer, canary, установка, смена моделей/default/authority, commit/push/deploy. Codex Gateway не изменён. Google-реестр ведёт координатор; здесь он не обновлялся.
+
+## Voice recovery + HuiHui admission 1.2.23 — 2026-09-12
+
+- [x] reproduce inconsistent cold-load/first-decode readiness and add bounded technical warmup
+- [x] bound renderer TTS stages and expose a no-microphone **Проверить ответ** action
+- [x] preserve exact Developer model allowlist, human approval and CPU-only Lab separation
+- [x] pass 156 voice/security tests, 3 native lifecycle tests, typecheck/lint/build and mocked desktop/mobile QA
+- [x] verify author HuiHui UD-DW Q4_K_M source, normalized tensor equality and local registration
+- [x] complete synthetic CPU-only Developer proposal (173.075s, ~16GiB RAM, 0 GPU bytes) and verify owned cleanup
+- [x] package/verify/install isolated 1.2.23 on E:; retain 1.2.22 rollback
+- [ ] confirm actual speaker output, multi-turn microphone/resume and Stop with user
+
+Current evidence and blockers: [2026-09-12 recovery](ultron-recovery-2026-09-12.md).
+
+## TTS diagnostics 1.2.22 (installed; short audible retry confirmed) - 2026-09-08
+
+- [x] confirm from user screenshot that STT and text answer succeed; failure is in speech output
+- [x] reproduce numeric/word/sentence synthesis successfully with installed helpers in Node and Electron, no mic/playback
+- [x] replace blanket TTS error with fixed Piper/DSP/config/cancellation codes, without exposing native payloads
+- [x] pass 150 voice tests, syntax/typecheck/lint/build, mocked desktop/mobile live-flow QA and ASAR isolation checks
+- [x] install/restart approved voice-only 1.2.22 on E:, verify exact version and ASAR hash; retain 1.2.21 rollback
+- [x] user confirmed audible retry after update/restart: "Он заговорил"
+- [ ] verify multi-turn live conversation/resume/Stop; exact cause of the prior running-app TTS failure remains unproven
+
+Evidence: [voice recovery status](ultron-voice-readiness-2026-09-08.md).
+
+## Voice recovery hotfix 1.2.21 (installed; human incident still open) - 2026-09-08
+
+- [x] separate cancellable model preload from the first-answer deadline; preserve independent microphone startup
+- [x] retain Whisper ownership through failed termination, expose Stop retry and fix resume-before-ready
+- [x] retain burst/duplicate/silence guards while allowing natural nine-turn conversations
+- [x] strip unnecessary capture environment; include packaged GUI host in diagnostics
+- [x] pass 147 voice/security tests, 3 native lifecycle tests, lint, supported typecheck and web build
+- [x] add CI coverage for voice session/host and native Windows lifecycle
+- [x] run isolated real model/TTS smoke with no visible console SHOW events
+- [x] verify/install voice-only candidate on E: without releasing the separate AI Hub Task Ledger
+- [ ] pass human multi-turn microphone/audio/Stop test: user reports no response and no visible error
+- [x] local non-speech-symbol filtering regression fix, 149 tests passed; not yet installed
+- [ ] verify bounded control-phrase capture before further release; previous one-shot ended on unrelated short fragment
+
+Evidence and rollout status: [voice recovery](ultron-voice-readiness-2026-09-08.md).
+
+## Follow-up audit — 2026-09-08
+
+- [x] recheck installed 1.2.19 integrity, 137 voice tests, 13 task-journal tests, lint/typecheck/build and native model/TTS probes
+- [x] P1: local fix separates cold model loading from first-answer budget; see hotfix rollout above
+- [x] P1: local fix blocks repeat capture until actual child close, repairs early resume readiness and lifecycle fixtures
+
+Evidence, remaining risks and scope: [audit 2026-09-08](ultron-audit-2026-09-08.md). No application changes or reinstall performed by this audit.
+
+## Ultron 1.2.19 — proven console source and native VAD — 2026-09-05
+
+- [x] trace visible Terminal events beyond desktop descendants to independent Ollama 0.32.15 GPU discovery
+- [x] package a fixed GUI host with inherited headless console, bounded pipes and owned Job Object cleanup
+- [x] unify one-shot/live Whisper capture, enable actual VAD and wait for native microphone readiness
+- [x] bound and cancel native non-thinking voice requests; reject stale UI/status results
+- [x] pass 137 voice/security tests, lint, supported typecheck, syntax checks and production build
+- [x] build/install 1.2.19 on E:; verify installed version, ASAR hash and GUI subsystem host
+- [x] confirm short human Russian question -> spoken "4"; actual installed chain observed with zero visible console events
+- [ ] verify longer multi-turn conversation and user-driven Stop/tray/reopen lifecycle
+
+Evidence and corrected earlier assumptions: [1.2.19 incident](ultron-1.2.19-console-and-voice-recovery.md).
+
+## Ultron 1.2.18 — immediate listening and unified stop — 2026-09-05
+
+- [x] trace the installed 1.2.17 process tree and separate Ultron children from Codex, Edge and Explorer shells
+- [x] verify that the desktop shortcut launches the executable directly and that no repeated credential-helper loop occurs
+- [x] start Whisper before the potentially slow Qwen readiness request; prepare the model in parallel
+- [x] synchronize tray start/stop/emergency commands with renderer state and query authoritative state on renderer mount
+- [x] stop capture, current model turn, TTS and pending local work when the window is closed to tray
+- [x] terminate live Whisper through the exact owned Windows PID tree and keep all native spawns shell-free
+- [x] explicitly hide the fixed Windows Credential Manager PowerShell helper
+- [x] pass 126/126 voice/security tests, lint, supported typecheck, syntax checks, web build, zero-advisory dashboard audit and NSIS guard
+- [x] build and locally verify the unsigned 1.2.18 installer and packaged ASAR
+- [x] install 1.2.18 to the fixed E-drive program path; verify ProductVersion, matching ASAR and both shortcuts
+- [ ] complete a human live phrase, audible answer, mid-generation Stop and no-console-flash smoke
+
+## Ultron 1.2.17 — FIFINE sliding recognition recovery — 2026-09-04
+
+- [x] verify Windows microphone consent, FIFINE endpoint presence and healthy input level (`-8 dB` peak)
+- [x] reproduce zero VAD blocks at thresholds `0.45` and `0.20` with the installed whisper-stream build
+- [x] verify the same build emits sliding-window redraws and known silence hallucinations
+- [x] require two matching bounded redraws before a live or one-shot transcript can become a command
+- [x] preserve silence filters, echo guard, duplicate suppression, rate circuit breaker and no-audio-retention boundary
+- [x] extend the Primary Ollama readiness window for the measured Windows startup race without duplicate processes,
+  startup microphone activation, model downloads or 27B loading
+- [x] pass real local model (`81.487 s` cold) and protected TTS (`842 ms`) smokes; retain cold-load latency as an
+  explicit product limitation
+- [x] pass 125/125 voice/security tests, lint, supported typecheck and web build; build and verify 1.2.17,
+  then install it to the fixed E-drive path after an explicit preview
+- [ ] complete a human spoken-phrase and audible-response check
+
+## Ultron 1.2.16 — Windows STT encoding hotfix — 2026-09-01
+
+- [x] reproduce the failure in the exact installed Windows PowerShell 5.1 parser
+- [x] identify UTF-8-without-BOM mojibake as the pre-Whisper parser failure
+- [x] encode the packaged STT wrapper with UTF-8 BOM and request a hidden PowerShell window explicitly
+- [x] add a byte-level and native PowerShell parse regression test
+- [x] build and install 1.2.16 to the fixed E-drive path; verify the installed BOM, version and unchanged Ollama PID
+- [ ] complete a real spoken-phrase and audible-response check from the user-launched desktop shortcut
+
+## Ultron 1.2.15 — process lifecycle fail-safe — 2026-09-01
+
+- [x] inspect the live Windows process tree without stopping unrelated terminals, media or Ollama
+- [x] enforce one desktop instance and focus the existing window on a repeated launch
+- [x] bind one-shot STT cancellation and timeout to the exact PowerShell + Whisper process tree
+- [x] expose a tray emergency stop for live STT, one-shot STT, TTS, pending voice action and Developer proposal
+- [x] stop live capture after eight anomalous transcript deliveries in sixty seconds
+- [x] add regression/security coverage for exact PID-tree termination, no shell and circuit-breaker behavior
+- [x] build the unsigned 1.2.15 installer and verify ASAR contents, version, SHA-256, installer process guard and voice ACL guard without installing it
+- [x] install 1.2.15 after explicit operator approval; verify exact ASAR, registry, shortcuts, real single-instance behavior, idle helper absence and unchanged Ollama PID
+- [ ] complete the human spoken-phrase and audible TTS check in the held application session (automated GUI launch jobs close their children on completion)
+- [ ] attribute any future visible console window from a captured PID/PPID/command-line snapshot; current evidence did not attribute one to Ultron
+
+## Ultron 1.2.14 — FIFINE VAD hotfix — 2026-08-31
+
+- [x] reproduce the false phrase `Продолжение следует…` from quiet live capture and classify it as a Whisper silence hallucination, not user speech
+- [x] pin the only enumerated DirectSound capture endpoint (`FIFINE`, device `0`) for one-shot and live recognition
+- [x] move production live recognition from sliding redraws to completed VAD framing; reject unframed output and two exact common silence artifacts
+- [x] show an actionable gain/input-level hint after twelve seconds without recognized speech, without storing or uploading audio
+- [x] pass focused and full voice/security regression suites
+- [x] isolate the remaining screenshot failure to TTS after verified STT and Qwen response; recreate the fixed capability-free AppContainer profile and pass a real 837 ms installed-runtime smoke
+- [ ] run human spoken-phrase calibration after increasing FIFINE hardware gain and Windows input level
+- [ ] confirm audible playback in the interactive application, then remove the empty AppContainer recovery directory
+- [x] superseded by the installed 1.2.15 build containing the 1.2.14 microphone fixes
+
+## Ultron 1.2.13 — fast voice and runtime diagnostics — 2026-08-31
+
+- [x] consolidate the existing `qwen3:8b` blobs into the canonical E-drive model store with size/SHA-256 verification and same-volume hardlinks; preserve the source store
+- [x] pin both Primary and Lab profiles to the reviewed E-drive store so stale environment values cannot redirect desktop inference to C: or a legacy path
+- [x] replace the five-minute CPU Qwen3-TTS production path with pinned Piper + Ultron DSP; keep Qwen3-TTS as non-realtime Studio/Lab evidence
+- [x] add a read-only diagnostics dialog for storage, Whisper, pinned Piper artifacts, Primary/Lab models and media resource guard
+- [x] move Chromium cache and Ultron logs below `Eclipse AI Runtime` on E: while preserving the stable Chromium user-data migration boundary
+- [x] cover loading/error/success, keyboard focus, Escape, mobile and reduced-motion states; browser QA has zero external requests, console errors or horizontal overflow
+- [x] build the assisted Windows installer and run non-mutating NSIS process/ACL guards
+- [x] install 1.2.13 after explicit operator confirmation; verify ProductVersion, ASAR/helpers, startup, shortcut and unchanged Ollama PID
+- [ ] reduce the 175.803 s observed cold Qwen 8B load without auto-warming on app startup or regressing media playback; warm/re-cached load is 5.511 s
+- [ ] record human microphone, audible voice quality and simultaneous local video-playback QA on the installed build
+- [ ] sign the installer before public distribution
+
+## Bounded Developer Mode and resource governor — 2026-08-31
+
+- [x] add native Git workspace selection with a read-only, text-only, secret-aware context boundary
+- [x] generate a schema-bound 27B proposal on loopback without tools, shell, network or renderer-controlled model/path arguments
+- [x] add explicit cancellation for long cold proposals; cancellation returns no partial diff and still runs unload/owned-server cleanup
+- [x] require an expiring exact approval before atomic file replacement; return receipt and conflict-safe rollback preview
+- [x] prevent prompt/file output from expanding the path allowlist or introducing secret-like values
+- [x] remove primary/Lab model warm-up from application startup; reduce explicit voice keep-alive from two hours to five minutes
+- [x] run Developer inference with `think=false`, CPU-only six threads, bounded 8K context and `keep_alive=0`; block concurrent voice/TTS heavy work
+- [x] move Whisper, Hugging Face and HyperFrames cache assets from C: to the E-drive runtime with compatibility junctions
+- [x] redirect future Ollama/HF/Whisper/npm/pip/Electron caches to `E:\ADMIN_HOPSON_PC\Программы\Eclipse AI Runtime`
+- [x] remove 13.04 GiB of exact, re-downloadable caches/install archives without scanning or changing personal media/doc roots
+- [x] run the first real OrcaRouter Q4 Developer smoke on an artificial Git fixture: 168.08 s cold end-to-end, valid one-file diff, no apply, zero model left in `/api/ps`
+- [ ] record a simultaneous local video-playback QA; current GPU/RAM evidence is safe but is not a playback test
+- [ ] evaluate adding new files only after a separate path/create policy and regression suite; current MVP modifies existing context files only
+
 ## Voice-first Ultron — 2026-08-25
 
 - [x] remove the visible text Chat, session sidebar, status rail and floating contact dock from the primary desktop shell
@@ -531,7 +706,7 @@ The next milestone should not be considered complete until all of the following 
 - [x] Rebrand the application, first-run guide, icon and NSIS artwork to the original Eclipse crimson/graphite/silver system.
 - [x] Verify a machine-wide Windows upgrade from Sentinel 1.1.1 to Ultron 1.2.0 in the approved E-drive directory.
 - [x] Install the verified portable `whisper.cpp b4938` runtime and `large-v3-turbo-q5_0` model only on the approved E-drive, then pass a real Russian microphone smoke.
-- [x] Install portable Ollama 0.32.15 and HuiHui Qwen3.8 27B in an isolated loopback Lab profile with a separate E-drive model store and no tools.
+- [x] Install portable Ollama 0.32.15 and a Qwen3.8 27B Q4 candidate in an isolated loopback Lab profile with a separate E-drive model store and no tools.
 
 ### P1 next
 

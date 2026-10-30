@@ -1,4 +1,4 @@
-param(
+﻿param(
   [int]$TimeoutSeconds = 12,
   [string]$RuntimeRoot = ''
 )
@@ -72,7 +72,7 @@ function Invoke-WhisperRecognition {
     throw 'The local Whisper model is missing.'
   }
 
-  $arguments = '-m "{0}" -l ru --step 0 --length 6000 --keep 200 -vth 0.45 -fth 100 -nf' -f $modelPath
+  $arguments = '-m "{0}" -l ru -c 0 --step 2000 --length 6000 --keep 200 -fth 100' -f $modelPath
   $startInfo = New-Object System.Diagnostics.ProcessStartInfo
   $startInfo.FileName = $whisperExe
   $startInfo.Arguments = $arguments
@@ -120,24 +120,32 @@ function Invoke-WhisperRecognition {
     throw 'Whisper could not load the local speech model.'
   }
 
-  $transcriptionMatch = [regex]::Match(
-    $stdoutText,
-    '(?s)### Transcription \d+ START[^\r\n]*\r?\n(.*?)\r?\n### Transcription \d+ END'
-  )
-  if (-not $transcriptionMatch.Success) {
-    $script:errorCode = 'NO_SPEECH_RECOGNIZED'
-    throw 'No speech was recognized before the local timeout.'
+  $cleanOutput = [regex]::Replace($stdoutText, '\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])', '')
+  $seenCandidates = @{}
+  $text = ''
+  foreach ($line in [regex]::Split($cleanOutput, '[\r\n]+')) {
+    $candidate = $line -replace '^\s*\[\d{2}:\d{2}:\d{2}[.,]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}[.,]\d{3}\]\s*', ''
+    $candidate = $candidate -replace '<\|[^|]+\|>', ''
+    $candidate = ($candidate -replace '\s+', ' ').Trim()
+    if ([string]::IsNullOrWhiteSpace($candidate) -or $candidate -match '^(?:\[?Start speaking\]?|### Transcription|ggml_|load_backend:|init:|whisper_|SDL_main:|main:)') {
+      continue
+    }
+    if ($candidate.Length -gt 500) {
+      continue
+    }
+    $candidateKey = $candidate.ToLowerInvariant().Trim().TrimEnd([char[]]'.!?…')
+    if (@('продолжение следует', 'спасибо за просмотр', 'спасибо') -contains $candidateKey) {
+      continue
+    }
+    $seenCandidates[$candidateKey] = 1 + [int]$seenCandidates[$candidateKey]
+    if ($seenCandidates[$candidateKey] -ge 2) {
+      $text = $candidate
+    }
   }
-
-  $rawTranscript = $transcriptionMatch.Groups[1].Value
-  $text = $rawTranscript -replace '(?m)^\s*\[[^\]]+\]\s*', ''
-  $text = $text -replace '<\|[^|]+\|>', ''
-  $text = $text -replace '\s+', ' '
-  $text = $text.Trim()
 
   if ([string]::IsNullOrWhiteSpace($text)) {
     $script:errorCode = 'NO_SPEECH_RECOGNIZED'
-    throw 'Whisper returned an empty transcript.'
+    throw 'No stable speech was recognized before the local timeout.'
   }
 
   return (Write-SttPayload -Ok $true -Text $text)

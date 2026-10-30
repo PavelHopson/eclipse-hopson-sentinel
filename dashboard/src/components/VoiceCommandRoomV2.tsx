@@ -22,6 +22,7 @@ import { isLocalSTTSupported, isTTSSupported, listenOnceLocal, speak, stopSpeaki
 import { buildVoicePlan, VOICE_SKILL_ALLOWLIST, type VoicePlan, type VoiceSkillId } from '../lib/voiceCommandPolicy';
 import { UltronCore, type UltronCoreState } from './UltronCore';
 import { type UltronPresenceState } from '../lib/ultronPresence';
+import { OperatorMascot } from './OperatorMascot';
 
 type Stage = 'command' | 'plan' | 'approved' | 'executing' | 'receipt' | 'error';
 
@@ -135,6 +136,8 @@ export function VoiceCommandRoom({ motionEnabled, motionLocked, onMotionChange, 
     setSpeaking(true);
     try {
       await speak(receipt.speech);
+    } catch (error) {
+      setVoiceError(error instanceof Error ? error.message : 'Не удалось озвучить ответ.');
     } finally {
       setSpeaking(false);
     }
@@ -294,6 +297,9 @@ export function VoiceCommandRoom({ motionEnabled, motionLocked, onMotionChange, 
             <div><span>Decision trace</span><h2>Контроль</h2></div>
             <strong>{plan ? 'LIVE' : 'IDLE'}</strong>
           </div>
+
+          <OperatorMascot stage={stage} plan={plan} receipt={receipt} approvedAt={approvedAt}
+            killSwitch={killSwitch} transport={transport} motionEnabled={motionEnabled} />
 
           {!plan && !receipt && !error && (
             <div className="ultron-empty-state">

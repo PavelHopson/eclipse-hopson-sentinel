@@ -6,9 +6,15 @@ dist/
 !.env.example
 .openclaude-profile.json
 reports/
+# Private temporary audio; crash leftovers must never be committed.
+.voice-recording-*/
+.voice-smoke-*/
+.voice-qa/
 .sentinel/
 dashboard/release/
 dashboard/release2/
+dashboard/build/UltronOllamaHost.exe
+dashboard/build/compiler-temp/
 __pycache__/
 
 # Locally-cloned Claude Code skill marketplaces (each имеет свой .git):

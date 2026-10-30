@@ -70,7 +70,7 @@ export function warmVoiceModel(): Promise<void> {
           model: VOICE_MODEL_ID,
           prompt: '',
           stream: false,
-          keep_alive: '2h',
+          keep_alive: '5m',
         }),
         signal: controller.signal,
       });

@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/PavelHopson/eclipse-hopson-sentinel/actions/workflows/ci.yml)
 ![Desktop](https://img.shields.io/badge/Desktop-Windows-111318?style=flat-square&logo=windows11&logoColor=F3F5F7)
-![Release](https://img.shields.io/badge/Ultron-1.2.8-8E1024?style=flat-square)
+![Installed](https://img.shields.io/badge/installed-1.2.22-8E1024?style=flat-square)
 ![Runtime](https://img.shields.io/badge/Sentinel-0.1.7-15181D?style=flat-square)
 ![Local first](https://img.shields.io/badge/data-local--first-45D89A?style=flat-square)
 ![Policy](https://img.shields.io/badge/execution-human%20approved-F2C94C?style=flat-square)
@@ -21,6 +21,8 @@
 **Sentinel** — его совместимый runtime, CLI, IPC и набор инженерных контрактов.
 
 [Возможности](#что-уже-работает) · [Архитектура](#архитектура) · [Быстрый старт](#быстрый-старт) · [Голос](#голосовая-связь) · [Безопасность](#модель-безопасности) · [Документация](#документация)
+
+[Локальный пилот «Цифровой след»](experiments/footprint-pilot/README.md) — отдельный процесс: источники, ручной граф доказательств и одноразовое согласие перед запросом. По умолчанию без внешней сети; не входит в установленный Electron-пакет.
 
 </div>
 
@@ -62,7 +64,7 @@
 
 - **[Интерфейс Альтрона](<dashboard/src>)** — Голосовое рабочее пространство и настройки помощника.
 - **[Desktop runtime](<dashboard/electron>)** — Связь интерфейса с локальными возможностями Windows.
-- **[Голосовой конвейер](<docs/ultron-local-ai-runtime.md>)** — Управление локальными компонентами голосовой сессии.
+- **[Голосовой конвейер](<scripts/voice-runtime>)** — Управление локальными компонентами голосовой сессии.
 
 <a id="readme-start"></a>
 
@@ -104,7 +106,8 @@ npm run dev
 5. интерфейс возвращает проверяемый receipt.
 
 Это не обещание автономного «управления всем компьютером». Текущий desktop-контур ограничен
-read-only диагностикой и отдельными least-privilege actions с preview, ручным approval и receipt.
+read-only диагностикой и отдельными least-privilege workflows с diff, ручным approval, receipt
+и проверяемым откатом.
 
 ## Что уже работает
 
@@ -113,16 +116,39 @@ read-only диагностикой и отдельными least-privilege actio
 | **Альтрон** | центральный voice-first диалог: явный live STT, потоковый локальный ответ и быстрый neural TTS | без text composer, wake word и автозапуска микрофона |
 | **Voice Actions** | «Открой YouTube» через deterministic intent, preview и one-shot receipt | только fixed `https://www.youtube.com/`; произвольные URL запрещены |
 | **Operator** | command room с plan, diff, approval и receipt | execute требует отдельного approval и снятия STOP |
+| **Developer Mode** | read-only контекст Git → локальный 27B proposal → diff → approval → receipt/rollback | только существующие allowlisted text-файлы; без shell, сети, секретов и фоновой записи |
 | **Ultron Lab** | изолированный инвентарь 27B research-моделей | не участвует в живом голосе; без tools, shell, filesystem, network и execute |
 | **Sentinel CLI** | coding-agent, provider routing, bridge и MCP contracts | расширенные права зависят от явной конфигурации |
 | **Office bridge** | подписанные локальные события для Eclipse Chat | opt-in, bounded payloads, replay protection |
 | **Windows Doctor** | read-only security posture audit | диагностика без автоматического remediation |
+| **Диагностика** | один экран состояния E-storage, Whisper, Piper, Qwen 8B/27B и media guard | read-only; не включает микрофон и не загружает модели |
 
 <p align="center">
   <img src="docs/assets/ultron-command-center.png" alt="Eclipse Ultron Operator command room" width="100%" />
 </p>
 
 ## Голосовая связь
+
+Текущая локально установленная версия: **1.2.22**; файлы и версия проверены по хешам.
+После обновления и перезапуска пользователь подтвердил озвучку ответа в **1.2.22**.
+Ранее скриншот подтвердил распознавание «два плюс два» и текст «4.». Длительный живой разговор,
+повторное прослушивание и Stop пока требуют отдельной проверки. Ошибки Piper, DSP и загрузки
+runtime теперь имеют отдельные безопасные коды `TTS_…`; точная причина прежнего сбоя не установлена.
+Whisper запускается напрямую в native VAD-режиме
+(`--step 0`), принимает завершённые блоки и сообщает готовность только после native marker.
+GUI-лаунчер Ollama изолирует консольное наследование; короткая голосовая реплика ранее была
+подтверждена на **1.2.19**, но это не подтверждение работоспособности текущего сценария.
+[Протокол установленной версии](docs/ultron-1.2.19-console-and-voice-recovery.md).
+
+В изолированном голосовом hotfix **1.2.21** подготовка модели отделена от ответа,
+Stop ждёт реального завершения Whisper, ранний resume не изображает готовый микрофон,
+а защита от шума допускает девять обычных коротких реплик подряд. Основной checkout остаётся
+**1.2.20** с отдельной, ещё не выпускаемой здесь работой над журналом AI Hub.
+[Точный статус, измерения, установка и ограничения](docs/ultron-voice-readiness-2026-09-08.md).
+
+Голос: закреплённый **Piper Denis + Ultron DSP**. Диалог: **Qwen 3 8B**, не тяжёлая 27B-модель.
+Распознавание: локальный Whisper и DirectSound device `0`; после смены устройства порядок
+микрофонов может измениться. Открытие диагностики не включает микрофон и не загружает модели.
 
 <table>
   <tr>
@@ -146,9 +172,9 @@ explicit live start
     └─> trusted Electron IPC (fixed executable/model)
           └─> whisper.cpp + large-v3-turbo-q5_0
                 └─> transcript in memory
-                      └─> fixed Qwen 3 8B streaming answer
-                            └─> first complete sentence → Piper Denis · Brutal
-                                  └─> ephemeral E-drive WAV → validate → delete → memory playback
+                      └─> cancellable Qwen 3 8B preparation → bounded streaming answer
+                            └─> first complete sentence → pinned Piper Denis
+                                  └─> bounded raw PCM → Ultron DSP sandbox → memory MP3 playback
 
 Voice Action: deterministic intent → fixed target preview → manual approval → browser → receipt
 Operator: explicit dictation → editable command → plan → diff → approval → receipt
@@ -158,13 +184,15 @@ Operator: explicit dictation → editable command → plan → diff → approval
 - USB-микрофоны открываются через локальный SDL DirectSound backend с согласованием `16 kHz / mono`;
 - фиксированный timeout и rate limit;
 - bounded JSON output;
-- microphone audio и транскрипт не сохраняются; TTS использует уникальный временный WAV на
-  диске E:, проверяет его размер/RIFF и удаляет сразу после чтения;
+- microphone audio и транскрипт не сохраняются; TTS принимает только закреплённые executable,
+  модель и config, ограничивает raw PCM и возвращает обработанный MP3 только в память;
 - визуальные состояния `listening / thinking / speaking / success / error` синхронизированы с turn;
-- production TTS ограничен 400 символами, 12 MiB WAV и 8 секундами process time; голос можно остановить вручную;
-- основной voice — более низкий CC0 Piper `ru_RU-denis-medium` без renderer pitch/time processing; проверенный Windows voice остаётся fallback;
-- измеренный Piper path генерирует 5.39 сек аудио за 0.67 сек, тогда как Qwen3-TTS 0.6B warm test занял 13.21 сек для 2.96 сек аудио и оставлен только в Studio/Lab;
-- модель прогревается при старте, получает восемь последних сообщений, отвечает до 120 токенов и начинает говорить по первой законченной фразе;
+- production TTS ограничен 240 символами на chunk, 1.2 MiB PCM и 20 секундами; голос можно остановить вручную;
+- основной voice — CC0 Piper `ru_RU-denis-medium` с фиксированным Ultron DSP; браузерный/SAPI fallback намеренно запрещён;
+- post-install smoke текущего production TTS подготовил MP3 за 0.795 сек; CPU Qwen3-TTS превысил пять минут и оставлен только как Studio/Lab evidence, а не живой голос;
+- Qwen 8B показал 175.803 сек при холодном чтении после unload и 5.511 сек при повторной загрузке в GPU; warm-цифра не выдаётся за cold latency;
+- модель запускается только после явного голосового действия, остаётся тёплой не более пяти минут,
+  получает восемь последних сообщений, отвечает до 120 токенов и начинает говорить по первой законченной фразе;
 - wake word, startup capture и standing microphone authorization отсутствуют.
 
 Подробности: [Eclipse Ultron Local AI Runtime](docs/ultron-local-ai-runtime.md).
@@ -179,10 +207,12 @@ flowchart LR
     subgraph Desktop["Desktop control plane"]
       D --> V["Local Voice IPC"]
       D --> R["Safe Operator"]
+      D --> DEV["Developer Mode"]
       D --> H["Voice Conversation"]
       R --> P["Plan → Diff → Approval"]
       P --> X["One-shot handler"]
       X --> Q["Receipt"]
+      DEV --> DP["Read-only context → Diff → Approval → Receipt / Rollback"]
     end
 
     subgraph Runtime["Sentinel runtime"]
@@ -216,7 +246,9 @@ flowchart LR
 | Renderer boundary | fixed IPC channel, zero user-controlled process arguments |
 | Process safety | `spawn`, `shell: false`, timeout, output limit, one in-flight process |
 | Local endpoints | Ollama profiles слушают только loopback |
-| Lab isolation | abliterated model получает chat completion, но не tools |
+| Lab isolation | 27B-модель получает только bounded text context; CPU-only inference выгружается после proposal |
+| Developer write gate | только существующие text-файлы из read-only context; hash precondition, expiring exact approval, atomic replace и rollback |
+| Resource governor | нет автозапуска Lab/прогрева на старте; voice и Developer Mode взаимно блокируют тяжёлые операции |
 | Office transport | bounded signed events, nonce/replay protection, explicit opt-in |
 | Browser action | fixed YouTube target, expiring preview, exact one-shot approval и receipt; model/user URL не принимается |
 | Browser worker | произвольный read-only browsing требует отдельной изоляции и allowlist |
@@ -229,7 +261,7 @@ flowchart LR
 | Профиль | Endpoint | Назначение | Default |
 | --- | --- | --- | --- |
 | `qwen3:8b` | `127.0.0.1:11434` | живой голосовой диалог | да, закреплён |
-| `huihui_ai/qwen3.8-abliterated:27b` | `127.0.0.1:11435` | изолированный Lab-эксперимент | нет |
+| `huihui_ai/qwen3.8-abliterated:27b` | `127.0.0.1:11435` | исследовательский кандидат; manifest сейчас не подтверждён | нет |
 | OrcaRouter Qwen3.8 27B Q4 | `127.0.0.1:11435` | установленный Lab-кандидат; сравнительный benchmark ожидается | нет |
 | `qwen3.8-cyber-iq4xs:27b` | `127.0.0.1:11435` | cyjin-yl IQ4_XS GGUF, только после ручного импорта и проверки SHA-256 | нет |
 
@@ -249,6 +281,10 @@ default-профиля. Она остаётся opt-in Lab-моделью без
 `qwen3.8-cyber-iq4xs:27b` на `127.0.0.1:11435`. Установщик не запускается при старте приложения,
 не кладёт веса в Git и задаёт начальный контекст 8K. Модель остаётся текстовым Lab-профилем без
 tools, shell, filesystem, network, secrets, install, deploy и Operator execute.
+Developer Mode использует только фактически найденный 27B Qwen3.8-tag и показывает его в UI.
+Название HuiHui не подставляется автоматически: отсутствие manifest считается фактом, а не
+поводом скрытно скачивать или переименовывать модель. Подробный контракт:
+[Developer Mode и E:-first storage](docs/ultron-developer-mode-storage.md).
 
 ## Быстрый старт
 
@@ -299,6 +335,23 @@ bun run doctor:windows
 ```
 
 ## Проверки качества
+
+Русская диктовка (без микрофона, сети и модельных вызовов):
+
+```powershell
+npm run test:voice
+npm run eval:voice
+```
+
+Первый вызов проверяет обработку частичных фраз и отмену. Второй без входного файла
+показывает «не измерено», а не выдуманную точность модели. Корпус из 30 фраз, локальный
+JSON и границы измерений: [тест русской диктовки](docs/ru-dictation-evaluation.md).
+
+Для отдельного выбранного WAV есть `npm run eval:voice:recording`: без аргументов он
+только показывает три стартовые фразы. `--check` проверяет файл без модели; `--run`
+с отдельным флагом согласия запускает установленный локальный Whisper. Микрофон и облако
+не включаются, оригинал не меняется, текст не записывается в отчёт. Команды и ограничения
+формата — в документе выше. Человеческая диктовка пока не измерена.
 
 Desktop:
 

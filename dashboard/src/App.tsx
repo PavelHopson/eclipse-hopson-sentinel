@@ -1,18 +1,24 @@
-import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react';
-import { BookOpen, Plus, Settings2 } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useState, type CSSProperties } from 'react';
+import { Activity, BookOpen, Plus, Settings2 } from 'lucide-react';
 import { SettingsPanel } from './components/SettingsPanel';
 import { BrandLockup } from './components/BrandMark';
 import { UsageGuide } from './components/UsageGuide';
+import { RuntimeDiagnosticsPanel } from './components/RuntimeDiagnosticsPanel';
 import { UltronAvatar } from './components/UltronAvatar';
 import { type ChatSession, type Message, createSession, getLabModelId, getModelDefinition, getSelectedModel, loadSessions, saveSessions, VOICE_MODEL_ID } from './lib/ai';
-import { type ContactTurn, type UltronPresenceState } from './lib/ultronPresence';
+import { type ContactTurn, type UltronPresenceState, ULTRON_PRESENCE_COPY } from './lib/ultronPresence';
+import './components/task-ledger.css';
 
 const VoiceConversation = lazy(() => import('./components/UltronVoiceConversation').then((module) => ({ default: module.UltronVoiceConversation })));
 const VoiceCommandRoom = lazy(() => import('./components/VoiceCommandRoomV2').then((module) => ({ default: module.VoiceCommandRoom })));
 const LabChat = lazy(() => import('./components/Chat').then((module) => ({ default: module.Chat })));
+const DeveloperMode = lazy(() => import('./components/DeveloperMode').then((module) => ({ default: module.DeveloperMode })));
+const TaskLedger = lazy(() => import('./components/TaskLedger').then((module) => ({ default: module.TaskLedger })));
 
 type ElectronWindowStyle = CSSProperties & { WebkitAppRegion: 'drag' | 'no-drag' };
-type Surface = 'conversation' | 'operator' | 'lab';
+const LocalModels = lazy(() => import('./components/LocalModels').then((module) => ({ default: module.LocalModels })));
+
+type Surface = 'conversation' | 'operator' | 'lab' | 'models' | 'developer' | 'tasks';
 
 const DRAG_STYLE: ElectronWindowStyle = { WebkitAppRegion: 'drag' };
 const NO_DRAG_STYLE: ElectronWindowStyle = { WebkitAppRegion: 'no-drag' };
@@ -42,6 +48,8 @@ export default function App() {
   const [sessions, setSessions] = useState<ChatSession[]>(loadInitialSessions);
   const [activeId, setActiveId] = useState<string>(sessions[0].id);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
   const [usageGuideOpen, setUsageGuideOpen] = useState(() => localStorage.getItem(USAGE_GUIDE_STORAGE_KEY) !== '1');
   const [surface, setSurface] = useState<Surface>('conversation');
   const [selectedModel, setSelectedModel] = useState(() => getLabModelId(getSelectedModel()));
@@ -64,8 +72,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (presence !== 'success' && presence !== 'error') return;
-    const timeoutId = window.setTimeout(() => setPresence('idle'), presence === 'success' ? 1_400 : 2_400);
+    if (presence !== 'success') return;
+    const timeoutId = window.setTimeout(() => setPresence('idle'), 1_400);
     return () => window.clearTimeout(timeoutId);
   }, [presence]);
 
@@ -95,10 +103,8 @@ export default function App() {
     const existing = sessions.find((session) => nextSurface === 'lab'
       ? getModelDefinition(session.model).endpoint === 'lab' && session.model === desiredModel
       : session.model === desiredModel);
-
-    if (existing) {
-      setActiveId(existing.id);
-    } else {
+    if (existing) setActiveId(existing.id);
+    else {
       const session = createSession(desiredModel);
       setSessions((current) => [session, ...current]);
       setActiveId(session.id);
@@ -130,7 +136,8 @@ export default function App() {
 
   const openSurfaceFromGuide = (nextSurface: Surface) => {
     closeUsageGuide();
-    openSurface(nextSurface);
+    if (nextSurface === 'conversation' || nextSurface === 'operator' || nextSurface === 'lab') openSurface(nextSurface);
+    else setSurface(nextSurface);
   };
 
   const queueConversationTurn = (text: string) => {
@@ -149,20 +156,26 @@ export default function App() {
   return (
     <div className="h-screen flex bg-bg overflow-hidden sentinel-shell" data-brand="ultron" data-visual-profile="operational">
       <main className="sentinel-main ultron-voice-shell flex-1 flex flex-col min-w-0">
-        <header className="sentinel-header ultron-voice-header" style={DRAG_STYLE}>
+        <header className="sentinel-header ultron-voice-header ultron-project-header" style={DRAG_STYLE}>
           <div className="ultron-voice-header__brand" style={NO_DRAG_STYLE}>
             <BrandLockup />
           </div>
           <nav className="surface-switcher" aria-label="Режим Альтрона" style={NO_DRAG_STYLE}>
-            <button type="button" aria-pressed={surface === 'conversation'} onClick={() => openSurface('conversation')}>Альтрон</button>
+            <button type="button" aria-pressed={surface === 'conversation'} onClick={() => setSurface('conversation')}>Альтрон</button>
             <button type="button" aria-pressed={surface === 'lab'} onClick={() => openSurface('lab')}>Lab</button>
-            <button type="button" aria-pressed={surface === 'operator'} onClick={() => openSurface('operator')}>Оператор</button>
+            <button type="button" aria-pressed={surface === 'operator'} onClick={() => setSurface('operator')}>Оператор</button>
+            <button type="button" aria-pressed={surface === 'developer'} onClick={() => setSurface('developer')}>Разработка</button>
+            <button type="button" aria-pressed={surface === 'tasks'} onClick={() => setSurface('tasks')}>Задачи</button>
+            <button type="button" aria-pressed={surface === 'models'} onClick={() => setSurface('models')}>Модели</button>
           </nav>
           <div className="ultron-voice-header__tools" style={NO_DRAG_STYLE}>
             <div className="ultron-header-presence" data-state={presence}>
               <span aria-hidden="true" />
-              <strong>{presence === 'idle' ? 'На связи' : 'Активен'}</strong>
+              <strong>{ULTRON_PRESENCE_COPY[presence].label}</strong>
             </div>
+            <button type="button" aria-label="Открыть диагностику" onClick={() => setDiagnosticsOpen(true)}>
+              <Activity size={15} aria-hidden="true" />
+            </button>
             <button type="button" aria-label="Начать новый разговор" onClick={handleNew}>
               <Plus size={15} aria-hidden="true" />
             </button>
@@ -176,9 +189,10 @@ export default function App() {
         </header>
 
         <div className="sentinel-workspace flex-1 overflow-hidden">
-          <Suspense fallback={<SurfaceLoading presence={presence} motionEnabled={motionEnabled} surface={surface} />}>
+          <Suspense fallback={surface === 'models' ? <div className="surface-loading" role="status">Загружаем локальные модели</div> : surface === 'tasks' ? <div className="surface-loading" role="status">Загружаем журнал задач</div> : <SurfaceLoading presence={presence} motionEnabled={motionEnabled} surface={surface} />}>
             {surface === 'conversation' ? (
               <VoiceConversation
+                key={activeId}
                 messages={activeSession.messages}
                 onMessagesChange={handleMessagesChange}
                 externalTurn={contactTurn}
@@ -187,18 +201,11 @@ export default function App() {
                 onPresenceChange={setPresence}
                 motionEnabled={motionEnabled}
               />
+            ) : surface === 'models' ? (
+              <LocalModels />
             ) : surface === 'lab' ? (
-              <LabChat
-                messages={activeSession.messages}
-                onMessagesChange={handleMessagesChange}
-                showGuide={false}
-                autoSpeak={false}
-                onPresenceChange={setPresence}
-                motionEnabled={motionEnabled}
-                model={selectedModel}
-                labMode
-              />
-            ) : (
+              <LabChat messages={activeSession.messages} onMessagesChange={handleMessagesChange} showGuide={false} autoSpeak={false} onPresenceChange={setPresence} motionEnabled={motionEnabled} model={selectedModel} labMode />
+            ) : surface === 'operator' ? (
               <VoiceCommandRoom
                 motionEnabled={motionEnabled}
                 motionLocked={systemReducedMotion}
@@ -206,16 +213,17 @@ export default function App() {
                 onPresenceChange={setPresence}
                 onVoiceQuestion={queueConversationTurn}
               />
+            ) : surface === 'tasks' ? (
+              <TaskLedger />
+            ) : (
+              <DeveloperMode onPresenceChange={setPresence} />
             )}
           </Suspense>
         </div>
       </main>
 
-      <SettingsPanel
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onModelChange={handleModelChange}
-      />
+      <SettingsPanel open={settingsOpen} onClose={closeSettings} onModelChange={handleModelChange} voiceBusy={['listening', 'thinking', 'speaking'].includes(presence)} />
+      <RuntimeDiagnosticsPanel open={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} />
       <UsageGuide
         open={usageGuideOpen}
         onClose={closeUsageGuide}
