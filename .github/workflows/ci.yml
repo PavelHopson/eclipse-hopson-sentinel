@@ -68,6 +68,36 @@ jobs:
       - name: Run tests
         run: python -m pytest test_smart_router.py test_atomic_chat_provider.py test_ollama_provider.py -v
 
+  dashboard-quality:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+
+      - name: Install dashboard dependencies
+        working-directory: dashboard
+        run: npm ci --ignore-scripts
+
+      - name: Lint dashboard
+        working-directory: dashboard
+        run: npm run lint
+
+      - name: Build dashboard
+        working-directory: dashboard
+        run: npm run build
+
+      - name: Audit production dependencies
+        working-directory: dashboard
+        run: npm audit --omit=dev --audit-level=high
+
   windows-doctor:
     runs-on: windows-latest
     permissions:
