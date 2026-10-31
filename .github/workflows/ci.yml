@@ -27,6 +27,11 @@ jobs:
       - name: Test (TypeScript)
         run: bun test
 
+      - name: Setup Node for desktop contracts
+        uses: actions/setup-node@249970729cb0ef3589644e289664e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+
       - name: Test desktop contracts (Node)
         run: >-
           node --test
