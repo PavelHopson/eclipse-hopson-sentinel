@@ -48,9 +48,7 @@ const hashes = {};
 for (const [name, filename] of Object.entries({
   installer:path.join(dashboard,'release','Eclipse-Ultron-' + expectedVersion + '-Setup.exe'),
   exe:path.join(dashboard,'release','win-unpacked','Eclipse Ultron.exe'),asar:archive,
-  preview:path.join(dashboard,'release','win-unpacked','resources','voice-runtime','ultron-approved.mp3'),
 })) hashes[name]=createHash('sha256').update(await readFile(filename)).digest('hex');
-assert.equal(hashes.preview,'0f1c326cd86caa874ea50223b29a787e8f6c10392720adc9f696449016f0fecb');
 const receipt={version:pkg.version,hashes,packageSourceMatches:true,helpersSourceMatch:true,components:sbom.components.length,vulnerabilities:audit.metadata.vulnerabilities};
 await writeFile(path.join(report,'release-audit.json'),JSON.stringify(receipt,null,2));
 console.log(JSON.stringify(receipt));

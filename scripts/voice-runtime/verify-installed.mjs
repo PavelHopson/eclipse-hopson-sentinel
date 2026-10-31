@@ -16,7 +16,6 @@ const config=await readRuntimeConfig(configFile);
 const hash=async filename=>createHash('sha256').update(await readFile(filename)).digest('hex');
 assert.equal(await hash(path.join(installRoot,'Eclipse Ultron.exe')),audit.hashes.exe);
 assert.equal(await hash(path.join(installRoot,'resources','app.asar')),audit.hashes.asar);
-assert.equal(await hash(path.join(installRoot,'resources','voice-runtime','ultron-approved.mp3')),audit.hashes.preview);
 for (const name of ['runtime.mjs','supervisor.mjs','session.mjs','dsp.mjs','worker.py','guard.py','model-lock.json'])
   assert.equal(await hash(path.join(installRoot,'resources','voice-runtime',name)),await hash(new URL(name,import.meta.url)));
 const require=createRequire(new URL('../../dashboard/package.json',import.meta.url));

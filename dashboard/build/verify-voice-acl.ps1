@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 $privateSid = 'S-1-15-2-3401530238-3731070781-1353621829-3068759506-4022790450-2217579969-1039810395'
 $required = [long][Security.AccessControl.FileSystemRights]::ReadAndExecute
 $allowed = $required -bor [long][Security.AccessControl.FileSystemRights]::Synchronize
-$helpers = @('runtime.mjs', 'piper-runtime.mjs', 'supervisor.mjs', 'session.mjs', 'dsp.mjs', 'worker.py', 'guard.py', 'model-lock.json', 'ultron-approved.mp3')
+$helpers = @('runtime.mjs', 'piper-runtime.mjs', 'supervisor.mjs', 'session.mjs', 'dsp.mjs', 'worker.py', 'guard.py', 'model-lock.json')
 function Reject-Access([string]$reason) { Write-Verbose $reason; exit 10 }
 
 try {

@@ -1,7 +1,7 @@
 {
   "name": "eclipse-sentinel",
   "private": true,
-  "version": "1.2.23",
+  "version": "1.2.24",
   "description": "Eclipse Ultron — local-first AI command center powered by Sentinel runtime",
   "author": "Eclipse Forge <hello@eclipseforge.dev>",
   "main": "electron/main.cjs",
@@ -44,10 +44,6 @@
           "guard.py",
           "model-lock.json"
         ]
-      },
-      {
-        "from": "../reports/voice-reference-2026-08-28/06-angry.mp3",
-        "to": "voice-runtime/ultron-approved.mp3"
       },
       {
         "from": "../office",

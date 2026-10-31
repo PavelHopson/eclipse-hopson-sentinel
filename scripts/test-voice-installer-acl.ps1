@@ -8,7 +8,7 @@ $version = (Get-Content -LiteralPath (Join-Path $repoRoot 'dashboard/package.jso
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid dashboard version' }
 $fixtureRoot = Join-Path $repoRoot ('reports/ultron-' + $version + '/acl-fixture-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
-foreach ($name in @('runtime.mjs','piper-runtime.mjs','supervisor.mjs','session.mjs','dsp.mjs','worker.py','guard.py','model-lock.json','ultron-approved.mp3')) {
+foreach ($name in @('runtime.mjs','piper-runtime.mjs','supervisor.mjs','session.mjs','dsp.mjs','worker.py','guard.py','model-lock.json')) {
     New-Item -ItemType File -Path (Join-Path $fixtureRoot $name) | Out-Null
 }
 function Assert-Result([string]$label, [int]$expected) {
