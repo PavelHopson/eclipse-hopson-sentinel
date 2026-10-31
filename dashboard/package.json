@@ -1,7 +1,7 @@
 {
   "name": "eclipse-sentinel",
   "private": true,
-  "version": "1.2.20",
+  "version": "1.2.21",
   "description": "Eclipse Ultron — local-first AI command center powered by Sentinel runtime",
   "author": "Eclipse Forge <hello@eclipseforge.dev>",
   "main": "electron/main.cjs",
@@ -83,6 +83,7 @@
         "en_US"
       ],
       "multiLanguageInstaller": true,
+      "runAfterFinish": false,
       "installerIcon": "build/eclipse-sentinel.ico",
       "uninstallerIcon": "build/eclipse-sentinel.ico",
       "installerHeader": "build/installerHeader.bmp",
