@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { lstat, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { createUltronDsp } from './dsp.mjs';
+import { createUltronDsp, ULTRON_FALLBACK_FILTERS } from './dsp.mjs';
 
 const SAMPLE_RATE = 22050;
 const MAX_PCM_BYTES = 1_200_000;
@@ -88,7 +88,7 @@ export function createFastUltronTts({ runtimeRoot, ffmpeg, sandboxHost, spawnPro
   verifyPaths = verifiedPaths, timeoutMs = 20_000 }) {
   if (typeof runtimeRoot !== 'string' || !path.isAbsolute(runtimeRoot) || !Number.isSafeInteger(timeoutMs)
     || timeoutMs < 1_000 || timeoutMs > 30_000) throw new Error('invalid-piper-runtime');
-  const dsp = createUltronDsp({ ffmpeg, sandboxHost, spawnProcess });
+  const dsp = createUltronDsp({ ffmpeg, sandboxHost, spawnProcess, primaryFilter: ULTRON_FALLBACK_FILTERS, recoveryFilter: ULTRON_FALLBACK_FILTERS });
   let pathsPromise = null, active = null, controller = null;
   return {
     async synthesize(text) {

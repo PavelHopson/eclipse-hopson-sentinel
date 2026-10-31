@@ -29,7 +29,7 @@ function fakeChild(onEnd) {
   return child;
 }
 
-test('retries DSP with the stable recovery graph after malformed output', async () => {
+test('uses the stable DSP graph and retries it after malformed output', async () => {
   const calls = [];
   let dspCalls = 0;
   const spawnProcess = (executable, args, options) => {
@@ -54,7 +54,7 @@ test('retries DSP with the stable recovery graph after malformed output', async 
   assert.equal(dspCalls, 2);
   const firstFilter = calls[1].args[calls[1].args.indexOf('-filter_complex') + 1];
   const fallbackFilter = calls[2].args[calls[2].args.indexOf('-filter_complex') + 1];
-  assert.match(firstFilter, /rubberband/);
+  assert.doesNotMatch(firstFilter, /rubberband/);
   assert.doesNotMatch(fallbackFilter, /rubberband/);
   await runtime.stop();
 });

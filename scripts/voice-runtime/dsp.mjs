@@ -8,9 +8,12 @@ export const ULTRON_FILTERS = '[0:a]rubberband=pitch=0.840896:tempo=1.04:formant
 // pitch-shift/multi-branch graph that can fail under load.
 export const ULTRON_FALLBACK_FILTERS = '[0:a]highpass=f=60,lowpass=f=8200,volume=1,alimiter=limit=0.794328:level=false[out]';
 
-export function createUltronDsp({ ffmpeg, sandboxHost, spawnProcess = spawn, timeoutMs = 15000 }) {
+export function createUltronDsp({ ffmpeg, sandboxHost, spawnProcess = spawn, timeoutMs = 15000, primaryFilter = ULTRON_FILTERS, recoveryFilter = ULTRON_FALLBACK_FILTERS }) {
   if (![ffmpeg, sandboxHost].every(p => typeof p === 'string' && path.isAbsolute(p) && !p.includes('\0')))
     throw new Error('invalid-dsp-path');
+  const approvedFilters = new Set([ULTRON_FILTERS, ULTRON_FALLBACK_FILTERS]);
+  if (![primaryFilter, recoveryFilter].every(filter => approvedFilters.has(filter)))
+    throw new Error('invalid-dsp-filter');
   const runPass = (pcm, sampleRate, filterComplex, signal) => new Promise((resolve, reject) => {
     const child = spawnProcess(sandboxHost, [ffmpeg, '-nostdin', '-hide_banner', '-loglevel', 'error',
       '-protocol_whitelist', 'pipe', '-f', 's16le', '-ar', String(sampleRate), '-ac', '1', '-i', 'pipe:0',
@@ -54,12 +57,12 @@ export function createUltronDsp({ ffmpeg, sandboxHost, spawnProcess = spawn, tim
       throw new Error('invalid-dsp-input');
     if (signal?.aborted) throw new Error('cancelled');
     try {
-      return await runPass(pcm, sampleRate, ULTRON_FILTERS, signal);
+      return await runPass(pcm, sampleRate, primaryFilter, signal);
     } catch (error) {
       // A malformed output is recoverable; startup, timeout and cancellation
       // failures are not retried so the caller keeps their precise stage code.
       if (error?.message !== 'dsp-invalid-audio' || signal?.aborted) throw error;
-      return runPass(pcm, sampleRate, ULTRON_FALLBACK_FILTERS, signal);
+      return runPass(pcm, sampleRate, recoveryFilter, signal);
     }
   };
 }
