@@ -25,7 +25,7 @@ jobs:
         run: bun run build
 
       - name: Test (TypeScript)
-        run: bun test
+        run: bun test src
 
       - name: Setup Node for desktop contracts
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
