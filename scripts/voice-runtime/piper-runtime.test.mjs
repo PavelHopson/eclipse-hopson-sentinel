@@ -29,6 +29,36 @@ function fakeChild(onEnd) {
   return child;
 }
 
+test('retries DSP with the stable recovery graph after malformed output', async () => {
+  const calls = [];
+  let dspCalls = 0;
+  const spawnProcess = (executable, args, options) => {
+    calls.push({ executable, args, options });
+    const isPiper = executable.endsWith('piper.exe');
+    return fakeChild((child) => {
+      if (isPiper) child.stdout.emit('data', Buffer.alloc(22050, 2));
+      else {
+        dspCalls += 1;
+        child.stdout.emit('data', dspCalls === 1 ? Buffer.from('broken') : Buffer.concat([Buffer.from('ID3'), Buffer.alloc(600)]));
+      }
+      child.emit('close', 0);
+    });
+  };
+  const runtime = createFastUltronTts({
+    runtimeRoot: 'E:\\runtime', ffmpeg: 'E:\\runtime\\ffmpeg.exe', sandboxHost: 'E:\\runtime\\sandbox.exe', spawnProcess,
+    verifyPaths: async () => ({ executable: 'E:\\runtime\\piper.exe', model: 'E:\\runtime\\model.onnx',
+      config: 'E:\\runtime\\model.onnx.json', dataRoot: 'E:\\runtime\\espeak-ng-data' }),
+  });
+  const result = await runtime.synthesize('Повтори ответ.');
+  assert.equal(result.ok, true);
+  assert.equal(dspCalls, 2);
+  const firstFilter = calls[1].args[calls[1].args.indexOf('-filter_complex') + 1];
+  const fallbackFilter = calls[2].args[calls[2].args.indexOf('-filter_complex') + 1];
+  assert.match(firstFilter, /rubberband/);
+  assert.doesNotMatch(fallbackFilter, /rubberband/);
+  await runtime.stop();
+});
+
 test('fast runtime accepts only fixed verified paths and produces bounded MP3', async () => {
   const calls = [];
   const spawnProcess = (executable, args, options) => {
